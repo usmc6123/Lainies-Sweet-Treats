@@ -1,0 +1,6 @@
+{
+  "name": "Lainie's Sweet Treats",
+  "description": "Custom order management and quoting application for Lainie's Sweet Treats bakery.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

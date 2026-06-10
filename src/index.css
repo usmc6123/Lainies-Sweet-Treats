@@ -1,0 +1,40 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Poppins:wght@300;400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-heading: "Playfair Display", "Georgia", serif;
+  --font-sans: "Poppins", "Inter", sans-serif;
+  
+  --color-brand-pink: #F9D5D3;
+  --color-brand-cream: #FFF8F0;
+  --color-brand-rosegold: #B76E79;
+  --color-brand-chocolate: #3E2723;
+  --color-brand-white: #FFFFFF;
+}
+
+/* Base resets & typography pairings */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--color-brand-cream);
+  color: var(--color-brand-chocolate);
+}
+
+/* Custom scrollbars for a refined look */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-brand-cream);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-brand-pink);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-brand-rosegold);
+}

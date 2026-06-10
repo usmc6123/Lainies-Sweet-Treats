@@ -1,0 +1,176 @@
+{
+  "entities": {
+    "Product": {
+      "title": "Product",
+      "description": "Bakery menu product info and cost tracking",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "category": { "type": "string" },
+        "basePrice": { "type": "number" },
+        "options": { "type": "object" },
+        "ingredients": { "type": "array" },
+        "imgUrl": { "type": "string" }
+      },
+      "required": ["name", "category", "basePrice"]
+    },
+    "Order": {
+      "title": "Order",
+      "description": "Bakery orders placed by clients",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "orderNumber": { "type": "string" },
+        "customerId": { "type": "string" },
+        "customerName": { "type": "string" },
+        "customerEmail": { "type": "string" },
+        "customerPhone": { "type": "string" },
+        "items": { "type": "array" },
+        "subtotal": { "type": "number" },
+        "tax": { "type": "number" },
+        "deliveryFee": { "type": "number" },
+        "total": { "type": "number" },
+        "orderDate": { "type": "string" },
+        "fulfillmentDate": { "type": "string" },
+        "type": { "type": "string" },
+        "deliveryAddress": { "type": "string" },
+        "status": { "type": "string" },
+        "paymentStatus": { "type": "string" },
+        "notes": { "type": "string" }
+      },
+      "required": ["orderNumber", "customerName", "customerEmail", "customerPhone", "items", "subtotal", "total", "fulfillmentDate", "type", "status", "paymentStatus"]
+    },
+    "Quote": {
+      "title": "Quote",
+      "description": "Custom complex event dessert quoting request",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "quoteNumber": { "type": "string" },
+        "eventType": { "type": "string" },
+        "eventDate": { "type": "string" },
+        "servings": { "type": "number" },
+        "flavorPreferences": { "type": "string" },
+        "designIdeas": { "type": "string" },
+        "budgetRange": { "type": "string" },
+        "contactName": { "type": "string" },
+        "contactEmail": { "type": "string" },
+        "contactPhone": { "type": "string" },
+        "status": { "type": "string" },
+        "createdAt": { "type": "string" },
+        "notes": { "type": "string" },
+        "priceProposal": { "type": "number" },
+        "proposedItems": { "type": "array" }
+      },
+      "required": ["quoteNumber", "eventType", "eventDate", "servings", "contactName", "contactEmail", "contactPhone", "status", "createdAt"]
+    },
+    "Customer": {
+      "title": "Customer",
+      "description": "Customer database records",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "phone": { "type": "string" },
+        "totalSpent": { "type": "number" },
+        "orderCount": { "type": "number" },
+        "lastOrderDate": { "type": "string" },
+        "isVIP": { "type": "boolean" },
+        "notes": { "type": "string" }
+      },
+      "required": ["name", "email", "phone"]
+    },
+    "Ingredient": {
+      "title": "Ingredient",
+      "description": "Recipe ingredients catalog for cost analysis",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "unit": { "type": "string" },
+        "costPerUnit": { "type": "number" },
+        "stock": { "type": "number" }
+      },
+      "required": ["name", "unit", "costPerUnit"]
+    },
+    "Settings": {
+      "title": "Settings",
+      "description": "Bakery business settings",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "businessName": { "type": "string" },
+        "phone": { "type": "string" },
+        "email": { "type": "string" },
+        "address": { "type": "string" },
+        "leadTimeDays": { "type": "number" },
+        "deliveryRadius": { "type": "number" },
+        "deliveryFeePerMile": { "type": "number" },
+        "taxRate": { "type": "number" },
+        "emailTemplateConfirmation": { "type": "string" }
+      },
+      "required": ["businessName", "phone", "email", "address", "leadTimeDays", "taxRate"]
+    },
+    "BlockedDate": {
+      "title": "BlockedDate",
+      "description": "Bakery unavailable dates",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "date": { "type": "string" },
+        "notes": { "type": "string" }
+      },
+      "required": ["date"]
+    },
+    "Expense": {
+      "title": "Expense",
+      "description": "Bulk raw ingredient or supply expenses",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "date": { "type": "string" },
+        "category": { "type": "string" },
+        "description": { "type": "string" },
+        "amount": { "type": "number" }
+      },
+      "required": ["date", "category", "amount"]
+    }
+  },
+  "firestore": {
+    "/products/{productId}": {
+      "schema": "Product",
+      "description": "Collection of menu items"
+    },
+    "/orders/{orderId}": {
+      "schema": "Order",
+      "description": "Collection of customer orders"
+    },
+    "/quotes/{quoteId}": {
+      "schema": "Quote",
+      "description": "Collection of custom quote requests"
+    },
+    "/customers/{customerId}": {
+      "schema": "Customer",
+      "description": "Collection of client contacts"
+    },
+    "/ingredients/{ingredientId}": {
+      "schema": "Ingredient",
+      "description": "Collection of raw ingredients"
+    },
+    "/settings/{settingsId}": {
+      "schema": "Settings",
+      "description": "Global config (document 'business')"
+    },
+    "/blockedDates/{blockedDateId}": {
+      "schema": "BlockedDate",
+      "description": "Dates Lainie cannot fulfill orders"
+    },
+    "/expenses/{expenseId}": {
+      "schema": "Expense",
+      "description": "Raw list of bulk bakery operating expenses"
+    }
+  }
+}
