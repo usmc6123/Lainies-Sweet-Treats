@@ -148,37 +148,37 @@ export default function AdminCalendar({ token, triggerRefresh }: AdminCalendarPr
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
         {/* Main interactive calendar sheet (takes 2/3 coordinates) */}
-        <div className="lg:col-span-2 bg-white border border-brand-pink/20 rounded-3xl p-5 sm:p-6 shadow-xs space-y-4">
-          <div className="flex justify-between items-center pb-3 border-b border-brand-pink/10">
-            <h3 className="text-base font-bold text-brand-chocolate flex items-center space-x-2">
-              <CalendarIcon className="h-5 w-5 text-brand-rosegold" />
+        <div className="lg:col-span-2 bg-white border border-brand-pink/20 rounded-3xl p-6 sm:p-7 shadow-sm space-y-5">
+          <div className="flex justify-between items-center pb-4 border-b border-brand-pink/10">
+            <h3 className="text-xl lg:text-2xl font-bold text-brand-chocolate flex items-center space-x-2 font-heading">
+              <CalendarIcon className="h-6 w-6 text-brand-rosegold" />
               <span>{monthNames[month]} {year} Scheduler</span>
             </h3>
             
-            <div className="flex items-center space-x-1">
+            <div className="flex items-center space-x-2">
               <button
                 onClick={() => navigateMonth("prev")}
-                className="p-1.5 hover:bg-brand-pink/30 rounded-lg text-brand-chocolate transition"
+                className="p-2 hover:bg-brand-pink/30 rounded-xl text-brand-chocolate transition cursor-pointer"
               >
-                <ChevronLeft className="h-4 w-4" />
+                <ChevronLeft className="h-5 w-5" />
               </button>
               <button
                 onClick={() => setCurrentDate(new Date())}
-                className="px-2.5 py-1 text-[10px] uppercase font-bold text-brand-rosegold bg-brand-pink/10 rounded-sm hover:opacity-80 transition"
+                className="px-4 py-1.5 text-xs uppercase font-extrabold text-brand-cream bg-brand-rosegold/90 rounded-lg hover:opacity-90 transition cursor-pointer"
               >
                 Today
               </button>
               <button
                 onClick={() => navigateMonth("next")}
-                className="p-1.5 hover:bg-brand-pink/30 rounded-lg text-brand-chocolate transition"
+                className="p-2 hover:bg-brand-pink/30 rounded-xl text-brand-chocolate transition cursor-pointer"
               >
-                <ChevronRight className="h-4 w-4" />
+                <ChevronRight className="h-5 w-5" />
               </button>
             </div>
           </div>
 
           {/* Calendar weekdays legend */}
-          <div className="grid grid-cols-7 text-center text-[10px] uppercase font-bold text-gray-400">
+          <div className="grid grid-cols-7 text-center text-xs uppercase font-bold text-[#B76E79] tracking-wider">
             <div>Sun</div>
             <div>Mon</div>
             <div>Tue</div>
@@ -189,7 +189,7 @@ export default function AdminCalendar({ token, triggerRefresh }: AdminCalendarPr
           </div>
 
           {/* Days Grid */}
-          <div className="grid grid-cols-7 gap-1">
+          <div className="grid grid-cols-7 gap-1.5">
             {calendarDays.map((slot, index) => {
               const { orderCount, isBlocked } = getDayMetrics(slot.dateStr);
               // limit criteria: limit is 10. warning if count >= 7. Full if >= 10.
@@ -199,27 +199,27 @@ export default function AdminCalendar({ token, triggerRefresh }: AdminCalendarPr
               return (
                 <div
                   key={index}
-                  className={`min-h-[55px] p-1.5 border rounded-xl flex flex-col justify-between transition-all relative group ${
+                  className={`min-h-[75px] p-2.5 border rounded-2xl flex flex-col justify-between transition-all relative group ${
                     slot.isCurrentMonth ? "bg-white border-brand-pink/10" : "bg-gray-50/50 border-gray-100 opacity-40"
                   } ${
-                    isBlocked ? "bg-red-50/30 border-red-150 text-red-800" : ""
+                    isBlocked ? "bg-red-50/40 border-red-200 text-red-800" : ""
                   }`}
                 >
                   <div className="flex justify-between items-start">
-                    <span className={`text-[11px] font-bold ${isBlocked ? "text-red-600 line-through" : "text-brand-chocolate"}`}>
+                    <span className={`text-sm lg:text-base font-extrabold ${isBlocked ? "text-red-500 line-through" : "text-brand-chocolate"}`}>
                       {slot.dayNum}
                     </span>
                     {isBlocked && (
-                      <span className="text-[8px] bg-red-600 text-white rounded-sm px-1 leading-normal font-bold">Closed</span>
+                      <span className="text-[10px] bg-red-650 text-red-800 bg-red-100 border border-red-200 rounded-md px-1.5 py-0.5 leading-normal font-bold">Closed</span>
                     )}
                   </div>
 
                   {/* Indicators */}
                   <div className="space-y-1">
                     {orderCount > 0 && (
-                      <div className={`text-[8.5px] font-bold rounded-md px-1.5 py-0.5 leading-none text-center ${
-                        isFull ? "bg-red-100 text-red-800" :
-                        isBusy ? "bg-amber-100 text-amber-800" : "bg-blue-100 text-blue-800"
+                      <div className={`text-[10px] font-extrabold rounded-lg px-2 py-1 leading-none text-center ${
+                        isFull ? "bg-red-150 text-red-905 border border-red-250" :
+                        isBusy ? "bg-amber-150 text-amber-900 border border-amber-250" : "bg-blue-150 text-blue-900 border border-blue-250"
                       }`}>
                         {orderCount} Cakes
                       </div>
@@ -227,9 +227,9 @@ export default function AdminCalendar({ token, triggerRefresh }: AdminCalendarPr
                   </div>
 
                   {/* hover info tooltip */}
-                  <div className="hidden group-hover:block absolute bg-brand-chocolate text-brand-cream text-[10px] p-2 rounded-lg z-20 shadow-lg -top-12 left-1/2 -translate-x-1/2 w-40 pointer-events-none text-center">
-                    <p className="font-semibold">{slot.dateStr}</p>
-                    <p className="mt-0.5">
+                  <div className="hidden group-hover:block absolute bg-brand-chocolate text-brand-cream text-xs p-3 rounded-xl z-20 shadow-md -top-14 left-1/2 -translate-x-1/2 w-44 pointer-events-none text-center">
+                    <p className="font-bold">{slot.dateStr}</p>
+                    <p className="mt-1 font-semibold text-brand-pink">
                       {isBlocked ? "CLOSED: Custom Block" : `${orderCount}/10 Order Limit Filled`}
                     </p>
                   </div>
@@ -239,21 +239,21 @@ export default function AdminCalendar({ token, triggerRefresh }: AdminCalendarPr
           </div>
 
           {/* Color coding legend */}
-          <div className="flex flex-wrap gap-4 text-[10px] font-semibold text-gray-500 pt-3 border-t border-brand-pink/10 justify-center">
-            <span className="flex items-center space-x-1.5">
-              <span className="h-2.5 w-2.5 bg-blue-100 text-blue-800 inline-block rounded-full"></span>
+          <div className="flex flex-wrap gap-5 text-xs font-bold text-gray-500 pt-4 border-t border-brand-pink/10 justify-center">
+            <span className="flex items-center space-x-2">
+              <span className="h-3 w-3 bg-blue-150 border border-blue-250 inline-block rounded-full"></span>
               <span>Light Load (&lt;5)</span>
             </span>
-            <span className="flex items-center space-x-1.5">
-              <span className="h-2.5 w-2.5 bg-amber-100 text-amber-800 inline-block rounded-full"></span>
+            <span className="flex items-center space-x-2">
+              <span className="h-3 w-3 bg-amber-150 border border-amber-250 inline-block rounded-full"></span>
               <span>Moderate Workload (5-9)</span>
             </span>
-            <span className="flex items-center space-x-1.5">
-              <span className="h-2.5 w-2.5 bg-red-100 text-red-800 inline-block rounded-full"></span>
+            <span className="flex items-center space-x-2">
+              <span className="h-3 w-3 bg-red-150 border border-red-250 inline-block rounded-full"></span>
               <span>Limit Fully Occupied (10)</span>
             </span>
-            <span className="flex items-center space-x-1.5">
-              <span className="h-2.5 w-2.5 bg-red-600 inline-block rounded-full"></span>
+            <span className="flex items-center space-x-2">
+              <span className="h-3 w-3 bg-red-650 inline-block rounded-full"></span>
               <span>Bake Shop Closed</span>
             </span>
           </div>
@@ -261,74 +261,74 @@ export default function AdminCalendar({ token, triggerRefresh }: AdminCalendarPr
 
         {/* Blocking out Calendar elements controls (takes 1/3) */}
         <div className="lg:col-span-1 space-y-6">
-          <div className="bg-white border border-brand-pink/20 rounded-3xl p-5 shadow-xs">
-            <h4 className="text-sm font-bold text-brand-chocolate flex items-center space-x-1.5 pb-3 border-b border-brand-pink/10">
-              <Lock className="h-4.5 w-4.5 text-red-600" />
+          <div className="bg-white border border-brand-pink/20 rounded-[2rem] p-6 shadow-sm">
+            <h4 className="text-lg font-bold text-brand-chocolate flex items-center space-x-2 pb-3 border-b border-brand-pink/10 font-heading">
+              <Lock className="h-5 w-5 text-red-650" />
               <span>Block Out Holidays</span>
             </h4>
-            <p className="text-[11px] text-gray-500 my-3 leading-relaxed">
+            <p className="text-sm text-gray-500 my-4 leading-relaxed font-semibold">
               Block out personal holidays, market dates, or peak weeks to fully close self-order quote submissions for those specific dates.
             </p>
 
-            <form onSubmit={handleBlockDate} className="space-y-3.5">
+            <form onSubmit={handleBlockDate} className="space-y-4">
               <div>
-                <label className="text-[10px] uppercase font-bold tracking-wider text-brand-chocolate/50 block">Target Close Date</label>
+                <label className="text-xs uppercase font-extrabold tracking-wider text-brand-chocolate/60 block">Target Close Date</label>
                 <input
                   type="date"
                   required
                   value={blockDateStr}
                   onChange={(e) => setBlockDateStr(e.target.value)}
-                  className="w-full text-xs bg-brand-cream/10 border border-brand-pink/15 rounded-xl px-3 py-2.5 mt-1 focus:none"
+                  className="w-full text-sm bg-brand-cream/10 border border-brand-pink/15 rounded-xl px-3.5 py-3 mt-1.5 focus:outline-none focus:ring-1 focus:ring-brand-rosegold text-brand-chocolate font-medium"
                 />
               </div>
 
               <div>
-                <label className="text-[10px] uppercase font-bold tracking-wider text-brand-chocolate/50 block">Reason of Closure</label>
+                <label className="text-xs uppercase font-extrabold tracking-wider text-brand-chocolate/60 block">Reason of Closure</label>
                 <input
                   type="text"
                   required
                   value={blockReasonStr}
                   onChange={(e) => setBlockReasonStr(e.target.value)}
                   placeholder="Christmas Holiday Break / Closed"
-                  className="w-full text-xs bg-brand-cream/10 border border-brand-pink/15 rounded-xl px-3 py-2.5 mt-1 focus:none"
+                  className="w-full text-sm bg-brand-cream/10 border border-brand-pink/15 rounded-xl px-3.5 py-3 mt-1.5 focus:outline-none focus:ring-1 focus:ring-brand-rosegold text-brand-chocolate font-medium"
                 />
               </div>
 
               {blockMessage && (
-                <p className="p-2.5 bg-yellow-50 text-brand-chocolate border border-yellow-100 rounded-xl text-[10px] font-semibold text-center">
+                <p className="p-3 bg-yellow-50 text-brand-chocolate border border-yellow-150 rounded-xl text-xs font-semibold text-center leading-normal">
                   💡 {blockMessage}
                 </p>
               )}
 
               <button
                 type="submit"
-                className="w-full bg-brand-chocolate text-brand-cream hover:bg-brand-chocolate/90 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center space-x-1 shadow-xs"
+                className="w-full bg-brand-chocolate text-brand-cream hover:opacity-95 py-3.5 rounded-xl text-sm font-bold transition flex items-center justify-center space-x-2 shadow-sm cursor-pointer"
               >
-                <Lock className="h-3.5 w-3.5 text-brand-pink" />
+                <Lock className="h-4.5 w-4.5 text-brand-pink" />
                 <span>Enforce Closure Block Date</span>
               </button>
             </form>
           </div>
 
           {/* List of blocked dates */}
-          <div className="bg-white border border-brand-pink/20 rounded-3xl p-5 shadow-xs space-y-3">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-brand-chocolate/60">
+          <div className="bg-white border border-brand-pink/20 rounded-[2rem] p-6 shadow-sm space-y-4">
+            <h4 className="text-xs lg:text-sm font-bold uppercase tracking-widest text-[#B76E79]">
               Active Closures ({blockedDates.length})
             </h4>
 
-            <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+            <div className="space-y-2.5 max-h-56 overflow-y-auto pr-1">
               {blockedDates.length === 0 ? (
-                <p className="text-[10px] text-gray-400 italic text-center py-4">No vacation dates currently disabled.</p>
+                <p className="text-xs text-gray-400 italic text-center py-5 font-medium">No vacation dates currently disabled.</p>
               ) : (
                 blockedDates.map((b, idx) => (
-                  <div key={idx} className="flex justify-between items-center p-2.5 bg-red-50/20 hover:bg-red-50/40 rounded-xl border border-red-100 text-xs">
+                  <div key={idx} className="flex justify-between items-center p-3 bg-red-50/20 hover:bg-red-50/40 rounded-xl border border-red-100 text-sm">
                     <div>
-                      <p className="font-bold text-red-800">{b.date}</p>
-                      <p className="text-[10px] text-gray-500 font-medium leading-tight">{b.reason}</p>
+                      <p className="font-extrabold text-red-800">{b.date}</p>
+                      <p className="text-xs text-gray-500 font-bold leading-normal mt-0.5">{b.reason}</p>
                     </div>
                     <button
                       onClick={() => handleUnblockDate(b.date)}
-                      className="text-red-600 hover:text-red-800 p-1 font-bold text-[11px]"
+                      className="text-red-650 hover:text-red-850 p-1.5 font-extrabold text-xs bg-red-50 rounded-lg hover:underline"
                     >
                       Unlock
                     </button>

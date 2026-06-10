@@ -135,11 +135,11 @@ export default function App() {
       )}
 
       {/* Dynamic Main Body */}
-      <main className={`flex-1 w-full max-w-7xl mx-auto pb-16 px-4 sm:px-6 lg:px-8 pt-6 ${isAdminView && token ? "md:flex md:space-x-8" : ""}`}>
+      <main className={`flex-1 w-full pb-16 pt-6 ${isAdminView && token ? "max-w-none px-6 md:px-10 lg:px-12 md:flex md:space-x-8" : "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"}`}>
         
         {/* Admin LEFT Navigation Sidebar: visible on md style screens */}
         {isAdminView && token && (
-          <aside className="hidden md:flex w-64 shrink-0 flex-col rounded-[2.5rem] bg-brand-chocolate text-white border border-brand-pink/20 shadow-lg p-6 self-start sticky top-24">
+          <aside className="hidden md:flex w-72 lg:w-80 shrink-0 flex-col rounded-3xl bg-brand-chocolate text-white border border-brand-pink/20 shadow-lg p-6 md:min-h-[calc(100vh-140px)] sticky top-24">
             <div className="pb-4 border-b border-brand-pink/15 mb-6 text-center">
               <h2 className="font-heading text-2xl font-bold italic tracking-tight text-brand-pink">Lainie's</h2>
               <p className="text-[10px] text-brand-rosegold uppercase tracking-[0.2em] -mt-1 font-semibold">Sweet Treats</p>

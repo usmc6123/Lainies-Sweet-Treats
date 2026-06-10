@@ -37,14 +37,19 @@ export default function AdminLogin({ onLoginSuccess }: AdminLoginProps) {
 
   return (
     <div id="admin-login-view" className="max-w-md mx-auto px-4 py-16 animate-in fade-in duration-300">
-      <div className="bg-white border border-brand-pink/20 rounded-3xl p-8 shadow-sm text-center">
-        <div className="mx-auto bg-brand-pink/50 text-brand-rosegold p-3.5 rounded-full w-fit">
-          <Lock className="h-6 w-6" />
+      <div className="bg-white border border-brand-pink/20 rounded-[2.5rem] p-8 shadow-xs text-center">
+        <div className="mx-auto h-20 w-20 rounded-full overflow-hidden border-2 border-brand-pink bg-white shadow-xs p-1 hover:scale-105 transition-transform duration-300 shrink-0 mb-4">
+          <img 
+            src="https://images.squarespace-cdn.com/content/v1/6a0b183aaec8f87f9644a515/4a01bf37-b09f-4987-8495-e4876d754270/ChatGPT+Image+May+19%2C+2026%2C+09_01_51+AM.png?format=1500w" 
+            alt="Lainie's Sweet Treats Logo" 
+            className="h-full w-full object-cover rounded-full"
+            referrerPolicy="no-referrer"
+          />
         </div>
-        <h2 className="text-2xl font-bold text-brand-chocolate mt-4 font-heading">
+        <h2 className="text-2xl font-black text-brand-chocolate font-heading">
           Lainie's Sweet Office
         </h2>
-        <p className="text-xs text-brand-chocolate/60 mt-1">
+        <p className="text-xs text-brand-chocolate/60 mt-1.5 font-semibold">
           Authorized bakery administrative personnel only
         </p>
 
@@ -101,7 +106,7 @@ export default function AdminLogin({ onLoginSuccess }: AdminLoginProps) {
 
         <div className="mt-8 pt-4 border-t border-brand-pink/10 text-[10px] text-brand-chocolate/50 italic">
           Default developer login credentials: <br />
-          Email: <span className="font-semibold text-brand-rosegold">lainie@sweet-treats.com</span> • Password: <span className="font-semibold text-brand-rosegold">bakery_love</span>
+          Email: <span className="font-semibold text-brand-rosegold">lainie@sweet-treats.com</span> • Password: <span className="font-semibold text-brand-rosegold">password123</span>
         </div>
       </div>
     </div>

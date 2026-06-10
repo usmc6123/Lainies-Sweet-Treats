@@ -159,24 +159,24 @@ export default function AdminQuotes({ token, triggerRefresh }: AdminQuotesProps)
   return (
     <div id="admin-quotes-tab" className="space-y-6 animate-in fade-in duration-300">
       {/* Tab Header Controls */}
-      <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center bg-white border border-brand-pink/20 rounded-2xl p-4 shadow-xs">
+      <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center bg-white border border-brand-pink/20 rounded-2xl p-5 shadow-sm">
         <div className="flex items-center space-x-2">
-          <Sparkles className="h-5 w-5 text-brand-rosegold" />
-          <h2 className="text-xl font-bold text-brand-chocolate font-heading">
-            Custom Event Quote sheets
+          <Sparkles className="h-6 w-6 text-brand-rosegold" />
+          <h2 className="text-2xl lg:text-3xl font-bold text-brand-chocolate font-heading">
+            Custom Event Quote Sheets
           </h2>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+        <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
           {/* Email/Client search */}
           <div className="relative flex-grow sm:flex-grow-0">
-            <Search className="h-4 w-4 text-brand-chocolate/40 absolute left-3 top-2.5" />
+            <Search className="h-4 w-4 text-brand-chocolate/40 absolute left-3 top-3.5" />
             <input
               type="text"
               value={searchEmail}
               onChange={(e) => setSearchEmail(e.target.value)}
               placeholder="Search by client or email..."
-              className="w-full sm:w-56 text-xs bg-brand-cream/30 border border-brand-pink/15 rounded-xl pl-8 pr-3 py-2 focus:outline-none focus:ring-1 focus:ring-brand-rosegold"
+              className="w-full sm:w-64 text-sm bg-brand-cream/30 border border-brand-pink/15 rounded-xl pl-9 pr-4 py-2.5 focus:outline-none focus:ring-1 focus:ring-brand-rosegold"
             />
           </div>
 
@@ -184,7 +184,7 @@ export default function AdminQuotes({ token, triggerRefresh }: AdminQuotesProps)
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="text-xs bg-brand-cream/30 border border-brand-pink/15 rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-brand-rosegold"
+            className="text-sm bg-brand-cream/30 border border-brand-pink/15 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-1 focus:ring-brand-rosegold text-brand-chocolate font-semibold"
           >
             <option value="All">All Estimates</option>
             <option value="Pending Review">Pending Review</option>
@@ -198,34 +198,34 @@ export default function AdminQuotes({ token, triggerRefresh }: AdminQuotesProps)
       {loading ? (
         <div className="flex flex-col items-center justify-center py-20 bg-white border border-brand-pink/10 rounded-3xl">
           <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-brand-rosegold"></div>
-          <p className="mt-4 text-xs text-brand-chocolate/85">Loading event sheets...</p>
+          <p className="mt-4 text-sm text-brand-chocolate/85">Loading event sheets...</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Custom Quote requests list (takes 1/3 layout space) */}
-          <div className="lg:col-span-1 space-y-3">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-brand-chocolate/50 px-1">
+          <div className="lg:col-span-1 space-y-4">
+            <h3 className="text-xs lg:text-sm font-bold uppercase tracking-widest text-[#B76E79] px-1">
               Active Estimates ({filteredQuotes.length})
             </h3>
             {filteredQuotes.length === 0 ? (
-              <div className="bg-white border border-brand-pink/10 rounded-2xl p-10 text-center text-brand-chocolate/50 font-medium text-xs">
+              <div className="bg-white border border-brand-pink/10 rounded-2xl p-10 text-center text-brand-chocolate/60 font-semibold text-sm">
                 No active quote sheets matching filter found.
               </div>
             ) : (
-              <div className="space-y-2.5">
+              <div className="space-y-3.5">
                 {filteredQuotes.map(q => (
                   <div
                     key={q.id}
                     onClick={() => handleSelectQuote(q)}
-                    className={`p-4 rounded-xl border cursor-pointer transition-all ${
+                    className={`p-5 rounded-2xl border cursor-pointer transition-all ${
                       selectedQuote?.id === q.id 
-                        ? "bg-brand-pink/20 border-brand-rosegold shadow-xs" 
-                        : "bg-white border-brand-pink/15 hover:border-brand-pink/30"
+                        ? "bg-brand-pink/15 border-brand-rosegold shadow-sm" 
+                        : "bg-white border-brand-pink/15 hover:border-brand-pink/30 hover:shadow-xs"
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <span className="font-mono text-xs font-bold text-gray-500">{q.quoteNumber}</span>
-                      <span className={`text-[9px] px-2.5 py-0.5 rounded-full font-bold uppercase block leading-none ${
+                      <span className="font-mono text-sm font-bold text-gray-500">{q.quoteNumber}</span>
+                      <span className={`text-xs px-2.5 py-1 rounded-full font-extrabold uppercase block leading-none ${
                         q.status === "Pending Review" ? "bg-yellow-100 text-yellow-800" :
                         q.status === "Sent" ? "bg-blue-100 text-blue-700 font-bold border border-blue-200" :
                         q.status === "Accepted" ? "bg-green-150 text-green-800" : "bg-red-100 text-red-800"
@@ -234,11 +234,11 @@ export default function AdminQuotes({ token, triggerRefresh }: AdminQuotesProps)
                       </span>
                     </div>
 
-                    <h4 className="text-xs font-bold text-brand-chocolate mt-2 leading-tight">
+                    <h4 className="text-base font-bold text-brand-chocolate mt-3 leading-tight font-heading">
                       {q.eventType} ({q.servings} Servings)
                     </h4>
-                    <p className="text-[10px] text-gray-400 mt-1">
-                      Client: <span className="font-semibold text-brand-chocolate">{q.contactName}</span> • Due {q.eventDate}
+                    <p className="text-sm text-gray-500 font-medium mt-1.5">
+                      Client: <span className="font-bold text-brand-chocolate">{q.contactName}</span> • Due {q.eventDate}
                     </p>
                   </div>
                 ))}
@@ -249,57 +249,57 @@ export default function AdminQuotes({ token, triggerRefresh }: AdminQuotesProps)
           {/* Detailed sheet reviewer & compiler workspace (takes 2/3 layout space) */}
           <div className="lg:col-span-2">
             {selectedQuote ? (
-              <div className="bg-white border border-brand-pink/20 rounded-3xl p-6 shadow-xs space-y-6">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-brand-pink/10 pb-4">
+              <div className="bg-white border border-brand-pink/20 rounded-3xl p-7 shadow-sm space-y-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-brand-pink/10 pb-4">
                   <div>
-                    <span className="text-[10px] font-mono tracking-wider bg-gray-100 p-1.5 rounded-md text-gray-500 font-bold">
+                    <span className="text-xs font-mono tracking-wider bg-brand-pink/30 px-2.5 py-1 rounded-md text-brand-chocolate font-bold">
                       {selectedQuote.quoteNumber}
                     </span>
-                    <h3 className="text-xl font-bold font-heading text-brand-chocolate mt-2">
-                      Review Complex Cake Request
+                    <h3 className="text-2xl font-bold font-heading text-brand-chocolate mt-3">
+                      Review Custom Request Specs
                     </h3>
                   </div>
 
                   <button
                     onClick={() => handleDeleteQuote(selectedQuote.id)}
-                    className="flex items-center space-x-1.5 text-red-600 hover:text-red-700 text-xs font-bold"
+                    className="flex items-center space-x-1.5 text-red-600 hover:text-red-700 text-sm font-bold bg-ref-50 hover:bg-red-50 px-3.5 py-1.5 rounded-xl border border-red-100 transition"
                   >
-                    <Trash className="h-3.5 w-3.5" />
+                    <Trash className="h-4 w-4" />
                     <span>Delete Quote</span>
                   </button>
                 </div>
 
                 {/* Details split panels */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs bg-brand-cream/30 p-4 border border-brand-pink/10 rounded-2xl">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 text-sm bg-brand-cream/30 p-5 border border-brand-pink/10 rounded-2xl">
                   <div>
-                    <span className="block text-[9px] uppercase tracking-wider font-bold text-gray-400">Main Event</span>
-                    <p className="font-bold text-brand-chocolate mt-0.5">{selectedQuote.eventType}</p>
+                    <span className="block text-xs uppercase tracking-widest font-bold text-brand-rosegold">Main Event</span>
+                    <p className="font-bold text-brand-chocolate mt-1 text-base">{selectedQuote.eventType}</p>
                   </div>
                   <div>
-                    <span className="block text-[9px] uppercase tracking-wider font-bold text-gray-400">Due Event Date</span>
-                    <p className="font-bold text-brand-chocolate mt-0.5">{selectedQuote.eventDate}</p>
+                    <span className="block text-xs uppercase tracking-widest font-bold text-brand-rosegold">Due Event Date</span>
+                    <p className="font-bold text-brand-chocolate mt-1 text-base">{selectedQuote.eventDate}</p>
                   </div>
                   <div>
-                    <span className="block text-[9px] uppercase tracking-wider font-bold text-gray-400">Total Servings</span>
-                    <p className="font-bold text-brand-chocolate mt-0.5">{selectedQuote.servings} Servings</p>
+                    <span className="block text-xs uppercase tracking-widest font-bold text-brand-rosegold">Total Servings</span>
+                    <p className="font-bold text-brand-chocolate mt-1 text-base">{selectedQuote.servings} Servings</p>
                   </div>
                   <div>
-                    <span className="block text-[9px] uppercase tracking-wider font-bold text-gray-400">Client Budget Filter</span>
-                    <p className="font-bold text-brand-chocolate mt-0.5">{selectedQuote.budgetRange}</p>
+                    <span className="block text-xs uppercase tracking-widest font-bold text-brand-rosegold">Client Budget Filter</span>
+                    <p className="font-bold text-brand-chocolate mt-1 text-base">{selectedQuote.budgetRange}</p>
                   </div>
                   <div className="col-span-2">
-                    <span className="block text-[9px] uppercase tracking-wider font-bold text-gray-400">Contact details</span>
-                    <p className="text-brand-chocolate font-medium mt-0.5">
+                    <span className="block text-xs uppercase tracking-widest font-bold text-brand-rosegold">Contact details</span>
+                    <p className="text-brand-chocolate font-semibold mt-1 text-sm lg:text-base">
                       {selectedQuote.contactName} • 📧 {selectedQuote.contactEmail} • 📞 {selectedQuote.contactPhone}
                     </p>
                   </div>
                   <div className="col-span-2 pt-1">
-                    <span className="block text-[9px] uppercase tracking-wider font-bold text-gray-400">Flavor Preferences</span>
-                    <p className="text-gray-700 italic mt-0.5">"{selectedQuote.flavorPreferences}"</p>
+                    <span className="block text-xs uppercase tracking-widest font-bold text-brand-rosegold">Flavor Preferences</span>
+                    <p className="text-gray-700 italic mt-1 font-medium text-sm lg:text-base">"{selectedQuote.flavorPreferences}"</p>
                   </div>
                   <div className="col-span-2 pt-1 font-sans">
-                    <span className="block text-[9px] uppercase tracking-wider font-bold text-gray-400">Bespoke Design Outline</span>
-                    <p className="text-brand-chocolate mt-0.5 bg-white p-3 rounded-xl border border-brand-pink/10 leading-relaxed font-sans font-medium">
+                    <span className="block text-xs uppercase tracking-widest font-bold text-brand-rosegold">Bespoke Design Outline</span>
+                    <p className="text-brand-chocolate mt-1.5 bg-white p-4 rounded-xl border border-brand-pink/10 leading-relaxed font-semibold">
                       "{selectedQuote.designIdeas}"
                     </p>
                   </div>
@@ -307,23 +307,23 @@ export default function AdminQuotes({ token, triggerRefresh }: AdminQuotesProps)
 
                 {/* Proposal Designer Form Workspace */}
                 {selectedQuote.status === "Pending Review" || selectedQuote.status === "Sent" ? (
-                  <form onSubmit={handlePublishProposal} className="space-y-4 pt-3 border-t border-brand-pink/10">
-                    <h4 className="text-sm font-bold text-brand-chocolate flex items-center gap-1">
-                      <DollarSign className="h-4.5 w-4.5 text-brand-rosegold" />
+                  <form onSubmit={handlePublishProposal} className="space-y-5 pt-4 border-t border-brand-pink/10">
+                    <h4 className="text-base font-bold text-brand-chocolate flex items-center gap-2">
+                      <DollarSign className="h-5 w-5 text-brand-rosegold" />
                       <span>Configure Lainie's Bespoke Proposal Pricing</span>
                     </h4>
 
                     {/* Step A: Add pre-configured products from catalog to proposal */}
-                    <div className="bg-brand-pink/10 p-4 border border-brand-pink/30 rounded-2xl space-y-3">
-                      <span className="block text-[10px] uppercase font-bold text-brand-chocolate/70">
+                    <div className="bg-brand-pink/10 p-5 border border-brand-pink/30 rounded-2xl space-y-4">
+                      <span className="block text-xs uppercase font-bold text-brand-chocolate/70 tracking-widest text-[#B76E79]">
                         Step 1: Itemize proposed catalog sweets (optional)
                       </span>
                       
-                      <div className="flex flex-wrap gap-2">
+                      <div className="flex flex-wrap gap-2.5">
                         <select
                           value={selectedProdId}
                           onChange={(e) => setSelectedProdId(e.target.value)}
-                          className="flex-1 text-xs bg-white border border-brand-pink/15 rounded-xl px-3 py-2.5 focus:outline-none"
+                          className="flex-1 text-sm bg-white border border-brand-pink/15 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-1 focus:ring-brand-rosegold font-medium"
                         >
                           <option value="">-- Choose Menu Product --</option>
                           {products.map(p => (
@@ -336,14 +336,14 @@ export default function AdminQuotes({ token, triggerRefresh }: AdminQuotesProps)
                           min="1"
                           value={selectedProdQty}
                           onChange={(e) => setSelectedProdQty(Number(e.target.value))}
-                          className="w-16 text-xs bg-white border border-brand-pink/15 rounded-xl text-center focus:outline-none"
+                          className="w-20 text-sm bg-white border border-brand-pink/15 rounded-xl text-center focus:outline-none focus:ring-1 focus:ring-brand-rosegold font-bold"
                           placeholder="Qty"
                         />
 
                         <button
                           type="button"
                           onClick={handleAddProposedItem}
-                          className="bg-brand-chocolate text-white text-xs px-4 py-2.5 rounded-xl font-bold transition"
+                          className="bg-brand-chocolate text-white text-sm px-5 py-2.5 rounded-xl font-bold transition hover:opacity-95"
                         >
                           Add Row
                         </button>
@@ -351,16 +351,16 @@ export default function AdminQuotes({ token, triggerRefresh }: AdminQuotesProps)
 
                       {/* Display proposed item list */}
                       {proposedItems.length > 0 && (
-                        <div className="space-y-1.5 pt-3 border-t border-brand-pink/20 max-h-36 overflow-y-auto pr-1">
+                        <div className="space-y-2 pt-3 border-t border-brand-pink/20 max-h-36 overflow-y-auto pr-1">
                           {proposedItems.map((item, idx) => (
-                            <div key={idx} className="flex justify-between items-center text-xs text-brand-chocolate bg-white px-3 py-2 border border-brand-pink/10 rounded-lg">
+                            <div key={idx} className="flex justify-between items-center text-sm text-brand-chocolate bg-white px-4 py-2.5 border border-brand-pink/10 rounded-lg">
                               <span><strong>{item.quantity}x</strong> {item.name}</span>
                               <div className="flex items-center space-x-3">
-                                <span className="font-bold text-brand-rosegold">${item.totalPrice.toFixed(2)}</span>
+                                <span className="font-extrabold text-brand-rosegold">${item.totalPrice.toFixed(2)}</span>
                                 <button
                                   type="button"
                                   onClick={() => handleRemoveProposedItem(idx)}
-                                  className="text-red-500 hover:text-red-700"
+                                  className="text-red-500 hover:text-red-700 text-sm font-bold bg-red-50 hover:bg-red-100 p-1 rounded-md"
                                 >
                                   ✕
                                 </button>
@@ -371,14 +371,14 @@ export default function AdminQuotes({ token, triggerRefresh }: AdminQuotesProps)
                       )}
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
                       {/* Price Proposal */}
                       <div className="sm:col-span-1">
-                        <label className="text-[10px] uppercase font-bold text-brand-chocolate/65 block">
+                        <label className="text-xs uppercase font-bold text-brand-chocolate/70 block">
                           Step 2: Total Price Proposal ($)
                         </label>
-                        <div className="relative mt-1">
-                          <DollarSign className="h-4 w-4 text-brand-chocolate/40 absolute left-3 top-3" />
+                        <div className="relative mt-1.5">
+                          <DollarSign className="h-4.5 w-4.5 text-brand-chocolate/40 absolute left-3 top-3.5" />
                           <input
                             type="number"
                             required
@@ -386,13 +386,13 @@ export default function AdminQuotes({ token, triggerRefresh }: AdminQuotesProps)
                             step="0.01"
                             value={priceProposal}
                             onChange={(e) => setPriceProposal(Number(e.target.value))}
-                            className="w-full text-xs font-bold text-brand-rosegold bg-brand-cream/20 border border-brand-pink/15 rounded-xl pl-8 py-2.5 focus:outline-none"
+                            className="w-full text-sm font-extrabold text-brand-rosegold bg-brand-cream/20 border border-brand-pink/15 rounded-xl pl-9 py-3 focus:outline-none focus:ring-1 focus:ring-brand-rosegold"
                           />
                         </div>
                       </div>
 
                       <div className="sm:col-span-2">
-                        <label className="text-[10px] uppercase font-bold text-brand-chocolate/65 block">
+                        <label className="text-xs uppercase font-bold text-brand-chocolate/70 block">
                           Step 3: Design, Setup & Icing Notes to Client
                         </label>
                         <input
@@ -400,36 +400,36 @@ export default function AdminQuotes({ token, triggerRefresh }: AdminQuotesProps)
                           value={proposalNotes}
                           onChange={(e) => setProposalNotes(e.target.value)}
                           placeholder="We can prepare vanilla/strawberry layers. Price includes full delivery & floral set."
-                          className="w-full text-xs bg-brand-cream/20 border border-brand-pink/15 rounded-xl p-2.5 mt-1 focus:none"
+                          className="w-full text-sm bg-brand-cream/20 border border-brand-pink/15 rounded-xl p-3 mt-1.5 focus:outline-none focus:ring-1 focus:ring-brand-rosegold font-semibold"
                         />
                       </div>
                     </div>
 
                     <button
                       type="submit"
-                      className="w-full bg-brand-rosegold text-white text-xs font-bold py-3 rounded-xl hover:opacity-90 transition shadow-xs flex items-center justify-center space-x-1.5"
+                      className="w-full bg-brand-rosegold text-white text-sm font-bold py-3.5 rounded-xl hover:opacity-90 transition shadow-xs flex items-center justify-center space-x-1.5"
                     >
-                      <Sparkles className="h-4 w-4 text-yellow-300" />
+                      <Sparkles className="h-5 w-5 text-yellow-300" />
                       <span>Publish & Send Quote Proposal to Client Portal</span>
                     </button>
                   </form>
                 ) : selectedQuote.status === "Accepted" ? (
-                  <div className="mt-4 p-4 bg-green-50 text-green-800 border border-green-250 rounded-2xl text-xs space-y-1">
-                    <p className="font-bold flex items-center gap-1">
-                      <CheckCircle className="h-4.5 w-4.5 text-green-600" />
+                  <div className="mt-4 p-5 bg-green-50 text-green-905 border border-green-250 rounded-2xl text-sm space-y-2 font-medium">
+                    <p className="font-bold flex items-center gap-1.5 text-base text-green-800">
+                      <CheckCircle className="h-5 w-5 text-green-600 animate-bounce" />
                       Celebration Estimate Accepted by Customer!
                     </p>
                     <p>
-                      Agreed pricing proposal total: <strong className="text-brand-chocolate">${selectedQuote.priceProposal?.toFixed(2)}</strong>.
+                      Agreed pricing proposal total: <strong className="text-base text-brand-chocolate font-bold">${selectedQuote.priceProposal?.toFixed(2)}</strong>.
                     </p>
-                    <p className="text-[11px] text-gray-600">
+                    <p className="text-xs text-gray-600 leading-relaxed font-semibold">
                       This has been converted automatically to a Confirmed Order in your calendar scheduler. Check your master order sheets!
                     </p>
                   </div>
                 ) : (
-                  <div className="mt-4 p-4 bg-red-50 text-red-800 border border-red-200 rounded-2xl text-xs">
-                    <span className="font-bold">Customer Declined Proposal Pricing</span>
-                    <p className="mt-1 text-gray-700">
+                  <div className="mt-4 p-5 bg-red-50 text-red-800 border border-red-200 rounded-2xl text-sm leading-relaxed font-medium">
+                    <span className="font-bold text-base flex items-center gap-1.5"><Clipboard className="h-5 w-5" />Customer Declined Proposal Pricing</span>
+                    <p className="mt-2 text-gray-700">
                       The client declined this budget structure. Feel free to contact Rebeca or Michael to negotiate alternative designs or servings count!
                     </p>
                   </div>
@@ -437,9 +437,9 @@ export default function AdminQuotes({ token, triggerRefresh }: AdminQuotesProps)
               </div>
             ) : (
               <div className="bg-white border border-dashed border-brand-pink/30 rounded-3xl p-20 text-center text-brand-chocolate/50 flex flex-col items-center justify-center">
-                <FolderHeart className="h-10 w-10 text-brand-pink mb-3" />
-                <p className="text-sm font-semibold">Select an event request quote card</p>
-                <p className="text-xs text-gray-400 mt-1">Analyze requested servings metrics, build custom line item proposals, draft designs and broadcast estimates directly to client portals.</p>
+                <FolderHeart className="h-12 w-12 text-brand-pink mb-4" />
+                <p className="text-base font-bold text-brand-chocolate">Select an event request quote card</p>
+                <p className="text-sm text-gray-500 mt-2 max-w-lg leading-relaxed">Analyze requested servings metrics, build custom line item proposals, draft designs and broadcast estimates directly to client portals.</p>
               </div>
             )}
           </div>

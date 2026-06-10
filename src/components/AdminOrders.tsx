@@ -126,24 +126,24 @@ export default function AdminOrders({ token, triggerRefresh }: AdminOrdersProps)
   return (
     <div id="admin-orders-tab" className="space-y-6 animate-in fade-in duration-300">
       {/* Search and Filters Header */}
-      <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center bg-white border border-brand-pink/20 rounded-2xl p-4 shadow-xs">
+      <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center bg-white border border-brand-pink/20 rounded-2xl p-5 shadow-sm">
         <div className="flex items-center space-x-2">
-          <ClipboardList className="h-5 w-5 text-brand-rosegold" />
-          <h2 className="text-xl font-bold text-brand-chocolate font-heading">
+          <ClipboardList className="h-6 w-6 text-brand-rosegold" />
+          <h2 className="text-2xl lg:text-3xl font-bold text-brand-chocolate font-heading">
             Order Management Console
           </h2>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+        <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
           {/* Search bar */}
           <div className="relative flex-1 sm:flex-initial">
-            <Search className="h-4 w-4 text-brand-chocolate/40 absolute left-3 top-2.5" />
+            <Search className="h-4 w-4 text-brand-chocolate/40 absolute left-3 top-3.5" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search by name, number..."
-              className="w-full sm:w-60 text-xs bg-brand-cream/30 border border-brand-pink/15 rounded-xl pl-8 pr-3 py-2 focus:outline-none focus:ring-1 focus:ring-brand-rosegold"
+              className="w-full sm:w-64 text-sm bg-brand-cream/30 border border-brand-pink/15 rounded-xl pl-9 pr-4 py-2.5 focus:outline-none focus:ring-1 focus:ring-brand-rosegold"
             />
           </div>
 
@@ -151,7 +151,7 @@ export default function AdminOrders({ token, triggerRefresh }: AdminOrdersProps)
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="text-xs bg-brand-cream/30 border border-brand-pink/15 rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-brand-rosegold"
+            className="text-sm bg-brand-cream/30 border border-brand-pink/15 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-1 focus:ring-brand-rosegold font-medium text-brand-chocolate"
           >
             <option value="All">All Statuses</option>
             <option value="Pending">Pending Review</option>
@@ -167,14 +167,14 @@ export default function AdminOrders({ token, triggerRefresh }: AdminOrdersProps)
       {loading ? (
         <div className="flex flex-col items-center justify-center py-20 bg-white border border-brand-pink/10 rounded-3xl">
           <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-brand-rosegold"></div>
-          <p className="mt-4 text-xs text-brand-chocolate/85">Loading customer orders...</p>
+          <p className="mt-4 text-sm text-brand-chocolate/85">Loading customer orders...</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Orders Sheet list (takes 2/3 space of screen) */}
-          <div className="lg:col-span-2 space-y-3">
+          <div className="lg:col-span-2 space-y-4">
             {filteredOrders.length === 0 ? (
-              <div className="bg-white border border-brand-pink/15 rounded-3xl p-16 text-center text-brand-chocolate/50 font-medium">
+              <div className="bg-white border border-brand-pink/15 rounded-3xl p-16 text-center text-brand-chocolate/60 text-base font-semibold">
                 No orders discovered that match the filter.
               </div>
             ) : (
@@ -182,35 +182,35 @@ export default function AdminOrders({ token, triggerRefresh }: AdminOrdersProps)
                 <div
                   key={o.id}
                   onClick={() => setSelectedOrder(o)}
-                  className={`bg-white border rounded-2xl p-4 cursor-pointer transition-all ${
+                  className={`bg-white border rounded-2xl p-5 cursor-pointer transition-all ${
                     selectedOrder?.id === o.id 
-                      ? "border-brand-rosegold shadow-sm bg-brand-pink/10" 
-                      : "border-brand-pink/15 hover:border-brand-pink/40 hover:shadow-xs"
+                       ? "border-brand-rosegold shadow-md bg-brand-pink/10" 
+                       : "border-brand-pink/15 hover:border-brand-pink/40 hover:shadow-xs"
                   }`}
                 >
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <div className="space-y-0.5">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div className="space-y-1">
                       <div className="flex items-center space-x-2">
-                        <span className="font-mono text-xs font-bold text-brand-chocolate">
+                        <span className="font-mono text-sm font-bold text-brand-chocolate bg-brand-pink/20 px-2 py-0.5 rounded">
                           {o.orderNumber}
                         </span>
-                        <span className={`text-[10px] px-2.5 py-0.5 border rounded-full font-bold uppercase ${getStatusColor(o.status)}`}>
+                        <span className={`text-xs px-3 py-1 border rounded-full font-bold uppercase ${getStatusColor(o.status)}`}>
                           {o.status}
                         </span>
                       </div>
-                      <h4 className="text-sm font-bold text-brand-chocolate pt-1">
+                      <h4 className="text-base font-bold text-brand-chocolate pt-1">
                         {o.customerName}
                       </h4>
-                      <p className="text-xs text-gray-400">
+                      <p className="text-sm text-gray-500 font-medium">
                         Requested Fulfillment: <strong className="text-brand-chocolate">{o.fulfillmentDate}</strong> ({o.type})
                       </p>
                     </div>
 
                     <div className="text-left sm:text-right shrink-0 space-y-1">
-                      <span className="text-sm font-bold text-brand-rosegold block">
+                      <span className="text-base lg:text-lg font-extrabold text-brand-rosegold block">
                         ${o.total.toFixed(2)}
                       </span>
-                      <span className={`text-[9.5px] px-2 py-0.5 rounded-md font-bold text-white inline-block ${
+                      <span className={`text-xs px-2.5 py-1 rounded-md font-bold text-white inline-block ${
                         o.paymentStatus === "Paid" ? "bg-green-600" : "bg-red-600"
                       }`}>
                         {o.paymentStatus}
@@ -225,48 +225,48 @@ export default function AdminOrders({ token, triggerRefresh }: AdminOrdersProps)
           {/* Detailed side drawer sheet (takes 1/3 space) */}
           <div className="lg:col-span-1">
             {selectedOrder ? (
-              <div className="bg-white border border-brand-pink/20 rounded-3xl p-6 shadow-xs space-y-5 animate-in slide-in-from-right duration-250">
+              <div className="bg-white border border-brand-pink/20 rounded-3xl p-6 shadow-sm space-y-6 animate-in slide-in-from-right duration-250">
                 <div className="flex items-center justify-between border-b border-brand-pink/10 pb-4">
-                  <div>
-                    <span className="text-[10px] font-mono text-brand-chocolate/50 bg-gray-100 p-1.5 rounded-sm font-bold">
-                      {selectedOrder.orderNumber}
-                    </span>
-                    <h3 className="text-base font-bold text-brand-chocolate mt-2">
-                      Fulfillment Specs
-                    </h3>
-                  </div>
-                  <button
-                    onClick={() => setSelectedOrder(null)}
-                    className="text-gray-400 hover:text-brand-chocolate text-xs p-1"
-                  >
-                    ✕ Close
-                  </button>
+                   <div>
+                    <span className="text-xs font-mono text-brand-chocolate/60 bg-brand-pink/30 px-2.5 py-1 rounded-full font-bold">
+                       {selectedOrder.orderNumber}
+                     </span>
+                    <h3 className="text-lg font-bold text-brand-chocolate mt-3 font-heading">
+                       Fulfillment Specs
+                     </h3>
+                   </div>
+                   <button
+                     onClick={() => setSelectedOrder(null)}
+                     className="text-gray-400 hover:text-brand-chocolate text-xs lg:text-sm font-bold bg-gray-50 hover:bg-gray-100 px-3 py-1.5 rounded-full transition"
+                   >
+                     ✕ Close
+                   </button>
                 </div>
 
                 {/* Customer Details */}
-                <div className="text-xs space-y-2 pb-4 border-b border-brand-pink/10">
-                  <p className="font-bold uppercase tracking-wider text-[9px] text-brand-chocolate/40">CUSTOMER CONTACT</p>
-                  <div>
-                    <p className="font-bold text-brand-chocolate">{selectedOrder.customerName}</p>
-                    <p className="text-gray-500 mt-0.5">📧 {selectedOrder.customerEmail}</p>
-                    <p className="text-gray-500 mt-0.5">📞 {selectedOrder.customerPhone ?? "No Phone"}</p>
+                <div className="text-sm space-y-2 pb-4 border-b border-brand-pink/10">
+                  <p className="font-bold uppercase tracking-wider text-xs text-brand-chocolate/40">CUSTOMER CONTACT</p>
+                  <div className="space-y-1">
+                    <p className="font-bold text-brand-chocolate text-base">{selectedOrder.customerName}</p>
+                    <p className="text-gray-600 mt-1">📧 {selectedOrder.customerEmail}</p>
+                    <p className="text-gray-600">📞 {selectedOrder.customerPhone ?? "No Phone"}</p>
                   </div>
                 </div>
 
                 {/* Items */}
-                <div className="text-xs space-y-2 pb-4 border-b border-brand-pink/10">
-                  <p className="font-bold uppercase tracking-wider text-[9px] text-brand-chocolate/40">ITEMIZED BAKE SPEC</p>
+                <div className="text-sm space-y-2 pb-4 border-b border-brand-pink/10">
+                  <p className="font-bold uppercase tracking-wider text-xs text-brand-chocolate/40">ITEMIZED BAKE SPEC</p>
                   <div className="space-y-3">
                     {selectedOrder.items.map((item, idx) => (
-                      <div key={idx} className="bg-brand-cream/40 p-2.5 rounded-xl border border-brand-pink/5 space-y-1">
-                        <div className="flex justify-between font-semibold text-brand-chocolate">
-                          <span>{item.quantity}x {item.name}</span>
-                          <span>${item.totalPrice.toFixed(2)}</span>
+                      <div key={idx} className="bg-brand-cream/40 p-3.5 rounded-xl border border-brand-pink/5 space-y-1.5">
+                        <div className="flex justify-between font-bold text-brand-chocolate text-sm">
+                           <span>{item.quantity}x {item.name}</span>
+                           <span>${item.totalPrice.toFixed(2)}</span>
                         </div>
-                        {item.size && <p className="text-[10px] text-gray-500">Scale: {item.size}</p>}
-                        {item.flavor && <p className="text-[10px] text-gray-500">Icing/Flavor: {item.flavor}</p>}
+                        {item.size && <p className="text-xs text-gray-500 font-medium">Scale: {item.size}</p>}
+                        {item.flavor && <p className="text-xs text-gray-500 font-medium">Icing/Flavor: {item.flavor}</p>}
                         {item.addOns && item.addOns.length > 0 && (
-                          <p className="text-[10px] text-brand-rosegold">Decor: {item.addOns.join(", ")}</p>
+                          <p className="text-xs text-brand-rosegold font-bold">Decor: {item.addOns.join(", ")}</p>
                         )}
                       </div>
                     ))}
@@ -274,24 +274,24 @@ export default function AdminOrders({ token, triggerRefresh }: AdminOrdersProps)
                 </div>
 
                 {/* Logistics */}
-                <div className="text-xs space-y-2 pb-4 border-b border-brand-pink/10">
-                  <p className="font-bold uppercase tracking-wider text-[9px] text-brand-chocolate/40">DELIVERY AND TIMELINES</p>
-                  <div className="space-y-1.5 text-xs text-brand-chocolate">
-                    <p className="flex items-center gap-1.5">
-                      <Calendar className="h-4 w-4 text-brand-rosegold" />
-                      <span>Due: <strong>{selectedOrder.fulfillmentDate}</strong></span>
+                <div className="text-sm space-y-2 pb-4 border-b border-brand-pink/10">
+                  <p className="font-bold uppercase tracking-wider text-xs text-brand-chocolate/40">DELIVERY AND TIMELINES</p>
+                  <div className="space-y-2 text-sm text-brand-chocolate">
+                    <p className="flex items-center gap-2">
+                       <Calendar className="h-4 w-4 text-brand-rosegold" />
+                       <span>Due: <strong>{selectedOrder.fulfillmentDate}</strong></span>
                     </p>
-                    <p className="flex items-center gap-1.5">
-                      {selectedOrder.type === "delivery" ? <Truck className="h-4 w-4 text-brand-rosegold" /> : <MapPin className="h-4 w-4 text-brand-rosegold" />}
-                      <span className="capitalize">Type: <strong>{selectedOrder.type}</strong></span>
+                    <p className="flex items-center gap-2">
+                       {selectedOrder.type === "delivery" ? <Truck className="h-4 w-4 text-brand-rosegold" /> : <MapPin className="h-4 w-4 text-brand-rosegold" />}
+                       <span className="capitalize">Type: <strong>{selectedOrder.type}</strong></span>
                     </p>
                     {selectedOrder.type === "delivery" && selectedOrder.deliveryAddress && (
-                      <p className="mt-1 bg-brand-cream/30 p-2 border border-brand-pink/10 rounded-lg italic text-[11px]">
+                      <p className="mt-1 bg-brand-cream/30 p-2.5 border border-brand-pink/10 rounded-lg italic text-xs leading-relaxed">
                         📍 Address: {selectedOrder.deliveryAddress}
                       </p>
                     )}
                     {selectedOrder.notes && (
-                      <div className="mt-2 text-[11px] bg-yellow-50 text-yellow-800 border-2 border-yellow-100 p-2.5 rounded-xl leading-relaxed">
+                      <div className="mt-2 text-xs bg-yellow-50 text-yellow-800 border border-yellow-250 p-3 rounded-xl leading-relaxed font-medium">
                         <strong>Lainie's Notes:</strong> {selectedOrder.notes}
                       </div>
                     )}
@@ -299,36 +299,36 @@ export default function AdminOrders({ token, triggerRefresh }: AdminOrdersProps)
                 </div>
 
                 {/* Cost Breakdown */}
-                <div className="text-xs space-y-1.5 pb-4 border-b border-brand-pink/10">
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Subtotal:</span>
+                <div className="text-sm space-y-2 pb-4 border-b border-brand-pink/10">
+                  <div className="flex justify-between text-gray-500">
+                    <span>Subtotal:</span>
                     <span className="font-semibold">${selectedOrder.subtotal.toFixed(2)}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Sales Tax (TX):</span>
+                  <div className="flex justify-between text-gray-500">
+                    <span>Sales Tax (TX):</span>
                     <span className="font-semibold">${selectedOrder.tax.toFixed(2)}</span>
                   </div>
                   {selectedOrder.type === "delivery" && (
-                    <div className="flex justify-between">
-                      <span className="text-gray-400">Delivery Charge:</span>
+                    <div className="flex justify-between text-gray-500">
+                      <span>Delivery Charge:</span>
                       <span className="font-semibold">${selectedOrder.deliveryFee.toFixed(2)}</span>
                     </div>
                   )}
-                  <div className="flex justify-between text-sm font-bold text-brand-rosegold pt-2">
+                  <div className="flex justify-between text-base font-bold text-brand-chocolate pt-2">
                     <span>Final Price:</span>
-                    <span>${selectedOrder.total.toFixed(2)}</span>
+                    <span className="text-lg text-brand-rosegold">${selectedOrder.total.toFixed(2)}</span>
                   </div>
                 </div>
 
                 {/* Workflow Status Shifter buttons */}
-                <div className="space-y-3">
-                  <p className="font-bold uppercase tracking-wider text-[9px] text-brand-chocolate/40">MUTATE BAKE WORKFLOW</p>
+                <div className="space-y-4">
+                  <p className="font-bold uppercase tracking-wider text-xs text-brand-chocolate/40">MUTATE BAKE WORKFLOW</p>
                   
                   {/* Status selection slider buttons */}
-                  <div className="grid grid-cols-2 gap-1.5">
+                  <div className="grid grid-cols-2 gap-2">
                     <button
                       onClick={() => handleStatusUpdate(selectedOrder.id, "Confirmed")}
-                      className={`py-2 text-[10px] font-bold rounded-xl border transition ${
+                      className={`py-2.5 text-xs font-bold rounded-xl border transition ${
                         selectedOrder.status === "Confirmed" 
                           ? "bg-blue-600 text-white border-blue-600" 
                           : "border-gray-100 text-gray-600 hover:bg-gray-50"
@@ -338,7 +338,7 @@ export default function AdminOrders({ token, triggerRefresh }: AdminOrdersProps)
                     </button>
                     <button
                       onClick={() => handleStatusUpdate(selectedOrder.id, "In Progress")}
-                      className={`py-2 text-[10px] font-bold rounded-xl border transition ${
+                      className={`py-2.5 text-xs font-bold rounded-xl border transition ${
                         selectedOrder.status === "In Progress" 
                           ? "bg-orange-500 text-white border-orange-500" 
                           : "border-gray-100 text-gray-600 hover:bg-gray-50"
@@ -348,7 +348,7 @@ export default function AdminOrders({ token, triggerRefresh }: AdminOrdersProps)
                     </button>
                     <button
                       onClick={() => handleStatusUpdate(selectedOrder.id, "Ready")}
-                      className={`py-2 text-[10px] font-bold rounded-xl border transition ${
+                      className={`py-2.5 text-xs font-bold rounded-xl border transition ${
                         selectedOrder.status === "Ready" 
                           ? "bg-green-600 text-white border-green-600" 
                           : "border-gray-100 text-gray-600 hover:bg-gray-50"
@@ -358,7 +358,7 @@ export default function AdminOrders({ token, triggerRefresh }: AdminOrdersProps)
                     </button>
                     <button
                       onClick={() => handleStatusUpdate(selectedOrder.id, "Delivered/Picked Up")}
-                      className={`py-2 text-[10px] font-bold rounded-xl border transition ${
+                      className={`py-2.5 text-xs font-bold rounded-xl border transition ${
                         selectedOrder.status === "Delivered/Picked Up" 
                           ? "bg-emerald-600 text-white border-emerald-600" 
                           : "border-gray-100 text-gray-600 hover:bg-gray-50"
@@ -369,12 +369,12 @@ export default function AdminOrders({ token, triggerRefresh }: AdminOrdersProps)
                   </div>
 
                   {/* Payment toggle */}
-                  <div className="pt-2 flex justify-between items-center bg-brand-cream/30 p-2.5 rounded-xl border border-brand-pink/10">
-                    <span className="text-[11px] font-bold text-brand-chocolate">Payment Balance:</span>
-                    <div className="flex gap-1 shrink-0">
+                  <div className="pt-2 flex justify-between items-center bg-brand-cream/30 p-3 rounded-xl border border-brand-pink/10">
+                    <span className="text-xs font-bold text-brand-chocolate">Payment Balance:</span>
+                    <div className="flex gap-2 shrink-0">
                       <button
                         onClick={() => handlePaymentUpdate(selectedOrder.id, "Unpaid")}
-                        className={`px-3 py-1 text-[10px] rounded-lg font-bold ${
+                        className={`px-3.5 py-1.5 text-xs rounded-lg font-bold ${
                           selectedOrder.paymentStatus === "Unpaid" ? "bg-red-600 text-white" : "bg-white border border-gray-100 text-gray-500"
                         }`}
                       >
@@ -382,7 +382,7 @@ export default function AdminOrders({ token, triggerRefresh }: AdminOrdersProps)
                       </button>
                       <button
                         onClick={() => handlePaymentUpdate(selectedOrder.id, "Paid")}
-                        className={`px-3 py-1 text-[10px] rounded-lg font-bold ${
+                        className={`px-3.5 py-1.5 text-xs rounded-lg font-bold ${
                           selectedOrder.paymentStatus === "Paid" ? "bg-green-600 text-white" : "bg-white border border-gray-100 text-gray-500"
                         }`}
                       >
@@ -394,7 +394,7 @@ export default function AdminOrders({ token, triggerRefresh }: AdminOrdersProps)
                   {/* Delete Button */}
                   <button
                     onClick={() => handleDeleteOrder(selectedOrder.id)}
-                    className="w-full text-center py-2 border border-red-200 hover:bg-red-50 text-red-700 text-[10px] font-bold rounded-xl transition"
+                    className="w-full text-center py-2.5 border border-red-200 hover:bg-red-50 text-red-750 text-xs font-bold rounded-xl transition"
                   >
                     Delete Custody Sheet
                   </button>

@@ -25,7 +25,7 @@ const JWT_SECRET = process.env.JWT_SECRET || "lainies_sweet_treats_secret_2026_x
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "lainie@sweet-treats.com";
 
 // Store a hashed default password if none matches
-const ADMIN_PASSWORD_HASH = bcrypt.hashSync(process.env.ADMIN_PASSWORD || "bakery_love", 10);
+const ADMIN_PASSWORD_HASH = bcrypt.hashSync(process.env.ADMIN_PASSWORD || "password123", 10);
 
 async function startServer() {
   const app = express();

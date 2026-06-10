@@ -12,22 +12,27 @@ export default function PublicHeader({ currentView, setView, isAdminLoggedIn, on
   return (
     <header id="public-header" className="bg-[#FFF8F0]/95 backdrop-blur-md border-b border-brand-rosegold/10 sticky top-0 z-40 shadow-xs">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-20">
+        <div className="flex items-center justify-between h-24">
           {/* Logo Brand */}
           <div 
             id="header-brand" 
-            className="flex items-center space-x-3 cursor-pointer group"
+            className="flex items-center space-x-4.5 cursor-pointer group"
             onClick={() => setView("shop")}
           >
-            <div className="bg-brand-pink/70 p-2.5 rounded-full text-brand-chocolate group-hover:scale-105 transition-transform duration-300">
-              <Cake className="h-6 w-6 text-brand-rosegold" />
+            <div className="h-16 w-16 rounded-2xl overflow-hidden border-2 border-brand-pink bg-white shadow-xs p-0.5 group-hover:scale-105 transition-transform duration-300 shrink-0">
+              <img 
+                src="https://images.squarespace-cdn.com/content/v1/6a0b183aaec8f87f9644a515/4a01bf37-b09f-4987-8495-e4876d754270/ChatGPT+Image+May+19%2C+2026%2C+09_01_51+AM.png?format=1500w" 
+                alt="Lainie's Sweet Treats Logo" 
+                className="h-full w-full object-cover rounded-xl"
+                referrerPolicy="no-referrer"
+              />
             </div>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight text-brand-chocolate leading-none">
+              <h1 className="text-2xl md:text-3xl font-black tracking-tight text-brand-chocolate leading-none">
                 Lainie's <span className="font-heading italic font-normal text-brand-rosegold">Sweet Treats</span>
               </h1>
-              <p className="text-[10px] tracking-widest text-[#B76E79] uppercase font-bold mt-1">
-                Royse City, TX • Custom Baking
+              <p className="text-xs tracking-widest text-[#B76E79] uppercase font-extrabold mt-1.5">
+                Bespoke Cottage Bakery • Royse City, TX
               </p>
             </div>
           </div>

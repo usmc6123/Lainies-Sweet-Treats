@@ -160,39 +160,39 @@ export default function AdminIngredients({ token, triggerRefresh }: AdminIngredi
     <div id="admin-ingredients-tab" className="space-y-6 animate-in fade-in duration-300">
       
       {/* Top Ledger stats summary */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-white border border-brand-pink/20 rounded-2xl p-4.5 shadow-xs flex items-center justify-between">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        <div className="bg-white border border-brand-pink/20 rounded-[2rem] p-6 shadow-sm flex items-center justify-between">
           <div>
-            <span className="text-[10px] text-gray-400 block uppercase font-bold">Tracked Ingredients</span>
-            <span className="text-xl font-bold text-brand-chocolate">{ingredients.length} items</span>
+            <span className="text-xs text-[#B76E79] block uppercase font-extrabold tracking-wider">Tracked Ingredients</span>
+            <span className="text-2xl font-black text-brand-chocolate mt-1 block">{ingredients.length} items</span>
           </div>
-          <Package className="h-5 w-5 text-brand-rosegold" />
+          <Package className="h-6 w-6 text-brand-rosegold" />
         </div>
         
-        <div className="bg-white border border-brand-pink/20 rounded-2xl p-4.5 shadow-xs flex items-center justify-between">
+        <div className="bg-white border border-brand-pink/20 rounded-[2rem] p-6 shadow-sm flex items-center justify-between">
           <div>
-            <span className="text-[10px] text-gray-400 block uppercase font-bold">Total Expenses Logged</span>
-            <span className="text-xl font-bold text-brand-chocolate">${totalExpensesSum.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+            <span className="text-xs text-[#B76E79] block uppercase font-extrabold tracking-wider">Total Expenses Logged</span>
+            <span className="text-2xl font-black text-brand-chocolate mt-1 block">${totalExpensesSum.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
           </div>
-          <DollarSign className="h-5 w-5 text-red-500" />
+          <DollarSign className="h-6 w-6 text-red-500" />
         </div>
 
-        <div className="bg-white border border-brand-pink/20 rounded-2xl p-4.5 shadow-xs flex items-center justify-between">
+        <div className="bg-white border border-brand-pink/20 rounded-[2rem] p-6 shadow-sm flex items-center justify-between">
           <div>
-            <span className="text-[10px] text-gray-400 block uppercase font-bold">Ledger Balance status</span>
-            <span className="text-xs text-green-700 font-bold bg-green-50 px-2.5 py-1 rounded-full border border-green-200">ACTIVE SHEETS</span>
+            <span className="text-xs text-[#B76E79] block uppercase font-extrabold tracking-wider">Ledger Balance Status</span>
+            <span className="text-xs text-green-700 font-extrabold bg-green-50 px-3 py-1.5 rounded-full border border-green-200 mt-2 inline-block">ACTIVE SHEETS</span>
           </div>
-          <TrendingUp className="h-5 w-5 text-emerald-600" />
+          <TrendingUp className="h-6 w-6 text-emerald-600" />
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         
         {/* Ingredient Library ledger Left column */}
-        <div className="bg-white border border-brand-pink/25 rounded-3xl p-5 sm:p-6 shadow-xs space-y-4">
+        <div className="bg-white border border-brand-pink/25 rounded-[2rem] p-6 shadow-sm space-y-5">
           <div className="flex justify-between items-center pb-3 border-b border-brand-pink/10">
-            <h3 className="text-base font-bold text-brand-chocolate flex items-center space-x-1.5">
-              <Package className="h-4.5 w-4.5 text-brand-rosegold" />
+            <h3 className="text-lg lg:text-xl font-bold text-brand-chocolate flex items-center space-x-2 font-heading">
+              <Package className="h-5.5 w-5.5 text-brand-rosegold" />
               <span>Ingredient Pricing Library</span>
             </h3>
             
@@ -201,24 +201,24 @@ export default function AdminIngredients({ token, triggerRefresh }: AdminIngredi
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search library..."
-              className="text-[11px] bg-brand-cream/20 border border-brand-pink/15 px-3 py-1 rounded-lg w-40"
+              className="text-xs bg-brand-cream/20 border border-brand-pink/15 px-3 py-2 rounded-xl w-48 font-medium focus:none"
             />
           </div>
 
-          <form onSubmit={handleAddIngredient} className="grid grid-cols-2 sm:grid-cols-4 gap-2 bg-brand-cream/20 p-3 rounded-2xl border border-brand-pink/10 text-xs">
+          <form onSubmit={handleAddIngredient} className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-brand-cream/20 p-4 rounded-3xl border border-brand-pink/10 text-xs">
             <div className="col-span-2">
-              <label className="text-[9px] uppercase font-bold text-gray-400">Ingredient Name</label>
+              <label className="text-[10px] uppercase font-extrabold tracking-wider text-gray-500 block">Ingredient Name</label>
               <input
                 type="text"
                 required
                 value={ingName}
                 onChange={(e) => setIngName(e.target.value)}
                 placeholder="Bulk Cake Flour"
-                className="w-full bg-white border border-brand-pink/15 p-1.5 rounded-lg text-[11px] mt-1"
+                className="w-full bg-white border border-brand-pink/15 p-2 rounded-xl text-xs sm:text-sm text-brand-chocolate font-medium mt-1 inline-block"
               />
             </div>
             <div>
-              <label className="text-[9px] uppercase font-bold text-gray-400">Cost/Unit ($)</label>
+              <label className="text-[10px] uppercase font-extrabold tracking-wider text-gray-500 block">Cost/Unit ($)</label>
               <input
                 type="number"
                 required
@@ -227,15 +227,15 @@ export default function AdminIngredients({ token, triggerRefresh }: AdminIngredi
                 value={ingCostUnit}
                 onChange={(e) => setIngCostUnit(Number(e.target.value))}
                 placeholder="0.08"
-                className="w-full bg-white border border-brand-pink/15 p-1.5 rounded-lg text-[11px] mt-1"
+                className="w-full bg-white border border-brand-pink/15 p-2 rounded-xl text-xs sm:text-sm text-brand-chocolate font-medium mt-1 inline-block font-mono"
               />
             </div>
             <div>
-              <label className="text-[9px] uppercase font-bold text-gray-400">Unit Type</label>
+              <label className="text-[10px] uppercase font-extrabold tracking-wider text-gray-500 block">Unit Type</label>
               <select
                 value={ingUnit}
                 onChange={(e) => setIngUnit(e.target.value)}
-                className="w-full bg-white border border-brand-pink/15 p-1.5 rounded-lg text-[11px] mt-1"
+                className="w-full bg-white border border-brand-pink/15 p-2 rounded-xl text-xs sm:text-sm text-brand-chocolate font-medium mt-1 inline-block"
               >
                 <option value="oz">Ounces (oz)</option>
                 <option value="g">Grams (g)</option>
@@ -244,11 +244,11 @@ export default function AdminIngredients({ token, triggerRefresh }: AdminIngredi
               </select>
             </div>
             <div className="col-span-3">
-              <label className="text-[9px] uppercase font-bold text-gray-400">Classification</label>
+              <label className="text-[10px] uppercase font-extrabold tracking-wider text-gray-500 block">Classification</label>
               <select
                 value={ingCategory}
                 onChange={(e) => setIngCategory(e.target.value)}
-                className="w-full bg-white border border-brand-pink/15 p-1.5 rounded-lg text-[11px] mt-1"
+                className="w-full bg-white border border-brand-pink/15 p-2 rounded-xl text-xs sm:text-sm text-brand-chocolate font-medium mt-1 inline-block"
               >
                 <option value="Pantry Staple">Pantry Staple (Sugar, Flour)</option>
                 <option value="Dairy & Fresh">Dairy & Fresh (Butter, Eggs)</option>
@@ -260,7 +260,7 @@ export default function AdminIngredients({ token, triggerRefresh }: AdminIngredi
             <div className="col-span-1 pt-4.5">
               <button
                 type="submit"
-                className="w-full bg-brand-chocolate text-white hover:opacity-90 transition font-bold py-1.5 rounded-lg text-[11px]"
+                className="w-full bg-brand-chocolate text-white hover:opacity-95 transition font-bold py-2.5 rounded-xl text-xs sm:text-sm cursor-pointer"
               >
                 Save
               </button>
@@ -268,26 +268,26 @@ export default function AdminIngredients({ token, triggerRefresh }: AdminIngredi
           </form>
 
           {/* Table display */}
-          <div className="max-h-72 overflow-y-auto pr-1">
-            <table className="w-full text-xs text-left text-brand-chocolate">
+          <div className="max-h-80 overflow-y-auto pr-1">
+            <table className="w-full text-xs sm:text-sm text-left text-brand-chocolate">
               <thead>
-                <tr className="border-b border-brand-pink/15 text-gray-400 font-semibold text-[9px] uppercase tracking-wider">
-                  <th className="py-2.5">Name</th>
-                  <th className="py-2.5">Classification</th>
-                  <th className="py-2.5">Unit Cost</th>
-                  <th className="py-2.5 text-right">Delete</th>
+                <tr className="border-b border-brand-pink/15 text-gray-400 font-extrabold text-[10px] uppercase tracking-wider">
+                  <th className="py-3">Name</th>
+                  <th className="py-3">Classification</th>
+                  <th className="py-3">Unit Cost</th>
+                  <th className="py-3 text-right">Delete</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-brand-pink/5">
+              <tbody className="divide-y divide-brand-pink/5 font-semibold">
                 {filteredIngredients.map(item => (
                   <tr key={item.id} className="hover:bg-brand-pink/5">
-                    <td className="py-3 font-semibold">{item.name}</td>
-                    <td className="py-3 text-[11px] text-gray-500">{item.category}</td>
-                    <td className="py-3 font-mono text-xs font-bold">${item.costPerUnit.toFixed(4)} / {item.unit}</td>
-                    <td className="py-3 text-right">
+                    <td className="py-3.5 font-bold">{item.name}</td>
+                    <td className="py-3.5 text-xs text-gray-500 font-bold">{item.category}</td>
+                    <td className="py-3.5 font-mono text-xs font-bold text-brand-chocolate">${item.costPerUnit.toFixed(4)} / {item.unit}</td>
+                    <td className="py-3.5 text-right">
                       <button
                         onClick={() => handleDeleteIngredient(item.id)}
-                        className="text-red-500 hover:text-red-700 p-1 font-bold"
+                        className="text-red-500 hover:text-red-700 p-1.5 font-extrabold"
                       >
                         ✕
                       </button>
@@ -297,31 +297,29 @@ export default function AdminIngredients({ token, triggerRefresh }: AdminIngredi
               </tbody>
             </table>
           </div>
-        </div>
-
-        {/* Expenses Book Right column */}
-        <div className="bg-white border border-brand-pink/25 rounded-3xl p-5 sm:p-6 shadow-xs space-y-4">
+        </div>        {/* Expenses Book Right column */}
+        <div className="bg-white border border-brand-pink/25 rounded-[2rem] p-6 shadow-sm space-y-5">
           <div className="pb-3 border-b border-brand-pink/10">
-            <h3 className="text-base font-bold text-brand-chocolate flex items-center space-x-1.5">
-              <ShoppingBag className="h-4.5 w-4.5 text-red-500" />
+            <h3 className="text-lg lg:text-xl font-bold text-brand-chocolate flex items-center space-x-2 font-heading">
+              <ShoppingBag className="h-5.5 w-5.5 text-red-500" />
               <span>Business Outlays & Expenses Book</span>
             </h3>
           </div>
 
-          <form onSubmit={handleAddExpense} className="grid grid-cols-2 gap-2 bg-brand-cream/15 p-3 rounded-2xl border border-brand-pink/10 text-xs">
+          <form onSubmit={handleAddExpense} className="grid grid-cols-2 gap-3 bg-brand-cream/15 p-4 rounded-3xl border border-brand-pink/10 text-xs">
             <div className="col-span-2">
-              <label className="text-[9px] uppercase font-bold text-gray-400">Expense Label / Description</label>
+              <label className="text-[10px] uppercase font-extrabold tracking-wider text-gray-500 block">Expense Label / Description</label>
               <input
                 type="text"
                 required
                 value={expDesc}
                 onChange={(e) => setExpDesc(e.target.value)}
                 placeholder="Stand Mixer Beater attachment"
-                className="w-full bg-white border border-brand-pink/15 p-1.5 rounded-lg text-[11px] mt-1"
+                className="w-full bg-white border border-brand-pink/15 p-2 rounded-xl text-xs sm:text-sm text-brand-chocolate font-medium mt-1 inline-block"
               />
             </div>
             <div>
-              <label className="text-[9px] uppercase font-bold text-gray-400">Amount ($)</label>
+              <label className="text-[10px] uppercase font-extrabold tracking-wider text-gray-500 block">Amount ($)</label>
               <input
                 type="number"
                 required
@@ -330,24 +328,24 @@ export default function AdminIngredients({ token, triggerRefresh }: AdminIngredi
                 value={expAmount}
                 onChange={(e) => setExpAmount(Number(e.target.value))}
                 placeholder="49.99"
-                className="w-full bg-white border border-brand-pink/15 p-1.5 rounded-lg text-[11px] mt-1"
+                className="w-full bg-white border border-brand-pink/15 p-2 rounded-xl text-xs sm:text-sm text-brand-chocolate mt-1 inline-block font-mono"
               />
             </div>
             <div>
-              <label className="text-[9px] uppercase font-bold text-gray-400">Billing Date</label>
+              <label className="text-[10px] uppercase font-extrabold tracking-wider text-gray-500 block">Billing Date</label>
               <input
                 type="date"
                 value={expDate}
                 onChange={(e) => setExpDate(e.target.value)}
-                className="w-full bg-white border border-brand-pink/15 p-1.5 rounded-lg text-[11px] mt-1"
+                className="w-full bg-white border border-brand-pink/15 p-2 rounded-xl text-xs sm:text-sm text-brand-chocolate font-medium mt-1 inline-block"
               />
             </div>
             <div className="col-span-2">
-              <label className="text-[9px] uppercase font-bold text-gray-400">Expense Category</label>
+              <label className="text-[10px] uppercase font-extrabold tracking-wider text-gray-500 block">Expense Category</label>
               <select
                 value={expCategory}
                 onChange={(e) => setExpCategory(e.target.value)}
-                className="w-full bg-white border border-brand-pink/15 p-1.5 rounded-lg text-[11px] mt-1"
+                className="w-full bg-white border border-brand-pink/15 p-2.5 rounded-xl text-xs sm:text-sm text-brand-chocolate font-medium mt-1 inline-block"
               >
                 <option value="Bakery Ingredients">Bakery Ingredients (Bulk stock flour, icing)</option>
                 <option value="Baking Utilities">Baking Utilities (Pans, offset spatulas, parchment)</option>
@@ -359,7 +357,7 @@ export default function AdminIngredients({ token, triggerRefresh }: AdminIngredi
             <div className="col-span-2 pt-2">
               <button
                 type="submit"
-                className="w-full bg-brand-chocolate text-brand-cream hover:opacity-90 font-bold py-2 rounded-lg text-[11px]"
+                className="w-full bg-brand-chocolate text-brand-cream hover:opacity-95 font-bold py-3.5 rounded-xl text-xs sm:text-sm cursor-pointer shadow-sm transition"
               >
                 Record Outlay Transaction
               </button>
@@ -367,18 +365,18 @@ export default function AdminIngredients({ token, triggerRefresh }: AdminIngredi
           </form>
 
           {/* Expenses ledgers list */}
-          <div className="max-h-70 overflow-y-auto pr-1 space-y-2">
+          <div className="max-h-80 overflow-y-auto pr-1 space-y-2.5">
             {expenses.map(exp => (
-              <div key={exp.id} className="p-3 bg-brand-pink/5 hover:bg-brand-pink/10 transition rounded-xl border border-brand-pink/5 flex justify-between items-center text-xs">
+              <div key={exp.id} className="p-3.5 bg-brand-pink/5 hover:bg-brand-pink/10 transition rounded-xl border border-brand-pink/5 flex justify-between items-center text-sm font-semibold">
                 <div>
-                  <h4 className="font-bold text-brand-chocolate">{exp.description}</h4>
-                  <p className="text-[10px] text-gray-400 mt-0.5">{exp.date} • {exp.category}</p>
+                  <h4 className="font-extrabold text-[#B76E79] lg:text-base">{exp.description}</h4>
+                  <p className="text-xs text-gray-500 mt-0.5 font-bold">{exp.date} • {exp.category}</p>
                 </div>
                 <div className="flex items-center space-x-3 shrink-0">
-                  <span className="font-mono text-sm font-bold text-red-600">-${exp.amount.toFixed(2)}</span>
+                  <span className="font-mono text-base font-extrabold text-red-650">-${exp.amount.toFixed(2)}</span>
                   <button
                     onClick={() => handleDeleteExpense(exp.id)}
-                    className="text-red-500 hover:text-red-800 font-bold"
+                    className="text-red-500 hover:text-red-800 font-extrabold p-1 text-sm bg-red-50 rounded"
                   >
                     ✕
                   </button>

@@ -226,19 +226,19 @@ export default function AdminMenu({ token, triggerRefresh }: AdminMenuProps) {
 
   return (
     <div id="admin-menu-tab" className="space-y-6 animate-in fade-in duration-300">
-      <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center bg-white border border-brand-pink/20 rounded-2xl p-4 shadow-xs">
+      <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center bg-white border border-brand-pink/20 rounded-2xl p-5 shadow-sm">
         <div className="flex items-center space-x-2">
-          <Tag className="h-5 w-5 text-brand-rosegold" />
-          <h2 className="text-xl font-bold text-brand-chocolate font-heading">
-            Bakery product Catalog
+          <Tag className="h-6 w-6 text-brand-rosegold" />
+          <h2 className="text-2xl lg:text-3xl font-bold text-brand-chocolate font-heading">
+            Bakery Product Catalog
           </h2>
         </div>
         {!isAdding && !editingProduct && (
           <button
             onClick={handleNewClick}
-            className="flex items-center space-x-1.5 px-4 py-2.5 bg-brand-chocolate text-brand-cream text-xs font-bold rounded-xl hover:opacity-90 transition shadow-xs"
+            className="flex items-center space-x-1.5 px-5 py-3 bg-brand-chocolate text-brand-cream text-xs sm:text-sm font-bold rounded-xl hover:opacity-90 transition shadow-sm cursor-pointer"
           >
-            <PlusCircle className="h-4 w-4 text-brand-pink" />
+            <PlusCircle className="h-4.5 w-4.5 text-brand-pink" />
             <span>Create New Product</span>
           </button>
         )}
@@ -247,21 +247,21 @@ export default function AdminMenu({ token, triggerRefresh }: AdminMenuProps) {
       {loading ? (
         <div className="flex flex-col items-center justify-center py-20 bg-white border border-brand-pink/10 rounded-3xl">
           <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-brand-rosegold"></div>
-          <p className="mt-4 text-xs text-brand-chocolate/85">Loading catalog lists...</p>
+          <p className="mt-4 text-sm text-brand-chocolate/85">Loading catalog lists...</p>
         </div>
       ) : isAdding || editingProduct ? (
         /* CREATOR OR EDITOR WORKSPACE */
-        <form onSubmit={handleSaveProduct} className="bg-white border border-brand-pink/20 rounded-3xl p-6 shadow-xs space-y-6 animate-in slide-in-from-bottom duration-300">
+        <form onSubmit={handleSaveProduct} className="bg-white border border-brand-pink/20 rounded-[2.5rem] p-8 shadow-sm space-y-6 animate-in slide-in-from-bottom duration-300">
           <div className="flex justify-between items-center border-b border-brand-pink/10 pb-4">
-            <h3 className="text-lg font-bold font-heading text-brand-chocolate">
+            <h3 className="text-xl lg:text-2xl font-bold font-heading text-brand-chocolate">
               {editingProduct ? `Modify: ${editingProduct.name}` : "Compile New Bakery Treat"}
             </h3>
-            <div className="flex gap-2">
+            <div className="flex gap-2.5">
               {editingProduct && (
                 <button
                   type="button"
                   onClick={() => handleDeleteProduct(editingProduct.id)}
-                  className="bg-red-50 text-red-700 hover:bg-red-100 border border-red-200 px-3.5 py-1.5 rounded-xl text-xs font-bold transition"
+                  className="bg-red-50 text-red-700 hover:bg-red-100 border border-red-200 px-4 py-2 rounded-xl text-sm font-bold transition cursor-pointer"
                 >
                   Retire Product
                 </button>
@@ -269,34 +269,34 @@ export default function AdminMenu({ token, triggerRefresh }: AdminMenuProps) {
               <button
                 type="button"
                 onClick={() => { setEditingProduct(null); setIsAdding(false); }}
-                className="bg-gray-150 hover:bg-gray-200 text-gray-700 px-3.5 py-1.5 rounded-xl text-xs font-bold transition"
+                className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-xl text-sm font-bold transition cursor-pointer"
               >
                 Exit Editor
               </button>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Left Column: Basic elements info */}
             <div className="space-y-4">
               <div>
-                <label className="text-[10px] uppercase font-bold text-gray-500">Treat Name</label>
+                <label className="text-xs uppercase font-extrabold tracking-wider text-gray-500 block">Treat Name</label>
                 <input
                   type="text"
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Vanilla Confetti Cupcakes"
-                  className="w-full text-xs bg-brand-cream/10 border border-brand-pink/15 rounded-xl p-2.5 mt-1 focus:outline-none focus:ring-1"
+                  className="w-full text-sm bg-brand-cream/10 border border-brand-pink/15 rounded-xl p-3 mt-1.5 focus:outline-none focus:ring-1 focus:ring-brand-rosegold text-brand-chocolate font-medium"
                 />
               </div>
 
               <div>
-                <label className="text-[10px] uppercase font-bold text-gray-500">Category</label>
+                <label className="text-xs uppercase font-extrabold tracking-wider text-gray-500 block">Category</label>
                 <select
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
-                  className="w-full text-xs bg-brand-cream/10 border border-brand-pink/15 rounded-xl p-2.5 mt-1"
+                  className="w-full text-sm bg-brand-cream/10 border border-brand-pink/15 rounded-xl p-3 mt-1.5 text-brand-chocolate font-medium focus:outline-none focus:ring-1 focus:ring-brand-rosegold"
                 >
                   {categories.map(cat => (
                     <option key={cat} value={cat}>{cat}</option>
@@ -305,7 +305,7 @@ export default function AdminMenu({ token, triggerRefresh }: AdminMenuProps) {
               </div>
 
               <div>
-                <label className="text-[10px] uppercase font-bold text-gray-500">Base Base Selling Price ($)</label>
+                <label className="text-xs uppercase font-extrabold tracking-wider text-gray-500 block">Base Selling Price ($)</label>
                 <input
                   type="number"
                   required
@@ -313,29 +313,29 @@ export default function AdminMenu({ token, triggerRefresh }: AdminMenuProps) {
                   step="0.01"
                   value={basePrice}
                   onChange={(e) => setBasePrice(Number(e.target.value))}
-                  className="w-full text-xs bg-brand-cream/10 border border-brand-pink/15 rounded-xl p-2.5 mt-1"
+                  className="w-full text-sm bg-brand-cream/10 border border-brand-pink/15 rounded-xl p-3 mt-1.5 text-brand-chocolate font-bold focus:outline-none focus:ring-1 focus:ring-brand-rosegold"
                 />
               </div>
 
               <div>
-                <label className="text-[10px] uppercase font-bold text-gray-500">Appetizing Photo URL</label>
+                <label className="text-xs uppercase font-extrabold tracking-wider text-gray-500 block">Appetizing Photo URL</label>
                 <input
                   type="text"
                   value={imgUrl}
                   onChange={(e) => setImgUrl(e.target.value)}
                   placeholder="https://images.unsplash.com/..."
-                  className="w-full text-xs bg-brand-cream/10 border border-brand-pink/15 rounded-xl p-2.5 mt-1"
+                  className="w-full text-sm bg-brand-cream/10 border border-brand-pink/15 rounded-xl p-3 mt-1.5 text-brand-chocolate font-medium focus:outline-none focus:ring-1 focus:ring-brand-rosegold"
                 />
               </div>
 
               <div>
-                <label className="text-[10px] uppercase font-bold text-gray-500">Catalog Description</label>
+                <label className="text-xs uppercase font-extrabold tracking-wider text-gray-500 block">Catalog Description</label>
                 <textarea
                   rows={3}
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="Perfect fluffy sponge cake finished with homemade cream frosting layer sprinkles."
-                  className="w-full text-xs bg-brand-cream/10 border border-brand-pink/15 rounded-xl p-2.5 mt-1"
+                  className="w-full text-sm bg-brand-cream/10 border border-brand-pink/15 rounded-xl p-3 mt-1.5 text-brand-chocolate font-medium focus:outline-none focus:ring-1 focus:ring-brand-rosegold"
                 />
               </div>
             </div>
@@ -343,101 +343,101 @@ export default function AdminMenu({ token, triggerRefresh }: AdminMenuProps) {
             {/* Middle Column: Options editor sizes list, flavors, accessories */}
             <div className="space-y-4">
               {/* Sizes section list */}
-              <div className="bg-brand-cream/35 p-3 rounded-2xl border border-brand-pink/15">
-                <span className="text-[10px] uppercase font-bold text-brand-chocolate/75">Option Sizes</span>
-                <div className="flex gap-1.5 mt-2">
+              <div className="bg-brand-cream/35 p-4 rounded-2xl border border-brand-pink/15 space-y-2">
+                <span className="text-xs uppercase font-extrabold tracking-widest text-[#B76E79]">Option Sizes</span>
+                <div className="flex gap-2">
                   <input
                     type="text"
                     value={newSizeName}
                     onChange={(e) => setNewSizeName(e.target.value)}
                     placeholder="e.g., Small, Dozen"
-                    className="flex-1 text-[11px] bg-white border border-brand-pink/15 p-1 rounded-lg"
+                    className="flex-1 text-sm bg-white border border-brand-pink/15 p-2 rounded-xl focus:outline-none"
                   />
                   <input
                     type="number"
                     value={newSizePrice}
                     onChange={(e) => setNewSizePrice(Number(e.target.value))}
                     placeholder="+$"
-                    className="w-12 text-[11px] bg-white border border-brand-pink/15 p-1 rounded-lg"
+                    className="w-16 text-sm bg-white border border-brand-pink/15 p-2 rounded-xl focus:outline-none font-bold text-center"
                   />
                   <button
                     type="button"
                     onClick={handleAddSizeOption}
-                    className="bg-brand-chocolate text-white text-[11px] font-bold px-2.5 py-1 rounded-lg"
+                    className="bg-brand-chocolate text-white text-sm font-bold px-3 py-2 rounded-xl cursor-pointer hover:opacity-90"
                   >
                     +
                   </button>
                 </div>
-                <div className="mt-2 space-y-1">
+                <div className="mt-2 space-y-1.5 font-semibold">
                   {sizes.map((s, idx) => (
-                    <div key={idx} className="flex justify-between items-center text-[10px] bg-white p-1.5 rounded border border-brand-pink/5">
+                    <div key={idx} className="flex justify-between items-center text-xs bg-white p-2 rounded-lg border border-brand-pink/10">
                       <span>{s.name} (+${s.priceAdd})</span>
-                      <button type="button" onClick={() => handleRemoveSizeOption(idx)} className="text-red-500 font-bold px-1 text-xs">✕</button>
+                      <button type="button" onClick={() => handleRemoveSizeOption(idx)} className="text-red-500 font-extrabold px-1 text-sm leading-none bg-red-50 rounded p-0.5">✕</button>
                     </div>
                   ))}
                 </div>
               </div>
 
               {/* Flavors input lists */}
-              <div className="bg-brand-cream/35 p-3 rounded-2xl border border-brand-pink/15">
-                <span className="text-[10px] uppercase font-bold text-brand-chocolate/75">Flavors List</span>
-                <div className="flex gap-1.5 mt-2">
+              <div className="bg-brand-cream/35 p-4 rounded-2xl border border-brand-pink/15 space-y-2">
+                <span className="text-xs uppercase font-extrabold tracking-widest text-[#B76E79]">Flavors List</span>
+                <div className="flex gap-2">
                   <input
                     type="text"
                     value={newFlavorName}
                     onChange={(e) => setNewFlavorName(e.target.value)}
                     placeholder="e.g., Red Velvet Sponge"
-                    className="flex-1 text-[11px] bg-white border border-brand-pink/15 p-1 rounded-lg"
+                    className="flex-1 text-sm bg-white border border-brand-pink/15 p-2 rounded-xl focus:outline-none"
                   />
                   <button
                     type="button"
                     onClick={handleAddFlavorOption}
-                    className="bg-brand-chocolate text-white text-[11px] font-bold px-2.5 py-1 rounded-lg"
+                    className="bg-brand-chocolate text-white text-sm font-bold px-3 py-2 rounded-xl cursor-pointer hover:opacity-90"
                   >
                     +
                   </button>
                 </div>
-                <div className="mt-2 flex flex-wrap gap-1">
+                <div className="mt-2 flex flex-wrap gap-1.5 font-semibold">
                   {flavors.map((f, idx) => (
-                    <span key={idx} className="inline-flex items-center text-[10px] bg-white px-2 py-0.5 rounded border border-brand-pink/5 font-medium">
+                    <span key={idx} className="inline-flex items-center text-xs bg-white px-2.5 py-1 rounded-lg border border-brand-pink/10">
                       {f}
-                      <button type="button" onClick={() => handleRemoveFlavorOption(idx)} className="text-red-500 font-bold ml-1 text-xs">✕</button>
+                      <button type="button" onClick={() => handleRemoveFlavorOption(idx)} className="text-red-500 font-extrabold ml-2 text-xs">✕</button>
                     </span>
                   ))}
                 </div>
               </div>
 
               {/* AddOns select elements */}
-              <div className="bg-brand-cream/35 p-3 rounded-2xl border border-brand-pink/15">
-                <span className="text-[10px] uppercase font-bold text-brand-chocolate/75">Extra Decoration Add-ons</span>
-                <div className="flex gap-1.5 mt-2">
+              <div className="bg-brand-cream/35 p-4 rounded-2xl border border-brand-pink/15 space-y-2">
+                <span className="text-xs uppercase font-extrabold tracking-widest text-[#B76E79]">Extra Decoration Add-ons</span>
+                <div className="flex gap-2">
                   <input
                     type="text"
                     value={newAddOnName}
                     onChange={(e) => setNewAddOnName(e.target.value)}
                     placeholder="e.g., Sparkler Candle"
-                    className="flex-1 text-[11px] bg-white border border-brand-pink/15 p-1 rounded-lg"
+                    className="flex-1 text-sm bg-white border border-brand-pink/15 p-2 rounded-xl focus:outline-none"
                   />
                   <input
                     type="number"
                     value={newAddOnPrice}
                     onChange={(e) => setNewAddOnPrice(Number(e.target.value))}
                     placeholder="+$"
-                    className="w-12 text-[11px] bg-white border border-brand-pink/15 p-1 rounded-lg"
+                    className="w-16 text-sm bg-white border border-brand-pink/15 p-2 rounded-xl focus:outline-none font-bold text-center"
                   />
                   <button
                     type="button"
                     onClick={handleAddAddOnOption}
-                    className="bg-brand-chocolate text-white text-[11px] font-bold px-2.5 py-1 rounded-lg"
+                    className="bg-brand-chocolate text-white text-sm font-bold px-3 py-2 rounded-xl cursor-pointer hover:opacity-90"
                   >
                     +
                   </button>
                 </div>
-                <div className="mt-2 space-y-1">
+                <div className="mt-2 space-y-1.5 font-semibold">
                   {addOns.map((a, idx) => (
-                    <div key={idx} className="flex justify-between items-center text-[10px] bg-white p-1.5 rounded border border-brand-pink/5">
+                    <div key={idx} className="flex justify-between items-center text-xs bg-white p-2 rounded-lg border border-brand-pink/10">
                       <span>{a.name} (+${a.priceAdd})</span>
-                      <button type="button" onClick={() => handleRemoveAddOnOption(idx)} className="text-red-500 font-bold px-1 text-xs">✕</button>
+                      <button type="button" onClick={() => handleRemoveAddOnOption(idx)} className="text-red-500 font-extrabold px-1 text-sm leading-none bg-red-50 rounded p-0.5">✕</button>
                     </div>
                   ))}
                 </div>
@@ -446,22 +446,22 @@ export default function AdminMenu({ token, triggerRefresh }: AdminMenuProps) {
 
             {/* Right Column: Recipe Ingredient and Margins accounting! */}
             <div className="space-y-4">
-              <div className="bg-brand-pink/10 p-4 border border-brand-pink/30 rounded-3xl space-y-3">
-                <div className="flex items-center space-x-1">
-                  <Scale className="h-4 w-4 text-brand-rosegold" />
-                  <h4 className="text-xs font-bold text-brand-chocolate uppercase tracking-wider">
+              <div className="bg-brand-pink/10 p-5 border border-brand-pink/30 rounded-3xl space-y-3">
+                <div className="flex items-center space-x-1.5">
+                  <Scale className="h-5 w-5 text-brand-rosegold" />
+                  <h4 className="text-sm font-extrabold text-brand-chocolate uppercase tracking-wider">
                     Recipe Ingredients Cost Tool
                   </h4>
                 </div>
-                <p className="text-[10px] text-gray-500">
+                <p className="text-xs text-gray-500 font-semibold mb-2">
                   Select ingredients and dosages to calculate unit baking resource costs and gross profit margin.
                 </p>
 
-                <div className="flex gap-1 mt-2">
+                <div className="flex gap-2 mt-3">
                   <select
                     value={inputIngId}
                     onChange={(e) => setInputIngId(e.target.value)}
-                    className="flex-1 text-[11px] bg-white border border-brand-pink/15 p-1 rounded-lg"
+                    className="flex-1 text-sm bg-white border border-brand-pink/15 p-2.5 rounded-xl text-brand-chocolate font-medium focus:none"
                   >
                     <option value="">-- Choose Ingredient --</option>
                     {ingredients.map(i => (
@@ -473,12 +473,12 @@ export default function AdminMenu({ token, triggerRefresh }: AdminMenuProps) {
                     value={inputIngQty}
                     onChange={(e) => setInputIngQty(Number(e.target.value))}
                     placeholder="Qty"
-                    className="w-12 text-[11px] bg-white border border-brand-pink/15 p-1 rounded-lg"
+                    className="w-16 text-sm bg-white border border-brand-pink/15 p-2.5 rounded-xl font-bold text-center focus:none"
                   />
                   <button
                     type="button"
                     onClick={handleAddIngLink}
-                    className="bg-brand-chocolate text-white text-[11px] px-2.5 py-1 rounded-lg font-bold"
+                    className="bg-brand-chocolate text-white text-xs px-4 py-2.5 rounded-xl font-bold hover:opacity-90 cursor-pointer"
                   >
                     Add
                   </button>
@@ -486,16 +486,16 @@ export default function AdminMenu({ token, triggerRefresh }: AdminMenuProps) {
 
                 {/* Grid Links list */}
                 {prodIngredients.length > 0 && (
-                  <div className="space-y-1.5 max-h-36 overflow-y-auto pr-1">
+                  <div className="space-y-2 max-h-44 overflow-y-auto pr-1">
                     {prodIngredients.map((link, idx) => {
                       const ing = ingredients.find(i => i.id === link.ingredientId);
                       const cost = ing ? ing.costPerUnit * link.quantity : 0;
                       return (
-                        <div key={idx} className="flex justify-between items-center text-[10px] bg-white p-2 rounded-lg border border-brand-pink/5">
+                        <div key={idx} className="flex justify-between items-center text-xs bg-white p-2.5 rounded-xl border border-brand-pink/10 font-bold">
                           <span>{link.quantity}{ing?.unit} {ing?.name}</span>
                           <div className="flex items-center space-x-2">
-                            <span className="font-semibold text-brand-rosegold">${cost.toFixed(2)}</span>
-                            <button type="button" onClick={() => handleRemoveIngLink(link.ingredientId)} className="text-red-500 hover:text-red-700">✕</button>
+                            <span className="font-extrabold text-brand-rosegold">${cost.toFixed(2)}</span>
+                            <button type="button" onClick={() => handleRemoveIngLink(link.ingredientId)} className="text-red-500 hover:text-red-700 font-bold text-sm px-1">✕</button>
                           </div>
                         </div>
                       );
@@ -504,19 +504,19 @@ export default function AdminMenu({ token, triggerRefresh }: AdminMenuProps) {
                 )}
 
                 {/* Cost/Margin indicators */}
-                <div className="pt-3 border-t border-brand-pink/20 space-y-1.5 text-xs text-brand-chocolate pt-4">
+                <div className="pt-4 border-t border-brand-pink/20 space-y-2 text-sm text-brand-chocolate font-semibold">
                   <div className="flex justify-between">
                     <span>Retail Sale Price:</span>
-                    <span className="font-bold">${basePrice.toFixed(2)}</span>
+                    <span className="font-extrabold">${basePrice.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Raw Ingredients Cost:</span>
-                    <span className="font-bold">${calculateIngredientTotalCost(prodIngredients).toFixed(2)}</span>
+                    <span className="font-extrabold text-red-700">${calculateIngredientTotalCost(prodIngredients).toFixed(2)}</span>
                   </div>
                   {basePrice > 0 && (
-                    <div className="flex justify-between text-brand-rosegold font-bold pt-2 border-t border-dashed border-brand-pink/10">
+                    <div className="flex justify-between text-brand-rosegold font-extrabold pt-3 border-t border-dashed border-brand-pink/20 text-base">
                       <span>Bake Gross Margin (%):</span>
-                      <span>
+                      <span className="bg-brand-pink/20 px-2 py-0.5 rounded-lg">
                         {(((basePrice - calculateIngredientTotalCost(prodIngredients)) / basePrice) * 100).toFixed(1)}%
                       </span>
                     </div>
@@ -528,15 +528,15 @@ export default function AdminMenu({ token, triggerRefresh }: AdminMenuProps) {
 
           <button
             type="submit"
-            className="w-full bg-brand-chocolate text-brand-cream hover:bg-brand-chocolate/90 py-3.5 rounded-xl text-xs font-bold transition shadow-xs flex items-center justify-center space-x-2"
+            className="w-full bg-brand-chocolate text-brand-cream hover:bg-brand-chocolate/95 py-4 rounded-xl text-sm font-bold transition shadow-sm flex items-center justify-center space-x-2 cursor-pointer"
           >
-            <Sparkles className="h-4 w-4 text-brand-pink animate-pulse" />
-            <span>Publish Catalog changes</span>
+            <Sparkles className="h-5 w-5 text-brand-pink animate-pulse" />
+            <span>Publish Catalog Changes</span>
           </button>
         </form>
       ) : (
         /* MASTER CATALOG DISPLAYS */
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {products.map(p => {
             const ingCost = calculateIngredientTotalCost(p.ingredients || []);
             const margin = p.basePrice > 0 ? ((p.basePrice - ingCost) / p.basePrice) * 100 : 0;
@@ -544,34 +544,36 @@ export default function AdminMenu({ token, triggerRefresh }: AdminMenuProps) {
             return (
               <div
                 key={p.id}
-                className="bg-white border border-brand-pink/20 rounded-2xl p-5 shadow-xs hover:shadow-sm transition flex flex-col justify-between group"
+                className="bg-white border border-brand-pink/20 rounded-[2rem] p-6 shadow-sm hover:shadow-md transition flex flex-col justify-between group"
               >
                 <div>
-                  <div className="h-32 bg-brand-pink/10 rounded-xl overflow-hidden mb-4 relative">
+                  <div className="h-44 bg-brand-pink/10 rounded-2xl overflow-hidden mb-5 relative">
                     <img 
                       src={p.imgUrl} 
                       alt={p.name}
                       className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
                       referrerPolicy="no-referrer"
                     />
-                    <span className="absolute top-2 left-2 text-[9px] uppercase font-bold bg-brand-chocolate text-brand-cream px-2 py-0.5 rounded-sm">
+                    <span className="absolute top-3 left-3 text-[10px] uppercase font-extrabold bg-brand-chocolate text-brand-cream px-3 py-1 rounded-lg">
                       {p.category}
                     </span>
                   </div>
 
-                  <h3 className="font-bold text-base text-brand-chocolate leading-tight">{p.name}</h3>
-                  <p className="text-[11px] text-gray-500 mt-1 line-clamp-2">{p.description}</p>
+                  <h3 className="font-extrabold text-lg lg:text-xl text-brand-chocolate leading-tight font-heading">{p.name}</h3>
+                  <p className="text-xs text-gray-500 mt-2 line-clamp-3 font-medium leading-relaxed">{p.description}</p>
                 </div>
 
-                <div className="mt-4 pt-3 border-t border-brand-pink/10">
-                  <div className="flex justify-between items-center text-xs">
+                <div className="mt-5 pt-4 border-t border-brand-pink/10">
+                  <div className="flex justify-between items-center text-sm font-semibold">
                     <div>
-                      <span className="text-[10px] text-gray-400 block uppercase">Price</span>
-                      <strong className="text-brand-chocolate font-bold">${p.basePrice.toFixed(2)}</strong>
+                      <span className="text-[10px] text-gray-400 block uppercase font-bold tracking-wider">Price</span>
+                      <strong className="text-brand-chocolate font-extrabold text-lg">${p.basePrice.toFixed(2)}</strong>
                     </div>
                     <div className="text-right">
-                      <span className="text-[10px] text-gray-400 block uppercase">Margin</span>
-                      <span className={`font-bold ${margin > 65 ? "text-green-600" : margin > 40 ? "text-blue-600" : "text-yellow-600"}`}>
+                      <span className="text-[10px] text-gray-400 block uppercase font-bold tracking-wider">Margin</span>
+                      <span className={`font-extrabold text-sm px-2 py-0.5 rounded-lg ${
+                        margin > 65 ? "bg-green-50 text-green-700" : margin > 40 ? "bg-blue-50 text-blue-700" : "bg-yellow-50 text-yellow-750"
+                      }`}>
                         {margin.toFixed(0)}% Profit
                       </span>
                     </div>
@@ -579,9 +581,9 @@ export default function AdminMenu({ token, triggerRefresh }: AdminMenuProps) {
 
                   <button
                     onClick={() => handleEditClick(p)}
-                    className="w-full mt-4 bg-brand-cream hover:bg-brand-pink/30 text-brand-chocolate border border-brand-pink/20 py-2 rounded-xl text-xs font-semibold transition flex items-center justify-center space-x-1"
+                    className="w-full mt-4 bg-brand-cream hover:bg-brand-pink/30 text-brand-chocolate border border-brand-pink/20 py-3 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center space-x-1.5 cursor-pointer"
                   >
-                    <Edit2 className="h-3 w-3 text-brand-rosegold" />
+                    <Edit2 className="h-4 w-4 text-brand-rosegold" />
                     <span>Edit Configuration & Costing</span>
                   </button>
                 </div>

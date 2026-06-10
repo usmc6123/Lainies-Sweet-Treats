@@ -111,13 +111,21 @@ export default function ClientQuotePortal() {
   return (
     <div id="interactive-portal" className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-in fade-in duration-300">
       <div className="text-center max-w-xl mx-auto mb-10">
+        <div className="mx-auto h-16 w-16 rounded-full overflow-hidden border border-brand-pink bg-white shadow-3xs p-1 hover:scale-105 transition-transform duration-300 shrink-0 mb-4 flex items-center justify-center">
+          <img 
+            src="https://images.squarespace-cdn.com/content/v1/6a0b183aaec8f87f9644a515/4a01bf37-b09f-4987-8495-e4876d754270/ChatGPT+Image+May+19%2C+2026%2C+09_01_51+AM.png?format=1500w" 
+            alt="Lainie's Sweet Treats Logo" 
+            className="h-full w-full object-cover rounded-full"
+            referrerPolicy="no-referrer"
+          />
+        </div>
         <span className="bg-brand-pink/60 text-brand-chocolate px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest">
           Client Contract Dashboard
         </span>
         <h2 className="text-4xl mt-3 text-brand-chocolate font-bold tracking-tight font-heading">
           Interactive <span className="italic font-normal text-brand-rosegold">Client Portal</span>
         </h2>
-        <p className="mt-2.5 text-xs text-brand-chocolate/75 leading-relaxed">
+        <p className="mt-2.5 text-xs text-brand-chocolate/75 leading-relaxed font-semibold">
           Enter the email address you used to request your custom wedding or party treats to view pending estimates, respond to proposals, or review historic orders instantly.
         </p>
 

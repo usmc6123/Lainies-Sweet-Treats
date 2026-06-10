@@ -12,6 +12,7 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
   const [settings, setSettings] = useState<Settings | null>(null);
   const [blockedDates, setBlockedDates] = useState<BlockedDate[]>([]);
   const [activeCategory, setActiveCategory] = useState<string>("All");
+  const [searchQuery, setSearchQuery] = useState("");
   
   // Cart state
   const [cart, setCart] = useState<OrderItem[]>([]);
@@ -198,9 +199,13 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
   };
 
   const categories = ["All", "Custom Cakes", "Cupcakes", "Cookies", "Cake Pops", "Dessert Trays", "Seasonal Specials"];
-  const filteredProducts = activeCategory === "All" 
-    ? products 
-    : products.filter(p => p.category === activeCategory);
+  const filteredProducts = products.filter(p => {
+    const matchesCategory = activeCategory === "All" || p.category === activeCategory;
+    const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                          p.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          p.category.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
 
   if (loading) {
     return (
@@ -214,32 +219,52 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
   return (
     <div id="shop-view" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Introduction Hero banner */}
-      <div className="text-center max-w-2xl mx-auto mb-12">
-        <span className="bg-brand-pink/60 text-brand-chocolate px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest">
-          Welcome to Lainie's Kitchen
-        </span>
-        <h2 className="text-4xl mt-3 text-brand-chocolate font-bold tracking-tight font-heading">
-          Lainie's <span className="italic font-normal text-brand-rosegold">Bespoke Bakery Menu</span>
-        </h2>
-        <p className="mt-3 text-brand-chocolate/80 text-xs leading-relaxed">
-          Based right here in <strong className="text-brand-rosegold font-bold font-sans">Royse City, TX</strong>, Lainie custom-bakes every celebration treats completely from scratch with local ingredients. Custom sizes, custom flavor choices, and gorgeous bespoke design!
-        </p>
+      <div className="relative overflow-hidden bg-gradient-to-br from-[#FFF5EE] via-[#FFF8F0] to-[#FDF0EE] border border-brand-pink/30 rounded-[3rem] p-8 md:p-12 shadow-xs text-center max-w-4xl mx-auto mb-12 animate-in fade-in duration-300">
+        {/* Background Sparkles */}
+        <div className="absolute top-4 left-4 text-brand-pink/40"><Sparkles className="h-8 w-8" /></div>
+        <div className="absolute bottom-4 right-4 text-brand-pink/40"><Sparkles className="h-8 w-8" /></div>
+        
+        {/* Logo and Greeting */}
+        <div className="flex flex-col items-center justify-center space-y-4">
+          <div className="h-28 w-28 rounded-full overflow-hidden border-4 border-brand-pink bg-white shadow-sm p-1.5 hover:scale-105 transition-transform duration-300">
+            <img 
+              src="https://images.squarespace-cdn.com/content/v1/6a0b183aaec8f87f9644a515/4a01bf37-b09f-4987-8495-e4876d754270/ChatGPT+Image+May+19%2C+2026%2C+09_01_51+AM.png?format=1500w" 
+              alt="Lainie's Sweet Treats Logo" 
+              className="h-full w-full object-cover rounded-full"
+              referrerPolicy="no-referrer"
+            />
+          </div>
+          
+          <span className="bg-brand-rosegold/10 text-brand-rosegold px-4.5 py-1.5 rounded-full text-xs font-extrabold uppercase tracking-widest border border-brand-rosegold/20">
+            Welcome to Lainie's Kitchen
+          </span>
+          
+          <h2 className="text-4xl md:text-5xl lg:text-6xl text-brand-chocolate font-black tracking-tight font-heading leading-tight">
+            Lainie's <span className="italic font-normal text-brand-rosegold">Bespoke Bakery Menu</span>
+          </h2>
+          
+          <p className="max-w-xl text-sm md:text-base text-brand-chocolate/85 leading-relaxed font-semibold">
+            Based right here in <strong className="text-brand-rosegold font-black font-sans">Royse City, TX</strong>, Lainie custom-bakes every celebration treat completely from scratch with local ingredients. Experience personalized sizing, bespoke flavor options, and custom buttercream artistry!
+          </p>
+        </div>
 
         {/* Custom Event Redirection Link */}
-        <div className="mt-6 p-5 bg-brand-pink/20 border border-brand-pink/40 rounded-[2rem] flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="text-left">
-            <h4 className="text-xs font-bold text-brand-chocolate uppercase tracking-wider flex items-center gap-1.5">
-              <Sparkles className="h-4 w-4 text-brand-rosegold animate-pulse" />
-              Planning a custom event or major wedding?
+        <div className="mt-8 p-6 bg-white/70 backdrop-blur-xs border border-brand-pink/40 rounded-[2.2rem] flex flex-col sm:flex-row items-center justify-between gap-4 shadow-2xs text-left max-w-2xl mx-auto">
+          <div>
+            <h4 className="text-sm font-extrabold text-brand-chocolate uppercase tracking-wider flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-brand-rosegold animate-pulse shrink-0" />
+              Planning a wedding or major event?
             </h4>
-            <p className="text-[11px] text-brand-chocolate/75 mt-0.5 font-medium">Need multi-tier design, complex buttercream piping, or major servings counts?</p>
+            <p className="text-xs text-brand-chocolate/75 mt-1 font-bold leading-normal">
+              Need multi-tiered designs, custom color coordination, or complex buttercream styling?
+            </p>
           </div>
           <button
             onClick={onSwitchToQuote}
-            className="bg-brand-rosegold text-white text-[11px] uppercase tracking-wider px-5 py-2.5 rounded-full font-bold hover:bg-brand-rosegold/90 transition-all shadow-[0_4px_12px_rgba(183,110,121,0.25)] shrink-0 flex items-center space-x-1"
+            className="w-full sm:w-auto bg-brand-rosegold text-white text-xs uppercase tracking-widest px-6 py-3.5 rounded-full font-black hover:bg-brand-rosegold/90 transition-all shadow-sm shrink-0 flex items-center justify-center space-x-1.5 cursor-pointer"
           >
             <span>Quote Builder</span>
-            <ChevronRight className="h-3.5 w-3.5" />
+            <ChevronRight className="h-4 w-4" />
           </button>
         </div>
       </div>
@@ -247,68 +272,122 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* LEFT COLUMN: Catalog list (takes 2/3 space of desk) */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Categories Tab selector */}
-          <div className="flex items-center space-x-2 overflow-x-auto pb-2 scrollbar-none">
-            {categories.map(cat => (
-              <button
-                key={cat}
-                onClick={() => setActiveCategory(cat)}
-                className={`px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-200 ${
-                  activeCategory === cat 
-                    ? "bg-brand-chocolate text-brand-cream shadow-xs" 
-                    : "bg-white border border-brand-rosegold/10 text-brand-chocolate/80 hover:bg-brand-pink/30"
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
+          {/* Categories Tab selector and Search Bar */}
+          <div className="space-y-4">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-4 border border-brand-pink/30 rounded-[2rem] shadow-xs">
+              <div className="flex items-center space-x-2 overflow-x-auto pb-1.5 md:pb-0 scrollbar-none flex-1">
+                {categories.map(cat => (
+                  <button
+                    key={cat}
+                    type="button"
+                    onClick={() => setActiveCategory(cat)}
+                    className={`px-4 py-2.5 rounded-full text-xs font-bold tracking-wide whitespace-nowrap transition-all duration-250 cursor-pointer ${
+                      activeCategory === cat 
+                        ? "bg-brand-chocolate text-brand-cream shadow-xs" 
+                        : "bg-brand-cream/50 border border-brand-pink/10 text-brand-chocolate/80 hover:bg-brand-pink/30"
+                    }`}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+              
+              <div className="relative shrink-0 w-full md:w-64">
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search sweet treats..."
+                  className="w-full bg-brand-cream/30 border border-brand-pink/20 text-xs text-brand-chocolate font-bold px-4 py-3 rounded-full pl-9 focus:outline-none focus:ring-2 focus:ring-brand-rosegold/50 placeholder-brand-chocolate/40"
+                />
+                <svg className="h-4 w-4 text-brand-chocolate/50 absolute left-3.5 top-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+                {searchQuery && (
+                  <button 
+                    type="button"
+                    onClick={() => setSearchQuery("")}
+                    className="absolute right-3.5 top-3 text-brand-chocolate/60 hover:text-brand-chocolate text-xs font-bold"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {searchQuery && (
+              <p className="text-xs text-brand-chocolate/70 pl-2 font-semibold">
+                Showing results for "<span className="text-brand-rosegold font-bold">{searchQuery}</span>" ({filteredProducts.length} items found)
+              </p>
+            )}
           </div>
 
           {/* Product Items grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            {filteredProducts.map(p => (
-              <div 
-                key={p.id}
-                className="bg-white border border-brand-rosegold/10 rounded-[2rem] overflow-hidden shadow-xs hover:shadow-md transition-all duration-300 flex flex-col group"
+          {filteredProducts.length === 0 ? (
+            <div className="bg-white border border-brand-pink/20 rounded-[2.5rem] p-12 text-center space-y-4 shadow-2xs">
+              <div className="text-4xl">🧁🔍</div>
+              <h3 className="text-lg font-bold text-brand-chocolate font-heading italic">No sweet matches found!</h3>
+              <p className="text-xs text-gray-500 max-w-sm mx-auto leading-relaxed font-semibold">
+                We couldn't locate any treats named "<strong className="text-brand-rosegold font-bold font-sans">{searchQuery}</strong>". Try clicking another category tab or check back later!
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  setSearchQuery("");
+                  setActiveCategory("All");
+                }}
+                className="bg-brand-chocolate text-brand-cream px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider hover:opacity-95 transition-all cursor-pointer"
               >
-                <div className="relative h-48 bg-brand-pink/10 overflow-hidden">
-                  <img 
-                    src={p.imgUrl || "https://images.unsplash.com/photo-1578985545062-69928b1d9587"} 
-                    alt={p.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    referrerPolicy="no-referrer"
-                  />
-                  <div className="absolute top-3 right-3 bg-brand-cream/90 backdrop-blur-xs text-brand-chocolate px-3 py-1 rounded-full text-xs font-bold border border-brand-pink/30">
-                    From ${p.basePrice.toFixed(2)}
-                  </div>
-                </div>
-
-                <div className="p-6 flex-1 flex flex-col justify-between">
-                  <div>
-                    <span className="text-[9px] uppercase tracking-widest text-[#B76E79] font-bold bg-brand-pink/30 px-2.5 py-1 rounded-full">
-                      {p.category}
-                    </span>
-                    <h3 className="text-base font-bold text-brand-chocolate mt-2 leading-tight">
-                      {p.name}
-                    </h3>
-                    <p className="text-xs text-brand-chocolate/70 mt-1.5 line-clamp-2 leading-relaxed">
-                      {p.description}
-                    </p>
+                Reset Menu Filters
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+              {filteredProducts.map(p => (
+                <div 
+                  key={p.id}
+                  className="bg-white border border-brand-pink/15 rounded-[2.2rem] overflow-hidden shadow-xs hover:shadow-md hover:border-brand-pink/30 hover:scale-[1.01] transition-all duration-300 flex flex-col group"
+                >
+                  <div className="relative h-56 bg-brand-pink/10 overflow-hidden">
+                    <img 
+                      src={p.imgUrl || "https://images.unsplash.com/photo-1578985545062-69928b1d9587"} 
+                      alt={p.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                      referrerPolicy="no-referrer"
+                    />
+                    <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-xs text-brand-chocolate px-4 py-1.5 rounded-full text-sm font-black border border-brand-pink/20 shadow-xs">
+                      From ${p.basePrice.toFixed(2)}
+                    </div>
                   </div>
 
-                  <div className="mt-5 pt-3 border-t border-brand-pink/10 flex items-center justify-between">
-                    <button
-                      onClick={() => handleProductSelect(p)}
-                      className="w-full bg-brand-cream hover:bg-brand-pink/40 text-brand-chocolate border border-brand-pink/20 py-2.5 rounded-full text-xs font-semibold transition-all duration-200 flex items-center justify-center space-x-1.5"
-                    >
-                      <ShoppingBag className="h-3.5 w-3.5 text-brand-rosegold" />
-                      <span>Configure Options / Add</span>
-                    </button>
+                  <div className="p-6.5 flex-1 flex flex-col justify-between">
+                    <div>
+                      <span className="text-[10px] uppercase tracking-widest text-brand-rosegold font-black bg-brand-pink/20 px-3.5 py-1.5 rounded-full border border-brand-pink/30">
+                        {p.category}
+                      </span>
+                      <h3 className="text-lg lg:text-xl font-black text-brand-chocolate mt-3 leading-tight font-heading">
+                        {p.name}
+                      </h3>
+                      <p className="text-xs text-brand-chocolate/75 mt-2 line-clamp-3 leading-relaxed font-medium">
+                        {p.description}
+                      </p>
+                    </div>
+
+                    <div className="mt-6 pt-4 border-t border-brand-pink/10 flex items-center justify-between">
+                      <button
+                        type="button"
+                        onClick={() => handleProductSelect(p)}
+                        className="w-full bg-brand-cream/50 hover:bg-brand-pink/40 text-brand-chocolate border border-brand-pink/20 py-3 rounded-full text-xs sm:text-sm font-extrabold transition-all duration-200 flex items-center justify-center space-x-1.5 cursor-pointer shadow-2xs hover:shadow-xs"
+                      >
+                        <ShoppingBag className="h-4 w-4 text-brand-rosegold" />
+                        <span>Place & Configure Order</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
 
           {/* CUSTOMIZABLE SELECTION MODAL PANELS (IF PRODUCT SELECTED) */}
           {selectedProduct && (
