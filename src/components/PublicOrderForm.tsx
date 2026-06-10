@@ -273,154 +273,144 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
 
       <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-8">
         {/* LEFT COLUMN: Catalog list (takes 3/4 space on desktop) */}
-        <div className="lg:col-span-2 xl:col-span-3">
-          <div className="flex flex-col md:flex-row gap-8 items-start">
-            {/* Left sidebar: Vertical category selector */}
-            <div className="w-full md:w-64 lg:w-72 shrink-0 md:sticky md:top-32 bg-[#FFFDFC]/90 border-2 border-[#B76E79]/20 border-dashed rounded-[2.5rem] p-6 shadow-sm select-none animate-in fade-in duration-300">
-              <span className="text-[10px] sm:text-xs uppercase font-black tracking-widest text-[#B76E79] mb-4 block text-center">
-                🥐 Treat Categories 🥐
-              </span>
-              <div className="flex flex-col gap-2.5">
-                {categories.map(cat => {
-                  const isActive = activeCategory === cat;
-                  const icons: Record<string, string> = {
-                    "All": "✨",
-                    "Custom Cakes": "🎂",
-                    "Cupcakes": "🧁",
-                    "Cookies": "🍪",
-                    "Cake Pops": "🍭",
-                    "Dessert Trays": "🍓",
-                    "Seasonal Specials": "💖"
-                  };
-                  const emoji = icons[cat] || "🧁";
-                  
-                  return (
-                    <button
-                      key={cat}
-                      type="button"
-                      onClick={() => setActiveCategory(cat)}
-                      className={`w-full px-5 py-4 rounded-2xl text-xs sm:text-sm font-black tracking-wide uppercase transition-all duration-300 cursor-pointer transform-gpu active:scale-95 flex items-center space-x-3 border-2 ${
-                        isActive 
-                          ? "bg-brand-chocolate border-brand-chocolate text-brand-cream shadow-md scale-102 ring-4 ring-brand-rosegold/15" 
-                          : "bg-white border-brand-pink/15 text-brand-chocolate/75 hover:border-brand-pink/35 hover:bg-brand-pink/15 hover:text-brand-chocolate"
-                      }`}
-                    >
-                      <span className="text-sm sm:text-lg shrink-0">{emoji}</span>
-                      <span className="truncate">{cat}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Right block: Search & Product items grid */}
-            <div className="flex-1 w-full space-y-6">
-              {/* Search Bar Block */}
-              <div className="relative">
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search sweet treats by name, keywords, or ingredients..."
-                  className="w-full bg-white border-2 border-brand-pink/15 text-xs sm:text-sm text-brand-chocolate font-bold px-5 py-4 sm:py-4.5 rounded-[2rem] pl-12 sm:pl-14 focus:outline-none focus:ring-2 focus:ring-brand-rosegold/40 focus:border-brand-rosegold/45 placeholder-brand-chocolate/35 transition-all shadow-xs"
-                />
-                <svg className="h-5 w-5 text-brand-chocolate/40 absolute left-4.5 top-4 sm:top-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                </svg>
-                {searchQuery && (
-                  <button 
-                    type="button"
-                    onClick={() => setSearchQuery("")}
-                    className="absolute right-4.5 top-4 sm:top-4.5 text-brand-chocolate/60 hover:text-brand-chocolate hover:scale-110 text-xs font-black p-1 transition-transform"
-                  >
-                    ✕
-                  </button>
-                )}
-              </div>
-
-              {searchQuery && (
-                <p className="text-xs text-brand-chocolate/70 pl-2 font-semibold">
-                  Showing results for "<span className="text-brand-rosegold font-bold">{searchQuery}</span>" ({filteredProducts.length} items found)
-                </p>
-              )}
-
-              {/* Product Items grid */}
-              {filteredProducts.length === 0 ? (
-                <div className="bg-white border border-brand-pink/20 rounded-[2.5rem] p-12 text-center space-y-4 shadow-2xs">
-                  <div className="text-4xl">🧁🔍</div>
-                  <h3 className="text-lg font-bold text-brand-chocolate font-heading italic">No sweet matches found!</h3>
-                  <p className="text-xs text-gray-500 max-w-sm mx-auto leading-relaxed font-semibold">
-                    We couldn't locate any treats named "<strong className="text-brand-rosegold font-bold font-sans">{searchQuery}</strong>". Try clicking another category tab or check back later!
-                  </p>
+        <div className="lg:col-span-2 xl:col-span-3 space-y-8">
+          {/* Horizontal category selector - Centered & Premium floating look */}
+          <div className="w-full bg-gradient-to-r from-[#FFF5F3] via-[#FFFDFC] to-[#FFF5F3] border-2 border-[#B76E79]/30 rounded-[2.5rem] p-6 sm:p-8 shadow-md select-none animate-in fade-in duration-300 text-center relative overflow-hidden">
+            <span className="text-[10px] sm:text-xs uppercase font-black tracking-widest text-[#B76E79] mb-4.5 block bg-brand-pink/45 py-1.5 px-6 rounded-full border border-brand-pink/30 max-w-xs mx-auto text-center shadow-3xs">
+              Menu Catalogue
+            </span>
+            <div className="flex flex-wrap items-center justify-center gap-3 md:gap-4 mt-2">
+              {categories.map(cat => {
+                const isActive = activeCategory === cat;
+                
+                return (
                   <button
+                    key={cat}
                     type="button"
-                    onClick={() => {
-                      setSearchQuery("");
-                      setActiveCategory("All");
-                    }}
-                    className="bg-brand-chocolate text-brand-cream px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider hover:opacity-95 transition-all cursor-pointer"
+                    onClick={() => setActiveCategory(cat)}
+                    className={`px-5 sm:px-6 py-3.5 sm:py-4 rounded-2xl text-xs sm:text-sm font-black tracking-wide uppercase transition-all duration-300 cursor-pointer transform-gpu active:scale-95 flex items-center space-x-2.5 border-2 ${
+                      isActive 
+                        ? "bg-brand-chocolate border-brand-chocolate text-brand-cream shadow-md scale-103 ring-4 ring-brand-pink/60" 
+                        : "bg-white border-[#B76E79]/20 text-brand-chocolate hover:border-[#B76E79]/50 hover:bg-[#FCF3F2] hover:text-brand-chocolate"
+                    }`}
                   >
-                    Reset Menu Filters
+                    <span>{cat}</span>
+                    {isActive && (
+                      <span className="h-2 w-2 rounded-full bg-brand-rosegold animate-ping shrink-0" />
+                    )}
                   </button>
-                </div>
-              ) : (
-                <motion.div 
-                  layout
-                  className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 sm:gap-8"
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Search & Product items block */}
+          <div className="w-full space-y-6">
+            {/* Search Bar Block */}
+            <div className="relative">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search sweet treats by name, keywords, or ingredients..."
+                className="w-full bg-white border-2 border-brand-pink/15 text-xs sm:text-sm text-brand-chocolate font-bold px-5 py-4 sm:py-4.5 rounded-[2rem] pl-12 sm:pl-14 focus:outline-none focus:ring-2 focus:ring-brand-rosegold/40 focus:border-brand-rosegold/45 placeholder-brand-chocolate/35 transition-all shadow-xs"
+              />
+              <svg className="h-5 w-5 text-brand-chocolate/40 absolute left-4.5 top-4 sm:top-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+              </svg>
+              {searchQuery && (
+                <button 
+                  type="button"
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-4.5 top-4 sm:top-4.5 text-brand-chocolate/60 hover:text-brand-chocolate hover:scale-110 text-xs font-black p-1 transition-transform"
                 >
-                  <AnimatePresence mode="popLayout">
-                    {filteredProducts.map(p => (
-                      <motion.div 
-                        layout
-                        initial={{ opacity: 0, scale: 0.95, y: 15 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.95, y: -15 }}
-                        transition={{ duration: 0.35, ease: "easeOut" }}
-                        key={p.id}
-                        className="bg-white border border-brand-pink/15 rounded-[2.5rem] overflow-hidden shadow-sm hover:shadow-xl hover:border-brand-pink/35 hover:-translate-y-2 transition-all duration-300 flex flex-col group transform-gpu"
-                      >
-                        <div className="relative h-60 bg-brand-pink/10 overflow-hidden">
-                          <img 
-                            src={p.imgUrl || "https://images.unsplash.com/photo-1578985545062-69928b1d9587"} 
-                            alt={p.name}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                            referrerPolicy="no-referrer"
-                          />
-                          <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-xs text-brand-chocolate px-4.5 py-2 rounded-full text-sm font-black border border-brand-pink/20 shadow-xs">
-                            From ${p.basePrice.toFixed(2)}
-                          </div>
-                        </div>
-
-                        <div className="p-7 flex-1 flex flex-col justify-between">
-                          <div>
-                            <span className="text-[10px] uppercase tracking-widest text-brand-rosegold font-black bg-brand-pink/20 px-3.5 py-1.5 rounded-full border border-brand-pink/30">
-                              {p.category}
-                            </span>
-                            <h3 className="text-xl font-black text-brand-chocolate mt-3.5 leading-tight font-heading">
-                              {p.name}
-                            </h3>
-                            <p className="text-xs text-brand-chocolate/75 mt-2.5 line-clamp-3 leading-relaxed font-medium">
-                              {p.description}
-                            </p>
-                          </div>
-
-                          <div className="mt-6 pt-4.5 border-t border-brand-pink/10 flex items-center justify-between font-sans">
-                            <button
-                              type="button"
-                              onClick={() => handleProductSelect(p)}
-                              className="w-full bg-brand-cream/50 hover:bg-brand-pink/40 text-brand-chocolate border border-brand-pink/20 py-3.5 rounded-full text-xs sm:text-sm font-black transition-all duration-250 flex items-center justify-center space-x-2 cursor-pointer shadow-3xs hover:shadow-2xs active:scale-98 transform-gpu"
-                            >
-                              <ShoppingBag className="h-4 w-4 text-brand-rosegold" />
-                              <span>Place & Configure Order</span>
-                            </button>
-                          </div>
-                        </div>
-                      </motion.div>
-                    ))}
-                  </AnimatePresence>
-                </motion.div>
+                  ✕
+                </button>
               )}
             </div>
+
+            {searchQuery && (
+              <p className="text-xs text-brand-chocolate/70 pl-2 font-semibold">
+                Showing results for "<span className="text-brand-rosegold font-bold">{searchQuery}</span>" ({filteredProducts.length} items found)
+              </p>
+            )}
+
+            {/* Product Items grid */}
+            {filteredProducts.length === 0 ? (
+              <div className="bg-white border border-brand-pink/20 rounded-[2.5rem] p-12 text-center space-y-4 shadow-2xs">
+                <div className="text-4xl">🧁🔍</div>
+                <h3 className="text-lg font-bold text-brand-chocolate font-heading italic">No sweet matches found!</h3>
+                <p className="text-xs text-gray-500 max-w-sm mx-auto leading-relaxed font-semibold">
+                  We couldn't locate any treats named "<strong className="text-brand-rosegold font-bold font-sans">{searchQuery}</strong>". Try clicking another category tab or check back later!
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchQuery("");
+                    setActiveCategory("All");
+                  }}
+                  className="bg-brand-chocolate text-brand-cream px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider hover:opacity-95 transition-all cursor-pointer"
+                >
+                  Reset Menu Filters
+                </button>
+              </div>
+            ) : (
+              <motion.div 
+                layout
+                className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 sm:gap-8"
+              >
+                <AnimatePresence mode="popLayout">
+                  {filteredProducts.map(p => (
+                    <motion.div 
+                      layout
+                      initial={{ opacity: 0, scale: 0.95, y: 15 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.95, y: -15 }}
+                      transition={{ duration: 0.35, ease: "easeOut" }}
+                      key={p.id}
+                      className="bg-[#FFFDFC] border-2 border-[#B76E79]/20 rounded-[2.5rem] overflow-hidden shadow-md hover:shadow-2xl hover:border-brand-chocolate hover:-translate-y-2 transition-all duration-300 flex flex-col group transform-gpu"
+                    >
+                      <div className="relative h-60 bg-[#FFF5F3]/50 overflow-hidden">
+                        <img 
+                          src={p.imgUrl || "https://images.unsplash.com/photo-1578985545062-69928b1d9587"} 
+                          alt={p.name}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                          referrerPolicy="no-referrer"
+                        />
+                        <div className="absolute top-4 right-4 bg-brand-chocolate border-2 border-brand-pink/50 text-brand-cream px-4.5 py-2 rounded-full text-xs font-black shadow-md">
+                          From ${p.basePrice.toFixed(2)}
+                        </div>
+                      </div>
+
+                      <div className="p-7 flex-1 flex flex-col justify-between">
+                        <div>
+                          <span className="text-[10px] uppercase tracking-widest text-[#B76E79] font-black bg-brand-pink/45 px-3.5 py-1.5 rounded-full border border-brand-pink/50 shadow-2xs">
+                            {p.category}
+                          </span>
+                          <h3 className="text-xl font-black text-brand-chocolate mt-3.5 leading-tight font-heading">
+                            {p.name}
+                          </h3>
+                          <p className="text-xs text-brand-chocolate/75 mt-2.5 line-clamp-3 leading-relaxed font-semibold">
+                            {p.description}
+                          </p>
+                        </div>
+
+                        <div className="mt-6 pt-4.5 border-t border-[#B76E79]/15 flex items-center justify-between font-sans">
+                          <button
+                            type="button"
+                            onClick={() => handleProductSelect(p)}
+                            className="w-full bg-[#B76E79] hover:bg-brand-chocolate text-white hover:text-brand-cream border-2 border-[#B76E79] hover:border-brand-chocolate py-3.5 rounded-full text-xs sm:text-sm font-black transition-all duration-250 flex items-center justify-center space-x-2 cursor-pointer shadow-sm hover:shadow-md active:scale-98 transform-gpu"
+                          >
+                            <ShoppingBag className="h-4 w-4 text-white" />
+                            <span>Place & Configure Order</span>
+                          </button>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </motion.div>
+            )}
           </div>
 
           {/* CUSTOMIZABLE SELECTION MODAL PANELS (IF PRODUCT SELECTED) */}
@@ -583,7 +573,7 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
         <div className="lg:col-span-1">
           <div 
             id="shop-cart" 
-            className="lg:sticky lg:top-32 bg-[#FFFDFC] border-2 border-[#B76E79]/20 border-dashed rounded-[2.5rem] p-7 md:p-8 shadow-md h-fit transition-all duration-300 transform-gpu hover:shadow-lg"
+            className="lg:sticky lg:top-32 bg-[#FFFDFC] border-2 border-[#B76E79]/20 rounded-[2.5rem] p-7 md:p-8 shadow-md h-fit transition-all duration-300 transform-gpu hover:shadow-lg"
           >
             <div className="border-b border-brand-pink/30 pb-4">
               <span className="text-[9px] uppercase font-bold tracking-widest text-brand-rosegold bg-brand-pink/15 px-3 py-1 rounded-full border border-brand-pink/20">
