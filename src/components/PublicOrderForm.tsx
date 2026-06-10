@@ -218,7 +218,7 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
   }
 
   return (
-    <div id="shop-view" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div id="shop-view" className="max-w-[96rem] mx-auto px-4 sm:px-6 lg:px-8 py-8 xl:py-12">
       {/* Introduction Hero banner */}
       <div className="relative overflow-hidden bg-gradient-to-br from-[#FFF5EE] via-[#FFFDFC] to-[#FDF0EE] border-2 border-brand-pink/30 rounded-[3rem] p-8 md:p-14 shadow-sm text-center max-w-4xl mx-auto mb-12 animate-in fade-in duration-500">
         {/* Background Sparkles */}
@@ -271,139 +271,157 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* LEFT COLUMN: Catalog list (takes 2/3 space of desk) */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Categories Tab selector and Search Bar */}
-          <div className="space-y-4">
-            <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 bg-white p-5 border border-brand-pink/30 rounded-[2.5rem] shadow-xs">
-              {/* Category Pills - Beautiful flex wrapping ensuring no cutoff of any categories */}
-              <div className="flex flex-wrap items-center gap-2.5 flex-1 select-none">
+      <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+        {/* LEFT COLUMN: Catalog list (takes 3/4 space on desktop) */}
+        <div className="lg:col-span-2 xl:col-span-3">
+          <div className="flex flex-col md:flex-row gap-8 items-start">
+            {/* Left sidebar: Vertical category selector */}
+            <div className="w-full md:w-64 lg:w-72 shrink-0 md:sticky md:top-32 bg-[#FFFDFC]/90 border-2 border-[#B76E79]/20 border-dashed rounded-[2.5rem] p-6 shadow-sm select-none animate-in fade-in duration-300">
+              <span className="text-[10px] sm:text-xs uppercase font-black tracking-widest text-[#B76E79] mb-4 block text-center">
+                🥐 Treat Categories 🥐
+              </span>
+              <div className="flex flex-col gap-2.5">
                 {categories.map(cat => {
                   const isActive = activeCategory === cat;
+                  const icons: Record<string, string> = {
+                    "All": "✨",
+                    "Custom Cakes": "🎂",
+                    "Cupcakes": "🧁",
+                    "Cookies": "🍪",
+                    "Cake Pops": "🍭",
+                    "Dessert Trays": "🍓",
+                    "Seasonal Specials": "💖"
+                  };
+                  const emoji = icons[cat] || "🧁";
+                  
                   return (
                     <button
                       key={cat}
                       type="button"
                       onClick={() => setActiveCategory(cat)}
-                      className={`px-4.5 py-2.5 rounded-full text-xs font-bold tracking-wide whitespace-nowrap transition-all duration-300 cursor-pointer transform-gpu active:scale-95 ${
+                      className={`w-full px-5 py-4 rounded-2xl text-xs sm:text-sm font-black tracking-wide uppercase transition-all duration-300 cursor-pointer transform-gpu active:scale-95 flex items-center space-x-3 border-2 ${
                         isActive 
-                          ? "bg-brand-chocolate text-brand-cream shadow-md scale-105 ring-2 ring-brand-rosegold/10 font-extrabold" 
-                          : "bg-brand-cream/60 border border-brand-pink/10 text-brand-chocolate/75 hover:bg-brand-pink/25 hover:scale-[1.02] hover:text-brand-chocolate"
+                          ? "bg-brand-chocolate border-brand-chocolate text-brand-cream shadow-md scale-102 ring-4 ring-brand-rosegold/15" 
+                          : "bg-white border-brand-pink/15 text-brand-chocolate/75 hover:border-brand-pink/35 hover:bg-brand-pink/15 hover:text-brand-chocolate"
                       }`}
                     >
-                      {cat}
+                      <span className="text-sm sm:text-lg shrink-0">{emoji}</span>
+                      <span className="truncate">{cat}</span>
                     </button>
                   );
                 })}
               </div>
-              
-              <div className="relative shrink-0 w-full xl:w-64">
+            </div>
+
+            {/* Right block: Search & Product items grid */}
+            <div className="flex-1 w-full space-y-6">
+              {/* Search Bar Block */}
+              <div className="relative">
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search sweet treats..."
-                  className="w-full bg-brand-cream/30 border border-brand-pink/20 text-xs text-brand-chocolate font-bold px-4 py-3.5 rounded-full pl-9 focus:outline-none focus:ring-2 focus:ring-brand-rosegold/50 placeholder-brand-chocolate/40 transition-shadow duration-200"
+                  placeholder="Search sweet treats by name, keywords, or ingredients..."
+                  className="w-full bg-white border-2 border-brand-pink/15 text-xs sm:text-sm text-brand-chocolate font-bold px-5 py-4 sm:py-4.5 rounded-[2rem] pl-12 sm:pl-14 focus:outline-none focus:ring-2 focus:ring-brand-rosegold/40 focus:border-brand-rosegold/45 placeholder-brand-chocolate/35 transition-all shadow-xs"
                 />
-                <svg className="h-4 w-4 text-brand-chocolate/50 absolute left-3.5 top-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <svg className="h-5 w-5 text-brand-chocolate/40 absolute left-4.5 top-4 sm:top-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                 </svg>
                 {searchQuery && (
                   <button 
                     type="button"
                     onClick={() => setSearchQuery("")}
-                    className="absolute right-3.5 top-3.5 text-brand-chocolate/60 hover:text-brand-chocolate text-xs font-black p-0.5"
+                    className="absolute right-4.5 top-4 sm:top-4.5 text-brand-chocolate/60 hover:text-brand-chocolate hover:scale-110 text-xs font-black p-1 transition-transform"
                   >
                     ✕
                   </button>
                 )}
               </div>
-            </div>
 
-            {searchQuery && (
-              <p className="text-xs text-brand-chocolate/70 pl-2 font-semibold">
-                Showing results for "<span className="text-brand-rosegold font-bold">{searchQuery}</span>" ({filteredProducts.length} items found)
-              </p>
-            )}
-          </div>
+              {searchQuery && (
+                <p className="text-xs text-brand-chocolate/70 pl-2 font-semibold">
+                  Showing results for "<span className="text-brand-rosegold font-bold">{searchQuery}</span>" ({filteredProducts.length} items found)
+                </p>
+              )}
 
-          {/* Product Items grid */}
-          {filteredProducts.length === 0 ? (
-            <div className="bg-white border border-brand-pink/20 rounded-[2.5rem] p-12 text-center space-y-4 shadow-2xs">
-              <div className="text-4xl">🧁🔍</div>
-              <h3 className="text-lg font-bold text-brand-chocolate font-heading italic">No sweet matches found!</h3>
-              <p className="text-xs text-gray-500 max-w-sm mx-auto leading-relaxed font-semibold">
-                We couldn't locate any treats named "<strong className="text-brand-rosegold font-bold font-sans">{searchQuery}</strong>". Try clicking another category tab or check back later!
-              </p>
-              <button
-                type="button"
-                onClick={() => {
-                  setSearchQuery("");
-                  setActiveCategory("All");
-                }}
-                className="bg-brand-chocolate text-brand-cream px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider hover:opacity-95 transition-all cursor-pointer"
-              >
-                Reset Menu Filters
-              </button>
-            </div>
-          ) : (
-            <motion.div 
-              layout
-              className="grid grid-cols-1 sm:grid-cols-2 gap-8"
-            >
-              <AnimatePresence mode="popLayout">
-                {filteredProducts.map(p => (
-                  <motion.div 
-                    layout
-                    initial={{ opacity: 0, scale: 0.95, y: 15 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95, y: -15 }}
-                    transition={{ duration: 0.35, ease: "easeOut" }}
-                    key={p.id}
-                    className="bg-white border border-brand-pink/15 rounded-[2.5rem] overflow-hidden shadow-sm hover:shadow-xl hover:border-brand-pink/35 hover:-translate-y-2 transition-all duration-300 flex flex-col group transform-gpu"
+              {/* Product Items grid */}
+              {filteredProducts.length === 0 ? (
+                <div className="bg-white border border-brand-pink/20 rounded-[2.5rem] p-12 text-center space-y-4 shadow-2xs">
+                  <div className="text-4xl">🧁🔍</div>
+                  <h3 className="text-lg font-bold text-brand-chocolate font-heading italic">No sweet matches found!</h3>
+                  <p className="text-xs text-gray-500 max-w-sm mx-auto leading-relaxed font-semibold">
+                    We couldn't locate any treats named "<strong className="text-brand-rosegold font-bold font-sans">{searchQuery}</strong>". Try clicking another category tab or check back later!
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSearchQuery("");
+                      setActiveCategory("All");
+                    }}
+                    className="bg-brand-chocolate text-brand-cream px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider hover:opacity-95 transition-all cursor-pointer"
                   >
-                    <div className="relative h-60 bg-brand-pink/10 overflow-hidden">
-                      <img 
-                        src={p.imgUrl || "https://images.unsplash.com/photo-1578985545062-69928b1d9587"} 
-                        alt={p.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                        referrerPolicy="no-referrer"
-                      />
-                      <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-xs text-brand-chocolate px-4.5 py-2 rounded-full text-sm font-black border border-brand-pink/20 shadow-xs">
-                        From ${p.basePrice.toFixed(2)}
-                      </div>
-                    </div>
+                    Reset Menu Filters
+                  </button>
+                </div>
+              ) : (
+                <motion.div 
+                  layout
+                  className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 sm:gap-8"
+                >
+                  <AnimatePresence mode="popLayout">
+                    {filteredProducts.map(p => (
+                      <motion.div 
+                        layout
+                        initial={{ opacity: 0, scale: 0.95, y: 15 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.95, y: -15 }}
+                        transition={{ duration: 0.35, ease: "easeOut" }}
+                        key={p.id}
+                        className="bg-white border border-brand-pink/15 rounded-[2.5rem] overflow-hidden shadow-sm hover:shadow-xl hover:border-brand-pink/35 hover:-translate-y-2 transition-all duration-300 flex flex-col group transform-gpu"
+                      >
+                        <div className="relative h-60 bg-brand-pink/10 overflow-hidden">
+                          <img 
+                            src={p.imgUrl || "https://images.unsplash.com/photo-1578985545062-69928b1d9587"} 
+                            alt={p.name}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                            referrerPolicy="no-referrer"
+                          />
+                          <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-xs text-brand-chocolate px-4.5 py-2 rounded-full text-sm font-black border border-brand-pink/20 shadow-xs">
+                            From ${p.basePrice.toFixed(2)}
+                          </div>
+                        </div>
 
-                    <div className="p-7 flex-1 flex flex-col justify-between">
-                      <div>
-                        <span className="text-[10px] uppercase tracking-widest text-brand-rosegold font-black bg-brand-pink/20 px-3.5 py-1.5 rounded-full border border-brand-pink/30">
-                          {p.category}
-                        </span>
-                        <h3 className="text-xl font-black text-brand-chocolate mt-3.5 leading-tight font-heading">
-                          {p.name}
-                        </h3>
-                        <p className="text-xs text-brand-chocolate/75 mt-2.5 line-clamp-3 leading-relaxed font-medium">
-                          {p.description}
-                        </p>
-                      </div>
+                        <div className="p-7 flex-1 flex flex-col justify-between">
+                          <div>
+                            <span className="text-[10px] uppercase tracking-widest text-brand-rosegold font-black bg-brand-pink/20 px-3.5 py-1.5 rounded-full border border-brand-pink/30">
+                              {p.category}
+                            </span>
+                            <h3 className="text-xl font-black text-brand-chocolate mt-3.5 leading-tight font-heading">
+                              {p.name}
+                            </h3>
+                            <p className="text-xs text-brand-chocolate/75 mt-2.5 line-clamp-3 leading-relaxed font-medium">
+                              {p.description}
+                            </p>
+                          </div>
 
-                      <div className="mt-6 pt-4.5 border-t border-brand-pink/10 flex items-center justify-between font-sans">
-                        <button
-                          type="button"
-                          onClick={() => handleProductSelect(p)}
-                          className="w-full bg-brand-cream/50 hover:bg-brand-pink/40 text-brand-chocolate border border-brand-pink/20 py-3.5 rounded-full text-xs sm:text-sm font-black transition-all duration-250 flex items-center justify-center space-x-2 cursor-pointer shadow-3xs hover:shadow-2xs active:scale-98 transform-gpu"
-                        >
-                          <ShoppingBag className="h-4 w-4 text-brand-rosegold" />
-                          <span>Place & Configure Order</span>
-                        </button>
-                      </div>
-                    </div>
-                  </motion.div>
-                ))}
-              </AnimatePresence>
-            </motion.div>
-          )}
+                          <div className="mt-6 pt-4.5 border-t border-brand-pink/10 flex items-center justify-between font-sans">
+                            <button
+                              type="button"
+                              onClick={() => handleProductSelect(p)}
+                              className="w-full bg-brand-cream/50 hover:bg-brand-pink/40 text-brand-chocolate border border-brand-pink/20 py-3.5 rounded-full text-xs sm:text-sm font-black transition-all duration-250 flex items-center justify-center space-x-2 cursor-pointer shadow-3xs hover:shadow-2xs active:scale-98 transform-gpu"
+                            >
+                              <ShoppingBag className="h-4 w-4 text-brand-rosegold" />
+                              <span>Place & Configure Order</span>
+                            </button>
+                          </div>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
+                </motion.div>
+              )}
+            </div>
+          </div>
 
           {/* CUSTOMIZABLE SELECTION MODAL PANELS (IF PRODUCT SELECTED) */}
           {selectedProduct && (
