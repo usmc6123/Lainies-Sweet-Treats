@@ -220,7 +220,7 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
   return (
     <div id="shop-view" className="max-w-[96rem] mx-auto px-4 sm:px-6 lg:px-8 py-8 xl:py-12">
       {/* Introduction Hero banner */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-[#FFF5EE] via-[#FFFDFC] to-[#FDF0EE] border-2 border-brand-pink/30 rounded-[3rem] p-8 md:p-14 shadow-sm text-center max-w-4xl mx-auto mb-12 animate-in fade-in duration-500">
+      <div className="relative overflow-hidden bg-gradient-to-br from-brand-pink/15 via-white/45 to-brand-cream/35 border-2 border-brand-pink/30 rounded-[3rem] p-8 md:p-14 shadow-sm text-center max-w-4xl mx-auto mb-12 animate-in fade-in duration-500">
         {/* Background Sparkles */}
         <div className="absolute top-6 left-6 text-brand-pink/40 animate-pulse"><Sparkles className="h-10 w-10" /></div>
         <div className="absolute bottom-6 right-6 text-brand-pink/40 animate-pulse"><Sparkles className="h-10 w-10" /></div>
@@ -275,8 +275,8 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
         {/* LEFT COLUMN: Catalog list (takes 3/4 space on desktop) */}
         <div className="lg:col-span-2 xl:col-span-3 space-y-8">
           {/* Horizontal category selector - Centered & Premium floating look */}
-          <div className="w-full bg-gradient-to-r from-[#FFF5F3] via-[#FFFDFC] to-[#FFF5F3] border-2 border-[#B76E79]/30 rounded-[2.5rem] p-6 sm:p-8 shadow-md select-none animate-in fade-in duration-300 text-center relative overflow-hidden">
-            <span className="text-[10px] sm:text-xs uppercase font-black tracking-widest text-[#B76E79] mb-4.5 block bg-brand-pink/45 py-1.5 px-6 rounded-full border border-brand-pink/30 max-w-xs mx-auto text-center shadow-3xs">
+          <div className="w-full bg-gradient-to-r from-brand-pink/15 via-white/85 to-brand-pink/15 border-2 border-brand-rosegold/30 rounded-[2.5rem] p-6 sm:p-8 shadow-md select-none animate-in fade-in duration-300 text-center relative overflow-hidden">
+            <span className="text-[10px] sm:text-xs uppercase font-black tracking-widest text-brand-rosegold mb-4.5 block bg-brand-pink/45 py-1.5 px-6 rounded-full border border-brand-pink/30 max-w-xs mx-auto text-center shadow-3xs">
               Menu Catalogue
             </span>
             <div className="flex flex-wrap items-center justify-center gap-3 md:gap-4 mt-2">
@@ -291,7 +291,7 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
                     className={`px-5 sm:px-6 py-3.5 sm:py-4 rounded-2xl text-xs sm:text-sm font-black tracking-wide uppercase transition-all duration-300 cursor-pointer transform-gpu active:scale-95 flex items-center space-x-2.5 border-2 ${
                       isActive 
                         ? "bg-brand-chocolate border-brand-chocolate text-brand-cream shadow-md scale-103 ring-4 ring-brand-pink/60" 
-                        : "bg-white border-[#B76E79]/20 text-brand-chocolate hover:border-[#B76E79]/50 hover:bg-[#FCF3F2] hover:text-brand-chocolate"
+                        : "bg-white border-brand-rosegold/20 text-brand-chocolate hover:border-brand-rosegold/50 hover:bg-brand-pink/20 hover:text-brand-chocolate"
                     }`}
                   >
                     <span>{cat}</span>
@@ -368,9 +368,9 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
                       exit={{ opacity: 0, scale: 0.95, y: -15 }}
                       transition={{ duration: 0.35, ease: "easeOut" }}
                       key={p.id}
-                      className="bg-[#FFFDFC] border-2 border-[#B76E79]/20 rounded-[2.5rem] overflow-hidden shadow-md hover:shadow-2xl hover:border-brand-chocolate hover:-translate-y-2 transition-all duration-300 flex flex-col group transform-gpu"
+                      className="bg-white border-2 border-brand-rosegold/20 rounded-[2.5rem] overflow-hidden shadow-md hover:shadow-2xl hover:border-brand-chocolate hover:-translate-y-2 transition-all duration-300 flex flex-col group transform-gpu"
                     >
-                      <div className="relative h-60 bg-[#FFF5F3]/50 overflow-hidden">
+                      <div className="relative h-60 bg-brand-pink/10 overflow-hidden">
                         <img 
                           src={p.imgUrl || "https://images.unsplash.com/photo-1578985545062-69928b1d9587"} 
                           alt={p.name}
@@ -384,7 +384,7 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
 
                       <div className="p-7 flex-1 flex flex-col justify-between">
                         <div>
-                          <span className="text-[10px] uppercase tracking-widest text-[#B76E79] font-black bg-brand-pink/45 px-3.5 py-1.5 rounded-full border border-brand-pink/50 shadow-2xs">
+                          <span className="text-[10px] uppercase tracking-widest text-brand-rosegold font-black bg-brand-pink/45 px-3.5 py-1.5 rounded-full border border-brand-pink/50 shadow-2xs">
                             {p.category}
                           </span>
                           <h3 className="text-xl font-black text-brand-chocolate mt-3.5 leading-tight font-heading">
@@ -395,11 +395,11 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
                           </p>
                         </div>
 
-                        <div className="mt-6 pt-4.5 border-t border-[#B76E79]/15 flex items-center justify-between font-sans">
+                        <div className="mt-6 pt-4.5 border-t border-brand-pink/30 flex items-center justify-between font-sans">
                           <button
                             type="button"
                             onClick={() => handleProductSelect(p)}
-                            className="w-full bg-[#B76E79] hover:bg-brand-chocolate text-white hover:text-brand-cream border-2 border-[#B76E79] hover:border-brand-chocolate py-3.5 rounded-full text-xs sm:text-sm font-black transition-all duration-250 flex items-center justify-center space-x-2 cursor-pointer shadow-sm hover:shadow-md active:scale-98 transform-gpu"
+                            className="w-full bg-brand-rosegold hover:bg-brand-chocolate text-white hover:text-brand-cream border-2 border-brand-rosegold hover:border-brand-chocolate py-3.5 rounded-full text-xs sm:text-sm font-black transition-all duration-250 flex items-center justify-center space-x-2 cursor-pointer shadow-sm hover:shadow-md active:scale-98 transform-gpu"
                           >
                             <ShoppingBag className="h-4 w-4 text-white" />
                             <span>Place & Configure Order</span>
@@ -573,7 +573,7 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
         <div className="lg:col-span-1">
           <div 
             id="shop-cart" 
-            className="lg:sticky lg:top-32 bg-[#FFFDFC] border-2 border-[#B76E79]/20 rounded-[2.5rem] p-7 md:p-8 shadow-md h-fit transition-all duration-300 transform-gpu hover:shadow-lg"
+            className="lg:sticky lg:top-32 bg-white border-2 border-brand-rosegold/20 rounded-[2.5rem] p-7 md:p-8 shadow-md h-fit transition-all duration-300 transform-gpu hover:shadow-lg"
           >
             <div className="border-b border-brand-pink/30 pb-4">
               <span className="text-[9px] uppercase font-bold tracking-widest text-brand-rosegold bg-brand-pink/15 px-3 py-1 rounded-full border border-brand-pink/20">
@@ -587,7 +587,7 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
 
             {/* Cart Contents */}
             {cart.length === 0 ? (
-              <div className="py-12 px-4 text-center bg-[#FFF8F6]/60 rounded-3xl border border-dashed border-brand-pink/25 mt-5">
+              <div className="py-12 px-4 text-center bg-brand-pink/10 rounded-3xl border border-dashed border-brand-pink/30 mt-5">
                 <p className="text-sm text-brand-chocolate/60 font-extrabold font-heading italic">No goods added to your bag yet.</p>
                 <p className="text-xs text-brand-rosegold font-bold mt-2 leading-relaxed">
                   Select customizable items from Lainie's catalog on the left to start configuring your custom treats!

@@ -70,7 +70,7 @@ export default function App() {
   const isAdminView = view.startsWith("admin-");
 
   return (
-    <div className="min-h-screen bg-gradient-to-tr from-[#FFF3F1] via-[#FFFBF9] to-[#FFF5F2] text-brand-chocolate font-sans flex flex-col justify-between selection:bg-brand-pink/50">
+    <div className="min-h-screen bg-gradient-to-tr from-[#FCF1FD] via-[#FAF2FB] to-[#F7E6FB] text-brand-chocolate font-sans flex flex-col justify-between selection:bg-brand-pink/50">
       
       {/* Top Welcome Ribbon */}
       <div className="bg-brand-chocolate text-brand-cream text-[10.5px] font-semibold tracking-wider text-center py-2 px-4 shadow-sm flex items-center justify-center space-x-1.5 shrink-0 z-40">

@@ -163,7 +163,7 @@ export default function ClientQuotePortal() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Quotes list */}
           <div className="md:col-span-1 space-y-3">
-            <h3 className="text-[10px] font-bold uppercase tracking-widest text-[#B76E79] mb-3">
+            <h3 className="text-[10px] font-bold uppercase tracking-widest text-brand-rosegold mb-3">
               Your Custom Quotes ({fetchedQuotes.length})
             </h3>
             <div className="space-y-4">
@@ -234,7 +234,7 @@ export default function ClientQuotePortal() {
                   </div>
                   <div className="col-span-2">
                     <p className="text-brand-chocolate/55 uppercase tracking-[0.15em] font-semibold text-[9px]">Custom Design Outline & Ideas</p>
-                    <p className="text-brand-chocolate/85 mt-0.5 leading-relaxed bg-[#FFF8F0]/50 p-4 rounded-xl border border-brand-pink/10">"{selectedQuote.designIdeas}"</p>
+                    <p className="text-brand-chocolate/85 mt-0.5 leading-relaxed bg-brand-cream/50 p-4 rounded-xl border border-brand-pink/10">"{selectedQuote.designIdeas}"</p>
                   </div>
                 </div>
 
@@ -293,7 +293,7 @@ export default function ClientQuotePortal() {
                         <button
                           onClick={() => handleRespond(selectedQuote.id, "accept")}
                           disabled={processingId !== null}
-                          className="px-5 py-2.5 bg-brand-chocolate text-[#FFF8F0] hover:opacity-90 text-xs font-bold uppercase tracking-widest rounded-full transition shadow-xs flex items-center space-x-1"
+                          className="px-5 py-2.5 bg-brand-chocolate text-brand-cream hover:opacity-90 text-xs font-bold uppercase tracking-widest rounded-full transition shadow-xs flex items-center space-x-1"
                         >
                           {processingId === selectedQuote.id ? (
                             <span>Working...</span>
