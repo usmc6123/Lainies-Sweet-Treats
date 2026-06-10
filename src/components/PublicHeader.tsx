@@ -12,18 +12,18 @@ export default function PublicHeader({ currentView, setView, isAdminLoggedIn, on
   return (
     <header id="public-header" className="bg-[#FFF8F0]/95 backdrop-blur-md border-b border-brand-rosegold/10 sticky top-0 z-40 shadow-xs">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-24">
+        <div className="flex items-center justify-between py-4 md:py-6 min-h-[7.5rem]">
           {/* Logo Brand */}
           <div 
             id="header-brand" 
-            className="flex items-center space-x-4.5 cursor-pointer group"
+            className="flex items-center space-x-5 cursor-pointer group"
             onClick={() => setView("shop")}
           >
-            <div className="h-16 w-16 rounded-2xl overflow-hidden border-2 border-brand-pink bg-white shadow-xs p-0.5 group-hover:scale-105 transition-transform duration-300 shrink-0">
+            <div className="h-20 w-20 md:h-24 md:w-24 rounded-full overflow-hidden border-4 border-brand-pink bg-white shadow-md p-1 group-hover:scale-[1.08] group-hover:rotate-3 transition-transform duration-300 shrink-0">
               <img 
                 src="https://images.squarespace-cdn.com/content/v1/6a0b183aaec8f87f9644a515/4a01bf37-b09f-4987-8495-e4876d754270/ChatGPT+Image+May+19%2C+2026%2C+09_01_51+AM.png?format=1500w" 
                 alt="Lainie's Sweet Treats Logo" 
-                className="h-full w-full object-cover rounded-xl"
+                className="h-full w-full object-cover rounded-full"
                 referrerPolicy="no-referrer"
               />
             </div>

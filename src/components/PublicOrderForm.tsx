@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "motion/react";
 import { Product, OrderItem, SelectedOptions, Settings, BlockedDate } from "../types";
 import { ShoppingBag, Sparkles, Calendar, User, Phone, Mail, MapPin, Truck, AlertTriangle, CheckCircle, Trash2, ChevronRight } from "lucide-react";
 
@@ -219,14 +220,14 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
   return (
     <div id="shop-view" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Introduction Hero banner */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-[#FFF5EE] via-[#FFF8F0] to-[#FDF0EE] border border-brand-pink/30 rounded-[3rem] p-8 md:p-12 shadow-xs text-center max-w-4xl mx-auto mb-12 animate-in fade-in duration-300">
+      <div className="relative overflow-hidden bg-gradient-to-br from-[#FFF5EE] via-[#FFFDFC] to-[#FDF0EE] border-2 border-brand-pink/30 rounded-[3rem] p-8 md:p-14 shadow-sm text-center max-w-4xl mx-auto mb-12 animate-in fade-in duration-500">
         {/* Background Sparkles */}
-        <div className="absolute top-4 left-4 text-brand-pink/40"><Sparkles className="h-8 w-8" /></div>
-        <div className="absolute bottom-4 right-4 text-brand-pink/40"><Sparkles className="h-8 w-8" /></div>
+        <div className="absolute top-6 left-6 text-brand-pink/40 animate-pulse"><Sparkles className="h-10 w-10" /></div>
+        <div className="absolute bottom-6 right-6 text-brand-pink/40 animate-pulse"><Sparkles className="h-10 w-10" /></div>
         
         {/* Logo and Greeting */}
-        <div className="flex flex-col items-center justify-center space-y-4">
-          <div className="h-28 w-28 rounded-full overflow-hidden border-4 border-brand-pink bg-white shadow-sm p-1.5 hover:scale-105 transition-transform duration-300">
+        <div className="flex flex-col items-center justify-center space-y-5">
+          <div className="relative h-32 w-32 rounded-full overflow-hidden border-4 border-brand-pink bg-white shadow-md p-1.5 hover:scale-110 hover:rotate-3 transition-transform duration-500 cursor-pointer">
             <img 
               src="https://images.squarespace-cdn.com/content/v1/6a0b183aaec8f87f9644a515/4a01bf37-b09f-4987-8495-e4876d754270/ChatGPT+Image+May+19%2C+2026%2C+09_01_51+AM.png?format=1500w" 
               alt="Lainie's Sweet Treats Logo" 
@@ -235,7 +236,7 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
             />
           </div>
           
-          <span className="bg-brand-rosegold/10 text-brand-rosegold px-4.5 py-1.5 rounded-full text-xs font-extrabold uppercase tracking-widest border border-brand-rosegold/20">
+          <span className="bg-brand-rosegold/10 text-brand-rosegold px-5 py-2 rounded-full text-xs font-extrabold uppercase tracking-widest border border-brand-rosegold/20 animate-fade-in">
             Welcome to Lainie's Kitchen
           </span>
           
@@ -243,25 +244,26 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
             Lainie's <span className="italic font-normal text-brand-rosegold">Bespoke Bakery Menu</span>
           </h2>
           
-          <p className="max-w-xl text-sm md:text-base text-brand-chocolate/85 leading-relaxed font-semibold">
-            Based right here in <strong className="text-brand-rosegold font-black font-sans">Royse City, TX</strong>, Lainie custom-bakes every celebration treat completely from scratch with local ingredients. Experience personalized sizing, bespoke flavor options, and custom buttercream artistry!
+          <p className="max-w-2xl text-sm md:text-base text-brand-chocolate/85 leading-relaxed font-semibold">
+            Based right here in <strong className="text-brand-rosegold font-black font-sans text-base md:text-lg">Royse City, TX</strong>, Lainie custom-bakes every celebration treat completely from scratch with local ingredients. Experience personalized sizing, bespoke flavor options, and custom buttercream artistry!
           </p>
         </div>
 
-        {/* Custom Event Redirection Link */}
-        <div className="mt-8 p-6 bg-white/70 backdrop-blur-xs border border-brand-pink/40 rounded-[2.2rem] flex flex-col sm:flex-row items-center justify-between gap-4 shadow-2xs text-left max-w-2xl mx-auto">
-          <div>
-            <h4 className="text-sm font-extrabold text-brand-chocolate uppercase tracking-wider flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-brand-rosegold animate-pulse shrink-0" />
+        {/* Custom Event Redirection Link - Elevated & Pop Design */}
+        <div className="mt-10 p-7 bg-gradient-to-r from-brand-pink/25 via-white/80 to-brand-pink/20 border-2 border-brand-rosegold/30 border-dashed rounded-[2.5rem] flex flex-col sm:flex-row items-center justify-between gap-6 shadow-md hover:shadow-lg transition-all duration-300 text-left max-w-2xl mx-auto relative group">
+          <div className="absolute top-0 right-0 p-1 text-[9px] bg-brand-rosegold text-white uppercase font-black tracking-widest rounded-bl-xl rounded-tr-md">Custom Artistry</div>
+          <div className="space-y-1">
+            <h4 className="text-sm md:text-base font-extrabold text-brand-chocolate uppercase tracking-wider flex items-center gap-2">
+              <Sparkles className="h-4.5 w-4.5 text-brand-rosegold animate-spin-slow shrink-0" />
               Planning a wedding or major event?
             </h4>
-            <p className="text-xs text-brand-chocolate/75 mt-1 font-bold leading-normal">
-              Need multi-tiered designs, custom color coordination, or complex buttercream styling?
+            <p className="text-xs text-brand-chocolate/80 font-bold leading-relaxed max-w-md">
+              Need exquisite multi-tiered cake designs, custom color coordination, or complex buttercream styling?
             </p>
           </div>
           <button
             onClick={onSwitchToQuote}
-            className="w-full sm:w-auto bg-brand-rosegold text-white text-xs uppercase tracking-widest px-6 py-3.5 rounded-full font-black hover:bg-brand-rosegold/90 transition-all shadow-sm shrink-0 flex items-center justify-center space-x-1.5 cursor-pointer"
+            className="w-full sm:w-auto bg-brand-rosegold text-white text-xs uppercase tracking-widest px-7 py-4 rounded-full font-black hover:bg-brand-rosegold/90 hover:scale-105 active:scale-95 transition-all duration-250 shadow-md shrink-0 flex items-center justify-center space-x-2 cursor-pointer transform-gpu"
           >
             <span>Quote Builder</span>
             <ChevronRight className="h-4 w-4" />
@@ -274,40 +276,44 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
         <div className="lg:col-span-2 space-y-6">
           {/* Categories Tab selector and Search Bar */}
           <div className="space-y-4">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-4 border border-brand-pink/30 rounded-[2rem] shadow-xs">
-              <div className="flex items-center space-x-2 overflow-x-auto pb-1.5 md:pb-0 scrollbar-none flex-1">
-                {categories.map(cat => (
-                  <button
-                    key={cat}
-                    type="button"
-                    onClick={() => setActiveCategory(cat)}
-                    className={`px-4 py-2.5 rounded-full text-xs font-bold tracking-wide whitespace-nowrap transition-all duration-250 cursor-pointer ${
-                      activeCategory === cat 
-                        ? "bg-brand-chocolate text-brand-cream shadow-xs" 
-                        : "bg-brand-cream/50 border border-brand-pink/10 text-brand-chocolate/80 hover:bg-brand-pink/30"
-                    }`}
-                  >
-                    {cat}
-                  </button>
-                ))}
+            <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 bg-white p-5 border border-brand-pink/30 rounded-[2.5rem] shadow-xs">
+              {/* Category Pills - Beautiful flex wrapping ensuring no cutoff of any categories */}
+              <div className="flex flex-wrap items-center gap-2.5 flex-1 select-none">
+                {categories.map(cat => {
+                  const isActive = activeCategory === cat;
+                  return (
+                    <button
+                      key={cat}
+                      type="button"
+                      onClick={() => setActiveCategory(cat)}
+                      className={`px-4.5 py-2.5 rounded-full text-xs font-bold tracking-wide whitespace-nowrap transition-all duration-300 cursor-pointer transform-gpu active:scale-95 ${
+                        isActive 
+                          ? "bg-brand-chocolate text-brand-cream shadow-md scale-105 ring-2 ring-brand-rosegold/10 font-extrabold" 
+                          : "bg-brand-cream/60 border border-brand-pink/10 text-brand-chocolate/75 hover:bg-brand-pink/25 hover:scale-[1.02] hover:text-brand-chocolate"
+                      }`}
+                    >
+                      {cat}
+                    </button>
+                  );
+                })}
               </div>
               
-              <div className="relative shrink-0 w-full md:w-64">
+              <div className="relative shrink-0 w-full xl:w-64">
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search sweet treats..."
-                  className="w-full bg-brand-cream/30 border border-brand-pink/20 text-xs text-brand-chocolate font-bold px-4 py-3 rounded-full pl-9 focus:outline-none focus:ring-2 focus:ring-brand-rosegold/50 placeholder-brand-chocolate/40"
+                  className="w-full bg-brand-cream/30 border border-brand-pink/20 text-xs text-brand-chocolate font-bold px-4 py-3.5 rounded-full pl-9 focus:outline-none focus:ring-2 focus:ring-brand-rosegold/50 placeholder-brand-chocolate/40 transition-shadow duration-200"
                 />
-                <svg className="h-4 w-4 text-brand-chocolate/50 absolute left-3.5 top-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <svg className="h-4 w-4 text-brand-chocolate/50 absolute left-3.5 top-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                 </svg>
                 {searchQuery && (
                   <button 
                     type="button"
                     onClick={() => setSearchQuery("")}
-                    className="absolute right-3.5 top-3 text-brand-chocolate/60 hover:text-brand-chocolate text-xs font-bold"
+                    className="absolute right-3.5 top-3.5 text-brand-chocolate/60 hover:text-brand-chocolate text-xs font-black p-0.5"
                   >
                     ✕
                   </button>
@@ -342,51 +348,61 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
               </button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-              {filteredProducts.map(p => (
-                <div 
-                  key={p.id}
-                  className="bg-white border border-brand-pink/15 rounded-[2.2rem] overflow-hidden shadow-xs hover:shadow-md hover:border-brand-pink/30 hover:scale-[1.01] transition-all duration-300 flex flex-col group"
-                >
-                  <div className="relative h-56 bg-brand-pink/10 overflow-hidden">
-                    <img 
-                      src={p.imgUrl || "https://images.unsplash.com/photo-1578985545062-69928b1d9587"} 
-                      alt={p.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                      referrerPolicy="no-referrer"
-                    />
-                    <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-xs text-brand-chocolate px-4 py-1.5 rounded-full text-sm font-black border border-brand-pink/20 shadow-xs">
-                      From ${p.basePrice.toFixed(2)}
-                    </div>
-                  </div>
-
-                  <div className="p-6.5 flex-1 flex flex-col justify-between">
-                    <div>
-                      <span className="text-[10px] uppercase tracking-widest text-brand-rosegold font-black bg-brand-pink/20 px-3.5 py-1.5 rounded-full border border-brand-pink/30">
-                        {p.category}
-                      </span>
-                      <h3 className="text-lg lg:text-xl font-black text-brand-chocolate mt-3 leading-tight font-heading">
-                        {p.name}
-                      </h3>
-                      <p className="text-xs text-brand-chocolate/75 mt-2 line-clamp-3 leading-relaxed font-medium">
-                        {p.description}
-                      </p>
+            <motion.div 
+              layout
+              className="grid grid-cols-1 sm:grid-cols-2 gap-8"
+            >
+              <AnimatePresence mode="popLayout">
+                {filteredProducts.map(p => (
+                  <motion.div 
+                    layout
+                    initial={{ opacity: 0, scale: 0.95, y: 15 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95, y: -15 }}
+                    transition={{ duration: 0.35, ease: "easeOut" }}
+                    key={p.id}
+                    className="bg-white border border-brand-pink/15 rounded-[2.5rem] overflow-hidden shadow-sm hover:shadow-xl hover:border-brand-pink/35 hover:-translate-y-2 transition-all duration-300 flex flex-col group transform-gpu"
+                  >
+                    <div className="relative h-60 bg-brand-pink/10 overflow-hidden">
+                      <img 
+                        src={p.imgUrl || "https://images.unsplash.com/photo-1578985545062-69928b1d9587"} 
+                        alt={p.name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                        referrerPolicy="no-referrer"
+                      />
+                      <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-xs text-brand-chocolate px-4.5 py-2 rounded-full text-sm font-black border border-brand-pink/20 shadow-xs">
+                        From ${p.basePrice.toFixed(2)}
+                      </div>
                     </div>
 
-                    <div className="mt-6 pt-4 border-t border-brand-pink/10 flex items-center justify-between">
-                      <button
-                        type="button"
-                        onClick={() => handleProductSelect(p)}
-                        className="w-full bg-brand-cream/50 hover:bg-brand-pink/40 text-brand-chocolate border border-brand-pink/20 py-3 rounded-full text-xs sm:text-sm font-extrabold transition-all duration-200 flex items-center justify-center space-x-1.5 cursor-pointer shadow-2xs hover:shadow-xs"
-                      >
-                        <ShoppingBag className="h-4 w-4 text-brand-rosegold" />
-                        <span>Place & Configure Order</span>
-                      </button>
+                    <div className="p-7 flex-1 flex flex-col justify-between">
+                      <div>
+                        <span className="text-[10px] uppercase tracking-widest text-brand-rosegold font-black bg-brand-pink/20 px-3.5 py-1.5 rounded-full border border-brand-pink/30">
+                          {p.category}
+                        </span>
+                        <h3 className="text-xl font-black text-brand-chocolate mt-3.5 leading-tight font-heading">
+                          {p.name}
+                        </h3>
+                        <p className="text-xs text-brand-chocolate/75 mt-2.5 line-clamp-3 leading-relaxed font-medium">
+                          {p.description}
+                        </p>
+                      </div>
+
+                      <div className="mt-6 pt-4.5 border-t border-brand-pink/10 flex items-center justify-between font-sans">
+                        <button
+                          type="button"
+                          onClick={() => handleProductSelect(p)}
+                          className="w-full bg-brand-cream/50 hover:bg-brand-pink/40 text-brand-chocolate border border-brand-pink/20 py-3.5 rounded-full text-xs sm:text-sm font-black transition-all duration-250 flex items-center justify-center space-x-2 cursor-pointer shadow-3xs hover:shadow-2xs active:scale-98 transform-gpu"
+                        >
+                          <ShoppingBag className="h-4 w-4 text-brand-rosegold" />
+                          <span>Place & Configure Order</span>
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </motion.div>
           )}
 
           {/* CUSTOMIZABLE SELECTION MODAL PANELS (IF PRODUCT SELECTED) */}
@@ -545,253 +561,269 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
           )}
         </div>
 
-        {/* RIGHT COLUMN: Interactive Cart & Checkout form (takes 1/3 desk space) */}
-        <div id="shop-cart" className="bg-white border border-brand-rosegold/10 rounded-[2.5rem] p-8 shadow-sm h-fit">
-          <h3 className="text-xl font-bold text-brand-chocolate flex items-center space-x-2 font-heading">
-            <ShoppingBag className="h-5 w-5 text-brand-rosegold" />
-            <span>Your Sweet Bag</span>
-          </h3>
-
-          {/* Cart Contents */}
-          {cart.length === 0 ? (
-            <div className="py-10 text-center">
-              <p className="text-xs text-brand-chocolate/50 font-medium">No goods added to your bag yet.</p>
-              <p className="text-[11px] text-brand-rosegold mt-1">Select customizable items from Lainie's catalog on the left to start your order!</p>
+        {/* RIGHT COLUMN: Interactive Cart & Checkout form (takes 1/3 desk space) - Integrated Sticky Design with Cottage Bakery Motif */}
+        <div className="lg:col-span-1">
+          <div 
+            id="shop-cart" 
+            className="lg:sticky lg:top-32 bg-[#FFFDFC] border-2 border-[#B76E79]/20 border-dashed rounded-[2.5rem] p-7 md:p-8 shadow-md h-fit transition-all duration-300 transform-gpu hover:shadow-lg"
+          >
+            <div className="border-b border-brand-pink/30 pb-4">
+              <span className="text-[9px] uppercase font-bold tracking-widest text-brand-rosegold bg-brand-pink/15 px-3 py-1 rounded-full border border-brand-pink/20">
+                Cottage Bakery Order Sheet
+              </span>
+              <h3 className="text-2xl font-black text-brand-chocolate flex items-center space-x-2.5 font-heading tracking-tight mt-3">
+                <ShoppingBag className="h-6 w-6 text-brand-rosegold" />
+                <span>Your Sweet Bag</span>
+              </h3>
             </div>
-          ) : (
-            <div className="mt-4 space-y-4 max-h-60 overflow-y-auto pr-1">
-              {cart.map((item, idx) => (
-                <div key={idx} className="flex justify-between items-start text-xs border-b border-brand-pink/10 pb-3">
-                  <div className="flex-1 pr-2">
-                    <div className="flex items-center justify-between">
-                      <span className="font-bold text-brand-chocolate">
-                        {item.quantity}x {item.name}
-                      </span>
-                      <button 
-                        onClick={() => handleRemoveFromBag(idx)}
-                        className="text-gray-400 hover:text-red-500"
-                        title="Remove"
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </button>
+
+            {/* Cart Contents */}
+            {cart.length === 0 ? (
+              <div className="py-12 px-4 text-center bg-[#FFF8F6]/60 rounded-3xl border border-dashed border-brand-pink/25 mt-5">
+                <p className="text-sm text-brand-chocolate/60 font-extrabold font-heading italic">No goods added to your bag yet.</p>
+                <p className="text-xs text-brand-rosegold font-bold mt-2 leading-relaxed">
+                  Select customizable items from Lainie's catalog on the left to start configuring your custom treats!
+                </p>
+              </div>
+            ) : (
+              <div className="mt-5 space-y-4.5 max-h-64 overflow-y-auto pr-1">
+                {cart.map((item, idx) => (
+                  <div key={idx} className="flex justify-between items-start text-xs border-b border-brand-pink/10 pb-4">
+                    <div className="flex-1 pr-3">
+                      <div className="flex items-center justify-between gap-1">
+                        <span className="font-extrabold text-brand-chocolate text-xs md:text-sm">
+                          {item.quantity}x {item.name}
+                        </span>
+                        <button 
+                          onClick={() => handleRemoveFromBag(idx)}
+                          className="text-gray-400 hover:text-red-500 transition-colors p-1"
+                          title="Remove"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                      {item.size && (
+                        <p className="text-[10px] text-brand-chocolate/70 font-semibold mt-1">
+                          Size: {item.size}
+                        </p>
+                      )}
+                      {item.flavor && (
+                        <p className="text-[10px] text-brand-chocolate/70 font-semibold">
+                          Flavor: {item.flavor}
+                        </p>
+                      )}
+                      {item.addOns && item.addOns.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {item.addOns.map((add, i) => (
+                            <span key={i} className="text-[9px] bg-brand-pink/15 text-brand-rosegold font-black px-2 py-0.5 rounded border border-brand-pink/20">
+                              {add}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                     </div>
-                    {item.size && (
-                      <p className="text-[10px] text-brand-chocolate/65 mt-0.5">
-                        Size: {item.size}
-                      </p>
-                    )}
-                    {item.flavor && (
-                      <p className="text-[10px] text-brand-chocolate/65">
-                        Flavor: {item.flavor}
-                      </p>
-                    )}
-                    {item.addOns && item.addOns.length > 0 && (
-                      <p className="text-[10px] text-brand-rosegold">
-                        Add-ons: {item.addOns.join(", ")}
-                      </p>
-                    )}
+                    <span className="font-bold text-brand-chocolate shrink-0">
+                      ${item.totalPrice.toFixed(2)}
+                    </span>
                   </div>
-                  <span className="font-bold text-brand-chocolate shrink-0">
-                    ${item.totalPrice.toFixed(2)}
-                  </span>
+                ))}
+              </div>
+            )}
+
+            {/* Delivery Type Option tabs */}
+            {cart.length > 0 && (
+              <div className="grid grid-cols-2 gap-2 mt-6">
+                <button
+                  type="button"
+                  onClick={() => setFulfillmentType("pickup")}
+                  className={`flex items-center justify-center space-x-1.5 py-3 rounded-2xl text-xs font-bold border-2 transition-all cursor-pointer transform-gpu active:scale-95 ${
+                    fulfillmentType === "pickup" 
+                      ? "bg-brand-pink/30 border-brand-rosegold text-brand-chocolate shadow-2xs font-extrabold" 
+                      : "border-brand-pink/10 bg-white/50 text-brand-chocolate/65 hover:bg-brand-cream/40"
+                  }`}
+                >
+                  <MapPin className="h-4 w-4 text-brand-rosegold" />
+                  <span>Store Pickup</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFulfillmentType("delivery")}
+                  className={`flex items-center justify-center space-x-1.5 py-3 rounded-2xl text-xs font-bold border-2 transition-all cursor-pointer transform-gpu active:scale-95 ${
+                    fulfillmentType === "delivery" 
+                      ? "bg-brand-pink/30 border-brand-rosegold text-brand-chocolate shadow-2xs font-extrabold" 
+                      : "border-brand-pink/10 bg-white/50 text-brand-chocolate/65 hover:bg-brand-cream/40"
+                  }`}
+                >
+                  <Truck className="h-4 w-4 text-brand-rosegold" />
+                  <span>Local Delivery</span>
+                </button>
+              </div>
+            )}
+
+            {/* Cart Cost summary breakdown */}
+            {cart.length > 0 && (
+              <div className="mt-6 space-y-2 text-xs pt-4 border-t border-brand-pink/20">
+                <div className="flex justify-between text-brand-chocolate/85 font-medium">
+                  <span>Subtotal:</span>
+                  <span>${cartSubtotal.toFixed(2)}</span>
                 </div>
-              ))}
-            </div>
-          )}
-
-          {/* Delivery Type Option tabs */}
-          {cart.length > 0 && (
-            <div className="grid grid-cols-2 gap-2 mt-5">
-              <button
-                type="button"
-                onClick={() => setFulfillmentType("pickup")}
-                className={`flex items-center justify-center space-x-1.5 py-2 rounded-xl text-xs font-semibold border transition ${
-                  fulfillmentType === "pickup" 
-                    ? "bg-brand-pink/30 border-brand-rosegold text-brand-chocolate" 
-                    : "border-gray-100 text-brand-chocolate/60 hover:bg-brand-cream/30"
-                }`}
-              >
-                <MapPin className="h-3.5 w-3.5 text-brand-rosegold" />
-                <span>Store Pickup</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setFulfillmentType("delivery")}
-                className={`flex items-center justify-center space-x-1.5 py-2 rounded-xl text-xs font-semibold border transition ${
-                  fulfillmentType === "delivery" 
-                    ? "bg-brand-pink/30 border-brand-rosegold text-brand-chocolate" 
-                    : "border-gray-100 text-brand-chocolate/60 hover:bg-brand-cream/30"
-                }`}
-              >
-                <Truck className="h-3.5 w-3.5 text-brand-rosegold" />
-                <span>Local Delivery</span>
-              </button>
-            </div>
-          )}
-
-          {/* Cart Cost summary breakdown */}
-          {cart.length > 0 && (
-            <div className="mt-5 space-y-1.5 text-xs pt-4 border-t border-brand-pink/10">
-              <div className="flex justify-between text-brand-chocolate/85">
-                <span>Subtotal:</span>
-                <span>${cartSubtotal.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between text-brand-chocolate/85">
-                <span>TX Sales Tax ({(taxRate * 100).toFixed(2)}%):</span>
-                <span>${cartTax.toFixed(2)}</span>
-              </div>
-              {fulfillmentType === "delivery" && (
-                <div className="flex justify-between text-brand-chocolate/85">
-                  <span>Delivery (within {settings?.deliveryRadius || 15} miles):</span>
-                  <span>${deliveryCost.toFixed(2)}</span>
+                <div className="flex justify-between text-brand-chocolate/85 font-medium">
+                  <span>TX Sales Tax ({(taxRate * 100).toFixed(2)}%):</span>
+                  <span>${cartTax.toFixed(2)}</span>
                 </div>
-              )}
-              <div className="flex justify-between text-base font-bold text-brand-chocolate pt-2 border-t border-brand-pink/10">
-                <span>Total Amount:</span>
-                <span className="text-brand-rosegold">${cartTotal.toFixed(2)}</span>
-              </div>
-            </div>
-          )}
-
-          {/* Checkout Info Form */}
-          {cart.length > 0 && (
-            <form onSubmit={handleCheckout} className="mt-6 space-y-3 pt-4 border-t border-brand-pink/10">
-              <h4 className="text-xs font-bold text-brand-chocolate uppercase tracking-wider block mb-1">
-                Fulfillment details
-              </h4>
-
-              <div>
-                <label className="text-[10px] uppercase font-bold text-brand-chocolate/60 block">Full Name</label>
-                <div className="relative mt-1">
-                  <User className="h-3.5 w-3.5 text-brand-chocolate/40 absolute left-3 top-3" />
-                  <input
-                    type="text"
-                    required
-                    value={customerName}
-                    onChange={(e) => setCustomerName(e.target.value)}
-                    placeholder="Rebecca Davis"
-                    className="w-full text-xs bg-brand-cream/25 border border-brand-pink/15 rounded-xl pl-8 py-2.5 focus:outline-none focus:ring-1 focus:ring-brand-rosegold"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                <div>
-                  <label className="text-[10px] uppercase font-bold text-brand-chocolate/60 block">Email</label>
-                  <div className="relative mt-1">
-                    <Mail className="h-3.5 w-3.5 text-brand-chocolate/40 absolute left-3 top-3" />
-                    <input
-                      type="email"
-                      required
-                      value={customerEmail}
-                      onChange={(e) => setCustomerEmail(e.target.value)}
-                      placeholder="rebecca@gmail.com"
-                      className="w-full text-xs bg-brand-cream/25 border border-brand-pink/15 rounded-xl pl-8 py-2.5 focus:outline-none focus:ring-1 focus:ring-brand-rosegold"
-                    />
+                {fulfillmentType === "delivery" && (
+                  <div className="flex justify-between text-brand-chocolate/85 font-medium">
+                    <span>Delivery (within {settings?.deliveryRadius || 15} miles):</span>
+                    <span>${deliveryCost.toFixed(2)}</span>
                   </div>
-                </div>
-                <div>
-                  <label className="text-[10px] uppercase font-bold text-brand-chocolate/60 block">Phone</label>
-                  <div className="relative mt-1">
-                    <Phone className="h-3.5 w-3.5 text-brand-chocolate/40 absolute left-3 top-3" />
-                    <input
-                      type="tel"
-                      required
-                      value={customerPhone}
-                      onChange={(e) => setCustomerPhone(e.target.value)}
-                      placeholder="469-555-1234"
-                      className="w-full text-xs bg-brand-cream/25 border border-brand-pink/15 rounded-xl pl-8 py-2.5 focus:outline-none focus:ring-1 focus:ring-brand-rosegold"
-                    />
-                  </div>
+                )}
+                <div className="flex justify-between text-base font-extrabold text-brand-chocolate pt-2.5 border-t border-brand-pink/20">
+                  <span>Total Amount:</span>
+                  <span className="text-brand-rosegold font-black">${cartTotal.toFixed(2)}</span>
                 </div>
               </div>
+            )}
 
-              {fulfillmentType === "delivery" && (
+            {/* Checkout Info Form */}
+            {cart.length > 0 && (
+              <form onSubmit={handleCheckout} className="mt-6 space-y-4 pt-4 border-t border-brand-pink/25">
+                <h4 className="text-xs font-black text-brand-chocolate uppercase tracking-wider block mb-1">
+                  Fulfillment Details
+                </h4>
+
                 <div>
-                  <label className="text-[10px] uppercase font-bold text-brand-chocolate/60 block">Delivery Address (Royse City Local)</label>
+                  <label className="text-[10px] uppercase font-bold text-brand-chocolate/60 block pl-1">Full Name</label>
                   <div className="relative mt-1">
-                    <MapPin className="h-3.5 w-3.5 text-brand-chocolate/40 absolute left-3 top-3" />
+                    <User className="h-3.5 w-3.5 text-brand-chocolate/40 absolute left-3 top-3.5" />
                     <input
                       type="text"
-                      required={fulfillmentType === "delivery"}
-                      value={deliveryAddress}
-                      onChange={(e) => setDeliveryAddress(e.target.value)}
-                      placeholder="104 Elm St, Royse City, TX"
-                      className="w-full text-xs bg-brand-cream/25 border border-brand-pink/15 rounded-xl pl-8 py-2.5 focus:outline-none focus:ring-1 focus:ring-brand-rosegold"
+                      required
+                      value={customerName}
+                      onChange={(e) => setCustomerName(e.target.value)}
+                      placeholder="Rebecca Davis"
+                      className="w-full text-xs bg-brand-cream/25 border-2 border-brand-pink/10 rounded-2xl pl-9 py-3 focus:outline-none focus:ring-2 focus:ring-brand-rosegold/40 focus:border-transparent transition-all placeholder-brand-chocolate/30 font-bold"
                     />
                   </div>
                 </div>
-              )}
 
-              <div>
-                <label className="text-[10px] uppercase font-bold text-brand-chocolate/60 block flex items-center justify-between">
-                  <span>Fulfillment Date Choice</span>
-                  <span className="text-[8px] text-brand-rosegold font-bold">Requires {settings?.leadTimeDays || 3} days notice</span>
-                </label>
-                <div className="relative mt-1">
-                  <Calendar className="h-3.5 w-3.5 text-brand-chocolate/40 absolute left-3 top-3" />
-                  <input
-                    type="date"
-                    required
-                    min={getMinFulfillmentDate()}
-                    value={fulfillmentDate}
-                    onChange={(e) => setFulfillmentDate(e.target.value)}
-                    className="w-full text-xs bg-brand-cream/25 border border-brand-pink/15 rounded-xl pl-8 py-2.5 focus:outline-none focus:ring-1 focus:ring-brand-rosegold"
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <div>
+                    <label className="text-[10px] uppercase font-bold text-brand-chocolate/60 block pl-1">Email</label>
+                    <div className="relative mt-1">
+                      <Mail className="h-3.5 w-3.5 text-brand-chocolate/40 absolute left-3 top-3.5" />
+                      <input
+                        type="email"
+                        required
+                        value={customerEmail}
+                        onChange={(e) => setCustomerEmail(e.target.value)}
+                        placeholder="rebecca@gmail.com"
+                        className="w-full text-xs bg-brand-cream/25 border-2 border-brand-pink/10 rounded-2xl pl-9 py-3 focus:outline-none focus:ring-2 focus:ring-brand-rosegold/40 focus:border-transparent transition-all placeholder-brand-chocolate/30 font-bold"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-[10px] uppercase font-bold text-brand-chocolate/60 block pl-1">Phone</label>
+                    <div className="relative mt-1">
+                      <Phone className="h-3.5 w-3.5 text-brand-chocolate/40 absolute left-3 top-3.5" />
+                      <input
+                        type="tel"
+                        required
+                        value={customerPhone}
+                        onChange={(e) => setCustomerPhone(e.target.value)}
+                        placeholder="469-555-1234"
+                        className="w-full text-xs bg-brand-cream/25 border-2 border-brand-pink/10 rounded-2xl pl-9 py-3 focus:outline-none focus:ring-2 focus:ring-brand-rosegold/40 focus:border-transparent transition-all placeholder-brand-chocolate/30 font-bold"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {fulfillmentType === "delivery" && (
+                  <div>
+                    <label className="text-[10px] uppercase font-bold text-brand-chocolate/60 block pl-1">Delivery Address (Royse City Local)</label>
+                    <div className="relative mt-1">
+                      <MapPin className="h-3.5 w-3.5 text-brand-chocolate/40 absolute left-3 top-3.5" />
+                      <input
+                        type="text"
+                        required={fulfillmentType === "delivery"}
+                        value={deliveryAddress}
+                        onChange={(e) => setDeliveryAddress(e.target.value)}
+                        placeholder="104 Elm St, Royse City, TX"
+                        className="w-full text-xs bg-brand-cream/25 border-2 border-brand-pink/10 rounded-2xl pl-9 py-3 focus:outline-none focus:ring-2 focus:ring-brand-rosegold/40 focus:border-transparent transition-all placeholder-brand-chocolate/30 font-bold"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                <div>
+                  <label className="text-[10px] uppercase font-bold text-brand-chocolate/60 block flex items-center justify-between px-1">
+                    <span>Fulfillment Date Choice</span>
+                    <span className="text-[8px] text-brand-rosegold font-black bg-brand-pink/20 px-2 py-0.5 rounded-full border border-brand-pink/20">Requires {settings?.leadTimeDays || 3} days notice</span>
+                  </label>
+                  <div className="relative mt-1">
+                    <Calendar className="h-3.5 w-3.5 text-brand-chocolate/40 absolute left-3 top-3.5" />
+                    <input
+                      type="date"
+                      required
+                      min={getMinFulfillmentDate()}
+                      value={fulfillmentDate}
+                      onChange={(e) => setFulfillmentDate(e.target.value)}
+                      className="w-full text-xs bg-brand-cream/25 border-2 border-brand-pink/10 rounded-2xl pl-9 py-3 focus:outline-none focus:ring-2 focus:ring-brand-rosegold/40 focus:border-transparent transition-all font-bold cursor-pointer"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-[10px] uppercase font-bold text-brand-chocolate/60 block pl-1">Add-on Notes / Custom writing requests</label>
+                  <textarea
+                    value={specialNotes}
+                    onChange={(e) => setSpecialNotes(e.target.value)}
+                    placeholder="E.g., Allergen alerts, specific lettering colors: 'Happy Birthday Sarah!'"
+                    rows={2}
+                    className="w-full text-xs bg-brand-cream/25 border-2 border-brand-pink/10 rounded-2xl p-3 mt-1 focus:outline-none focus:ring-2 focus:ring-brand-rosegold/40 focus:border-transparent transition-all placeholder-brand-chocolate/30 font-bold resize-none"
                   />
                 </div>
-              </div>
 
-              <div>
-                <label className="text-[10px] uppercase font-bold text-brand-chocolate/60 block">Add-on notes / Custom writing requests</label>
-                <textarea
-                  value={specialNotes}
-                  onChange={(e) => setSpecialNotes(e.target.value)}
-                  placeholder="E.g., Allergen alerts, specific lettering colors: 'Happy Birthday Sarah!'"
-                  rows={2}
-                  className="w-full text-xs bg-brand-cream/25 border border-brand-pink/15 rounded-xl p-3 mt-1 focus:outline-none focus:ring-1 focus:ring-brand-rosegold"
-                />
-              </div>
-
-              {/* Status and Submission */}
-              {errorMessage && (
-                <div className="p-3 bg-red-50 text-red-700 rounded-xl text-[11px] font-medium flex items-start space-x-2 border border-red-150 animate-bounce">
-                  <AlertTriangle className="h-4 w-4 shrink-0" />
-                  <span>{errorMessage}</span>
-                </div>
-              )}
-
-              <button
-                type="submit"
-                disabled={submitting}
-                className="w-full bg-brand-chocolate text-brand-cream hover:bg-brand-chocolate/90 py-3 rounded-xl text-xs font-bold transition shadow-xs disabled:opacity-50 flex items-center justify-center space-x-2"
-              >
-                {submitting ? (
-                  <>
-                    <div className="animate-spin rounded-full h-3.5 w-3.5 border-t border-b border-brand-cream"></div>
-                    <span>Booking Your Baking Spot...</span>
-                  </>
-                ) : (
-                  <span>Submit Order request (Pending Confirmation)</span>
+                {/* Status and Submission */}
+                {errorMessage && (
+                  <div className="p-3.5 bg-red-50 text-red-700 rounded-2xl text-[11px] font-bold flex items-start space-x-2 border border-red-150 animate-bounce">
+                    <AlertTriangle className="h-4 w-4 shrink-0" />
+                    <span>{errorMessage}</span>
+                  </div>
                 )}
-              </button>
-            </form>
-          )}
 
-          {/* Success Dialog */}
-          {successOrder && (
-            <div className="mt-5 p-4 bg-green-50 text-green-800 border border-green-150 rounded-2xl text-xs animate-in slide-in-from-bottom duration-300">
-              <div className="flex items-center space-x-2 font-bold mb-1">
-                <CheckCircle className="h-4 w-4 text-green-600" />
-                <span>Sweet Order Received!</span>
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="w-full bg-brand-chocolate text-brand-cream hover:bg-brand-chocolate/95 py-3.5 rounded-2xl text-xs font-black uppercase tracking-wider transition-all shadow-md disabled:opacity-50 flex items-center justify-center space-x-2 cursor-pointer transform-gpu active:scale-98"
+                >
+                  {submitting ? (
+                    <>
+                      <div className="animate-spin rounded-full h-3.5 w-3.5 border-t-2 border-b-2 border-brand-cream"></div>
+                      <span>Booking Your Baking Spot...</span>
+                    </>
+                  ) : (
+                    <span>Submit Order Request (Pending Confirmation)</span>
+                  )}
+                </button>
+              </form>
+            )}
+
+            {/* Success Dialog */}
+            {successOrder && (
+              <div className="mt-5 p-4 bg-green-50 text-green-800 border border-green-150 rounded-2xl text-xs animate-in slide-in-from-bottom duration-300">
+                <div className="flex items-center space-x-2 font-bold mb-1">
+                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  <span>Sweet Order Received!</span>
+                </div>
+                <p className="mt-1">
+                  Your order number is <strong className="text-brand-chocolate">{successOrder.orderNumber}</strong>.
+                </p>
+                <p className="mt-1 text-gray-700 font-medium">
+                  Lainie will review your date (<strong className="text-brand-chocolate">{successOrder.fulfillmentDate}</strong>) and special notes, and text or email a confirmation soon with payment guidelines. Thank you!
+                </p>
               </div>
-              <p className="mt-1">
-                Your order number is <strong className="text-brand-chocolate">{successOrder.orderNumber}</strong>.
-              </p>
-              <p className="mt-1 text-gray-700">
-                Lainie will review your date (<strong className="text-brand-chocolate">{successOrder.fulfillmentDate}</strong>) and special notes, and text or email a confirmation soon with payment guidelines. Thank you!
-              </p>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
     </div>
