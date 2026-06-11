@@ -271,39 +271,39 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
         </div>
       </div>
 
+      {/* Horizontal category selector - Centered & Premium floating look at 100% full width */}
+      <div className="w-full bg-gradient-to-r from-brand-pink/15 via-white/85 to-brand-pink/15 border-2 border-brand-rosegold/30 rounded-[2.5rem] p-5 sm:p-7 shadow-md select-none animate-in fade-in duration-300 text-center relative overflow-hidden mb-8">
+        <span className="text-[10px] sm:text-xs uppercase font-black tracking-widest text-brand-rosegold mb-4 block bg-brand-pink/45 py-1 px-4 rounded-full border border-brand-pink/30 max-w-xs mx-auto text-center shadow-3xs">
+          Menu Catalogue
+        </span>
+        <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 mt-2 w-full">
+          {categories.map(cat => {
+            const isActive = activeCategory === cat;
+            
+            return (
+              <button
+                key={cat}
+                type="button"
+                onClick={() => setActiveCategory(cat)}
+                className={`px-3 sm:px-4.5 py-2 sm:py-3 rounded-xl text-[10px] sm:text-xs md:text-sm font-black tracking-wide uppercase transition-all duration-300 cursor-pointer transform-gpu active:scale-95 flex items-center space-x-1.5 border-2 ${
+                  isActive 
+                    ? "bg-brand-chocolate border-brand-chocolate text-brand-cream shadow-md scale-103 ring-4 ring-brand-pink/60" 
+                    : "bg-white border-brand-rosegold/20 text-brand-chocolate hover:border-brand-rosegold/50 hover:bg-brand-pink/20 hover:text-brand-chocolate"
+                }`}
+              >
+                <span>{cat}</span>
+                {isActive && (
+                  <span className="h-1.5 w-1.5 rounded-full bg-brand-rosegold animate-ping shrink-0" />
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-8">
         {/* LEFT COLUMN: Catalog list (takes 3/4 space on desktop) */}
         <div className="lg:col-span-2 xl:col-span-3 space-y-8">
-          {/* Horizontal category selector - Centered & Premium floating look */}
-          <div className="w-full bg-gradient-to-r from-brand-pink/15 via-white/85 to-brand-pink/15 border-2 border-brand-rosegold/30 rounded-[2.5rem] p-6 sm:p-8 shadow-md select-none animate-in fade-in duration-300 text-center relative overflow-hidden">
-            <span className="text-[10px] sm:text-xs uppercase font-black tracking-widest text-brand-rosegold mb-4.5 block bg-brand-pink/45 py-1.5 px-6 rounded-full border border-brand-pink/30 max-w-xs mx-auto text-center shadow-3xs">
-              Menu Catalogue
-            </span>
-            <div className="flex flex-wrap items-center justify-center gap-3 md:gap-4 mt-2">
-              {categories.map(cat => {
-                const isActive = activeCategory === cat;
-                
-                return (
-                  <button
-                    key={cat}
-                    type="button"
-                    onClick={() => setActiveCategory(cat)}
-                    className={`px-5 sm:px-6 py-3.5 sm:py-4 rounded-2xl text-xs sm:text-sm font-black tracking-wide uppercase transition-all duration-300 cursor-pointer transform-gpu active:scale-95 flex items-center space-x-2.5 border-2 ${
-                      isActive 
-                        ? "bg-brand-chocolate border-brand-chocolate text-brand-cream shadow-md scale-103 ring-4 ring-brand-pink/60" 
-                        : "bg-white border-brand-rosegold/20 text-brand-chocolate hover:border-brand-rosegold/50 hover:bg-brand-pink/20 hover:text-brand-chocolate"
-                    }`}
-                  >
-                    <span>{cat}</span>
-                    {isActive && (
-                      <span className="h-2 w-2 rounded-full bg-brand-rosegold animate-ping shrink-0" />
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
           {/* Search & Product items block */}
           <div className="w-full space-y-6">
             {/* Search Bar Block */}
