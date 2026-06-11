@@ -106,7 +106,14 @@ export default function App() {
         /* Dynamic Header for Logged-In Admin with Tab Indicators */
         <header className="sticky top-0 bg-white/95 backdrop-blur-md border-b border-brand-pink/20 px-6 py-4 flex items-center justify-between z-50 shadow-xs shrink-0">
           <div className="flex items-center space-x-2.5">
-            <span className="bg-brand-pink/60 text-brand-chocolate h-8 w-8 rounded-full flex items-center justify-center text-sm font-bold">🍰</span>
+            <div className="h-8 w-8 rounded-lg overflow-hidden border border-brand-pink/30 bg-black p-0.5 shadow-sm shrink-0">
+              <img 
+                src="https://github.com/usmc6123/images/blob/main/SweetTreatLogo.webp?raw=true" 
+                alt="Lainie's Sweet Treats Logo" 
+                className="h-full w-full object-contain rounded-md"
+                referrerPolicy="no-referrer"
+              />
+            </div>
             <div>
               <h1 className="text-sm font-extrabold uppercase tracking-wide text-brand-chocolate flex items-center space-x-1">
                 <span>Lainie's Sweet treats</span>
@@ -245,8 +252,13 @@ export default function App() {
 
             <div className="mt-auto pt-6 border-t border-brand-pink/15">
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 rounded-full border-2 border-brand-rosegold flex items-center justify-center bg-brand-pink text-brand-chocolate font-bold text-xs">
-                  {adminEmail ? adminEmail.slice(0, 2).toUpperCase() : "LS"}
+                <div className="w-10 h-10 rounded-full border border-brand-rosegold/50 overflow-hidden bg-black p-0.5 shadow-sm shrink-0">
+                  <img 
+                    src="https://github.com/usmc6123/images/blob/main/SweetTreatLogo.webp?raw=true" 
+                    alt="Lainie's Sweet Treats Logo" 
+                    className="h-full w-full object-contain rounded-full"
+                    referrerPolicy="no-referrer"
+                  />
                 </div>
                 <div className="overflow-hidden">
                   <p className="text-sm font-semibold text-white truncate">{adminEmail || "Lainie Smith"}</p>
