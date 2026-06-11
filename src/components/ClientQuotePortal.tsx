@@ -111,11 +111,11 @@ export default function ClientQuotePortal() {
   return (
     <div id="interactive-portal" className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-in fade-in duration-300">
       <div className="text-center max-w-xl mx-auto mb-10">
-        <div className="mx-auto h-16 w-16 rounded-full overflow-hidden border border-brand-pink bg-white shadow-3xs p-1 hover:scale-105 transition-transform duration-300 shrink-0 mb-4 flex items-center justify-center">
+        <div className="mx-auto h-16 w-16 rounded-xl overflow-hidden border border-brand-pink/30 bg-black shadow-md p-1 hover:scale-105 transition-transform duration-300 shrink-0 mb-4">
           <img 
-            src="https://images.squarespace-cdn.com/content/v1/6a0b183aaec8f87f9644a515/4a01bf37-b09f-4987-8495-e4876d754270/ChatGPT+Image+May+19%2C+2026%2C+09_01_51+AM.png?format=1500w" 
+            src="https://github.com/usmc6123/images/blob/main/SweetTreatLogo.webp?raw=true" 
             alt="Lainie's Sweet Treats Logo" 
-            className="h-full w-full object-cover rounded-full"
+            className="h-full w-full object-contain rounded-lg"
             referrerPolicy="no-referrer"
           />
         </div>

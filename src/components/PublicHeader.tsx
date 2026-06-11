@@ -19,11 +19,11 @@ export default function PublicHeader({ currentView, setView, isAdminLoggedIn, on
             className="flex items-center space-x-5 cursor-pointer group"
             onClick={() => setView("shop")}
           >
-            <div className="h-20 w-20 md:h-24 md:w-24 rounded-full overflow-hidden border-4 border-brand-pink bg-white shadow-md p-1 group-hover:scale-[1.08] group-hover:rotate-3 transition-transform duration-300 shrink-0">
+            <div className="h-20 w-20 md:h-24 md:w-24 rounded-2xl overflow-hidden border-2 border-brand-pink/30 bg-black shadow-md p-1 hover:scale-[1.08] hover:rotate-3 transition-transform duration-300 shrink-0">
               <img 
-                src="https://images.squarespace-cdn.com/content/v1/6a0b183aaec8f87f9644a515/4a01bf37-b09f-4987-8495-e4876d754270/ChatGPT+Image+May+19%2C+2026%2C+09_01_51+AM.png?format=1500w" 
+                src="https://github.com/usmc6123/images/blob/main/SweetTreatLogo.webp?raw=true" 
                 alt="Lainie's Sweet Treats Logo" 
-                className="h-full w-full object-cover rounded-full"
+                className="h-full w-full object-contain rounded-xl"
                 referrerPolicy="no-referrer"
               />
             </div>

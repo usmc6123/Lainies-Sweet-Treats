@@ -38,11 +38,11 @@ export default function AdminLogin({ onLoginSuccess }: AdminLoginProps) {
   return (
     <div id="admin-login-view" className="max-w-md mx-auto px-4 py-16 animate-in fade-in duration-300">
       <div className="bg-white border border-brand-pink/20 rounded-[2.5rem] p-8 shadow-xs text-center">
-        <div className="mx-auto h-20 w-20 rounded-full overflow-hidden border-2 border-brand-pink bg-white shadow-xs p-1 hover:scale-105 transition-transform duration-300 shrink-0 mb-4">
+        <div className="mx-auto h-20 w-20 rounded-2xl overflow-hidden border border-brand-pink/30 bg-black shadow-md p-1 hover:scale-105 transition-transform duration-300 shrink-0 mb-4">
           <img 
-            src="https://images.squarespace-cdn.com/content/v1/6a0b183aaec8f87f9644a515/4a01bf37-b09f-4987-8495-e4876d754270/ChatGPT+Image+May+19%2C+2026%2C+09_01_51+AM.png?format=1500w" 
+            src="https://github.com/usmc6123/images/blob/main/SweetTreatLogo.webp?raw=true" 
             alt="Lainie's Sweet Treats Logo" 
-            className="h-full w-full object-cover rounded-full"
+            className="h-full w-full object-contain rounded-xl"
             referrerPolicy="no-referrer"
           />
         </div>
