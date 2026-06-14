@@ -1,17 +1,9 @@
-import adminModule from 'firebase-admin';
+import { initializeApp, getApps, getApp, cert } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import { setCorsHeaders } from './_lib/helper.js';
 
-function resolveFirebaseAdmin(rawAdmin: any): any {
-  if (!rawAdmin) return rawAdmin;
-  if (rawAdmin.apps) return rawAdmin;
-  if (rawAdmin.default && rawAdmin.default.apps) return rawAdmin.default;
-  return rawAdmin.default || rawAdmin;
-}
-
-const admin = resolveFirebaseAdmin(adminModule);
 const JWT_SECRET = process.env.JWT_SECRET as string;
 
 export default async function handler(req: any, res: any) {
@@ -37,16 +29,16 @@ export default async function handler(req: any, res: any) {
         return res.status(500).json({ error: 'Firestore configuration missing. Login unavailable.' });
       }
 
-      if (admin.apps.length === 0) {
+      if (getApps().length === 0) {
         const credentials = JSON.parse(firebaseConfigEnv);
         if (credentials.private_key || credentials.client_email) {
-          admin.initializeApp({ credential: admin.credential.cert(credentials) });
+          initializeApp({ credential: cert(credentials) });
         } else {
-          admin.initializeApp({ projectId: credentials.projectId || 'lainies-sweet-treats' });
+          initializeApp({ projectId: credentials.projectId || 'lainies-sweet-treats' });
         }
       }
 
-      const db = getFirestore(admin.app());
+      const db = getFirestore(getApp());
       const userUid = 'ek8gF35yuiWH7VXEzjUsTFdLANG3';
       
       const adminDoc = await db.collection('admins').doc(userUid).get();

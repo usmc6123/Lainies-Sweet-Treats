@@ -1,15 +1,9 @@
-import * as admin from "firebase-admin";
+import { initializeApp, getApps, getApp, cert } from "firebase-admin/app";
+import { getFirestore } from "firebase-admin/firestore";
 
 export const FIRESTORE_DATABASE_ID = "default";
 
 let realDb: any = null;
-
-function resolveFirebaseAdmin(rawAdmin: any): any {
-  if (!rawAdmin) return rawAdmin;
-  if (rawAdmin.apps) return rawAdmin;
-  if (rawAdmin.default && rawAdmin.default.apps) return rawAdmin.default;
-  return rawAdmin.default || rawAdmin;
-}
 
 export function getDb(): any {
   if (realDb) return realDb;
@@ -20,8 +14,7 @@ export function getDb(): any {
   }
 
   try {
-    const firebaseAdmin = resolveFirebaseAdmin(admin);
-    if (firebaseAdmin.apps.length === 0) {
+    if (getApps().length === 0) {
       let credentials: any;
       if (firebaseConfigEnv.trim().startsWith("{")) {
         credentials = JSON.parse(firebaseConfigEnv);
@@ -30,17 +23,17 @@ export function getDb(): any {
       }
 
       if (credentials.private_key || credentials.client_email) {
-        firebaseAdmin.initializeApp({
-          credential: firebaseAdmin.credential.cert(credentials),
+        initializeApp({
+          credential: cert(credentials),
         });
       } else {
-        firebaseAdmin.initializeApp({
+        initializeApp({
           projectId: credentials.projectId || 'lainies-sweet-treats',
         });
       }
     }
 
-    realDb = firebaseAdmin.firestore();
+    realDb = getFirestore(getApp());
     return realDb;
   } catch (error: any) {
     console.error("Firebase Admin initialization failed:", error);
