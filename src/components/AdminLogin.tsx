@@ -104,9 +104,8 @@ export default function AdminLogin({ onLoginSuccess }: AdminLoginProps) {
           </button>
         </form>
 
-        <div className="mt-8 pt-4 border-t border-brand-pink/10 text-[10px] text-brand-chocolate/50 italic">
-          Default developer login credentials: <br />
-          Email: <span className="font-semibold text-brand-rosegold">elainiehoncoop@gmail.com</span> • Password: <span className="font-semibold text-brand-rosegold">password123</span>
+        <div className="mt-8 pt-4 border-t border-brand-pink/10 text-[10px] text-brand-chocolate/40 text-center">
+          Secure baking administration portal. Unauthorized access is recorded.
         </div>
       </div>
     </div>

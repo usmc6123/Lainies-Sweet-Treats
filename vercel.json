@@ -1,0 +1,27 @@
+{
+  "rewrites": [
+    { "source": "/api/auth/login", "destination": "/api/auth.ts" },
+    { "source": "/api/auth/verify", "destination": "/api/auth.ts" },
+    { "source": "/api/user/login", "destination": "/api/auth.ts" },
+    { "source": "/api/settings", "destination": "/api/settings.ts" },
+    { "source": "/api/blocked-dates", "destination": "/api/blocked-dates.ts" },
+    { "source": "/api/blocked-dates/:id", "destination": "/api/blocked-dates.ts" },
+    { "source": "/api/public/menu", "destination": "/api/public.ts" },
+    { "source": "/api/public/order", "destination": "/api/public.ts" },
+    { "source": "/api/ingredients", "destination": "/api/ingredients.ts" },
+    { "source": "/api/ingredients/:id", "destination": "/api/ingredients.ts" },
+    { "source": "/api/expenses", "destination": "/api/expenses.ts" },
+    { "source": "/api/expenses/:id", "destination": "/api/expenses.ts" },
+    { "source": "/api/orders", "destination": "/api/orders.ts" },
+    { "source": "/api/orders/:id", "destination": "/api/orders.ts" },
+    { "source": "/api/orders/:id/status", "destination": "/api/orders.ts" },
+    { "source": "/api/quotes", "destination": "/api/quotes.ts" },
+    { "source": "/api/quotes/:id", "destination": "/api/quotes.ts" },
+    { "source": "/api/quotes/:id/respond", "destination": "/api/quotes.ts" },
+    { "source": "/api/customers", "destination": "/api/customers.ts" },
+    { "source": "/api/customers/:id", "destination": "/api/customers.ts" },
+    { "source": "/api/analytics", "destination": "/api/analytics.ts" },
+    { "source": "/api/products", "destination": "/api/products.ts" },
+    { "source": "/api/products/:id", "destination": "/api/products.ts" }
+  ]
+}
