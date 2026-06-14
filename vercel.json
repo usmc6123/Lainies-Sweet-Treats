@@ -22,6 +22,7 @@
     { "source": "/api/customers/:id", "destination": "/api/customers.ts" },
     { "source": "/api/analytics", "destination": "/api/analytics.ts" },
     { "source": "/api/products", "destination": "/api/products.ts" },
-    { "source": "/api/products/:id", "destination": "/api/products.ts" }
+    { "source": "/api/products/:id", "destination": "/api/products.ts" },
+    { "source": "/api/upload", "destination": "/api/upload.ts" }
   ]
 }

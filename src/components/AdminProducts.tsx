@@ -22,6 +22,68 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
   const [useCustomCategory, setUseCustomCategory] = useState(false);
   const [basePrice, setBasePrice] = useState<number>(0);
   const [imgUrl, setImgUrl] = useState("");
+
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState("");
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      setUploadError("Image too large. Please select an image under 5MB.");
+      return;
+    }
+
+    setUploading(true);
+    setUploadError("");
+
+    try {
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const base64String = reader.result as string;
+        try {
+          const uploadRes = await fetch("/api/upload", {
+            method: "POST",
+            headers: {
+              "Authorization": `Bearer ${token}`,
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              filename: file.name,
+              contentType: file.type,
+              base64: base64String
+            })
+          });
+
+          if (!uploadRes.ok) {
+            const errorData = await uploadRes.json();
+            throw new Error(errorData.error || "Upload failed");
+          }
+
+          const uploadData = await uploadRes.json();
+          if (uploadData.url) {
+            setImgUrl(uploadData.url);
+          } else {
+            throw new Error("No URL returned from server");
+          }
+        } catch (err: any) {
+          console.error("Upload error:", err);
+          setUploadError(err.message || "Failed to upload image.");
+        } finally {
+          setUploading(false);
+        }
+      };
+      reader.onerror = () => {
+        setUploadError("Failed to read local file.");
+        setUploading(false);
+      };
+      reader.readAsDataURL(file);
+    } catch (err: any) {
+      setUploadError(err.message || "File reading error.");
+      setUploading(false);
+    }
+  };
   
   // Options (simplified list editors)
   const [sizes, setSizes] = useState<{ name: string; priceAdd: number }[]>([]);
@@ -366,18 +428,69 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
                 />
               </div>
 
-              <div>
-                <label className="text-xs uppercase font-extrabold tracking-wider text-gray-500 block">Appetizing Photo URL</label>
-                <input
-                  type="text"
-                  value={imgUrl}
-                  onChange={(e) => setImgUrl(e.target.value)}
-                  placeholder="https://images.unsplash.com/..."
-                  className="w-full text-sm bg-brand-cream/10 border border-brand-pink/15 rounded-xl p-3 mt-1.5 text-brand-chocolate font-medium focus:outline-none focus:ring-1 focus:ring-brand-rosegold"
-                />
-                <p className="text-[10px] text-brand-chocolate/50 mt-1 font-semibold italic leading-relaxed">
-                  * Note: Image files uploads are coming soon. For now, please paste any direct web image URL (e.g. from unsplash.com) or leave blank for a default placeholder.
-                </p>
+              <div className="space-y-3">
+                <label className="text-xs uppercase font-extrabold tracking-wider text-gray-500 block">Product Photo</label>
+                
+                {/* Image preview */}
+                {imgUrl && (
+                  <div className="relative group w-full h-36 bg-gray-50 rounded-2xl overflow-hidden border border-brand-pink/10 flex items-center justify-center">
+                    <img 
+                      src={imgUrl} 
+                      alt="Product preview" 
+                      className="w-full h-full object-cover"
+                      referrerPolicy="no-referrer"
+                    />
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <button
+                        type="button"
+                        onClick={() => setImgUrl("")}
+                        className="bg-white/90 text-brand-chocolate px-3 py-1.5 rounded-lg text-xs font-bold shadow hover:bg-white transition cursor-pointer"
+                      >
+                        Remove Image
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Upload Section */}
+                <div id="product-photo-upload-container" className="border border-dashed border-brand-pink/30 hover:border-brand-rosegold rounded-2xl p-4 text-center bg-brand-cream/5 hover:bg-brand-cream/10 transition relative">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    id="product-photo-upload"
+                    onChange={handleFileChange}
+                    disabled={uploading}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                  />
+                  <div className="flex flex-col items-center justify-center space-y-1">
+                    <PlusCircle className="h-5 w-5 text-brand-rosegold" />
+                    <span className="text-xs font-bold text-brand-chocolate">
+                      {uploading ? "Uploading File..." : "Click to select or drag photo"}
+                    </span>
+                    <span className="text-[10px] text-brand-chocolate/50 font-medium">
+                      PNG, JPG, WEBP up to 5MB
+                    </span>
+                  </div>
+                </div>
+
+                {uploadError && (
+                  <p className="text-xs text-red-600 font-semibold">{uploadError}</p>
+                )}
+
+                {/* Manual Fallback Text Input */}
+                <div>
+                  <label className="text-[10px] uppercase font-bold tracking-wider text-gray-400 block mb-1">Or Paste Direct Image URL</label>
+                  <input
+                    type="text"
+                    value={imgUrl}
+                    onChange={(e) => setImgUrl(e.target.value)}
+                    placeholder="https://images.unsplash.com/..."
+                    className="w-full text-xs bg-brand-cream/10 border border-brand-pink/15 rounded-xl p-2.5 text-brand-chocolate font-medium focus:outline-none focus:ring-1 focus:ring-brand-rosegold"
+                  />
+                  <p className="text-[9px] text-brand-chocolate/40 mt-1 font-semibold italic leading-relaxed">
+                    * Paste an external image URL above if you prefer not to upload a custom file.
+                  </p>
+                </div>
               </div>
 
               <div>

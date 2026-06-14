@@ -13,6 +13,7 @@ import quotesHandler from "./api/quotes.js";
 import customersHandler from "./api/customers.js";
 import analyticsHandler from "./api/analytics.js";
 import productsHandler from "./api/products.js";
+import uploadHandler from "./api/upload.js";
 
 async function startServer() {
   const app = express();
@@ -62,6 +63,7 @@ async function startServer() {
 
   app.all("/api/products", adapt(productsHandler));
   app.all("/api/products/:id", adapt(productsHandler));
+  app.all("/api/upload", adapt(uploadHandler));
 
   // Vite middleware for development UI
   const vite = await createViteServer({
