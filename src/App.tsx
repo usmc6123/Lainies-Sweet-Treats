@@ -70,7 +70,7 @@ export default function App() {
   const isAdminView = view.startsWith("admin-");
 
   return (
-    <div className="min-h-screen bg-gradient-to-tr from-[#FCF1FD] via-[#FAF2FB] to-[#F7E6FB] text-brand-chocolate font-sans flex flex-col justify-between selection:bg-brand-pink/50">
+    <div className="min-h-screen bg-brand-pink text-brand-chocolate font-sans flex flex-col justify-between selection:bg-brand-rosegold/30">
       
       {/* Top Welcome Ribbon */}
       <div className="bg-brand-chocolate text-brand-cream text-[10.5px] font-semibold tracking-wider text-center py-2 px-4 shadow-sm flex items-center justify-center space-x-1.5 shrink-0 z-40">
@@ -104,7 +104,7 @@ export default function App() {
         />
       ) : (
         /* Dynamic Header for Logged-In Admin with Tab Indicators */
-        <header className="sticky top-0 bg-white/95 backdrop-blur-md border-b border-brand-pink/20 px-6 py-4 flex items-center justify-between z-50 shadow-xs shrink-0">
+        <header className="sticky top-0 bg-brand-cream/95 backdrop-blur-md border-b border-brand-pink/20 px-6 py-4 flex items-center justify-between z-50 shadow-xs shrink-0">
           <div className="flex items-center space-x-2.5">
             <div className="h-8 w-8 rounded-lg overflow-hidden border border-brand-pink/30 bg-black p-0.5 shadow-sm shrink-0">
               <img 

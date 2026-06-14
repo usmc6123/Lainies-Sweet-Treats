@@ -40,7 +40,7 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
   const [errorMessage, setErrorMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  // Load public details
+  // Load public details and listen for category changes
   useEffect(() => {
     async function loadData() {
       try {
@@ -59,6 +59,20 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
       }
     }
     loadData();
+
+    // Listen for custom category changes from the redesigned header
+    const handleCategoryCheck = () => {
+      const stored = sessionStorage.getItem("lainie_shop_category");
+      if (stored) {
+        setActiveCategory(stored);
+      }
+    };
+    handleCategoryCheck();
+    window.addEventListener("lainie_category_change", handleCategoryCheck);
+    
+    return () => {
+      window.removeEventListener("lainie_category_change", handleCategoryCheck);
+    };
   }, []);
 
   // Set default configurations when a product is clicked
@@ -218,65 +232,31 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
   }
 
   return (
-    <div id="shop-view" className="max-w-[96rem] mx-auto px-4 sm:px-6 lg:px-8 py-8 xl:py-12">
-      {/* Introduction Hero banner */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-brand-pink/15 via-white/45 to-brand-cream/35 border-2 border-brand-pink/30 rounded-[3rem] p-8 md:p-14 shadow-sm text-center max-w-4xl mx-auto mb-12 animate-in fade-in duration-500">
-        {/* Background Sparkles */}
-        <div className="absolute top-6 left-6 text-brand-pink/40 animate-pulse"><Sparkles className="h-10 w-10" /></div>
-        <div className="absolute bottom-6 right-6 text-brand-pink/40 animate-pulse"><Sparkles className="h-10 w-10" /></div>
+    <div id="shop-view" className="max-w-[96rem] mx-auto px-4 sm:px-6 lg:px-8 py-8 xl:py-12 animate-fade-in">
+      {/* Redesigned Hero Section */}
+      <div className="text-center max-w-4xl mx-auto mt-6 mb-12 px-4 py-8 animate-in fade-in duration-500">
+        <h2 className="text-4xl md:text-5xl lg:text-[54px] text-brand-chocolate font-medium tracking-tight font-heading leading-tight mb-4">
+          Lainie's Bespoke Bakery Menu
+        </h2>
         
-        {/* Logo and Greeting */}
-        <div className="flex flex-col items-center justify-center space-y-5">
-          <div className="relative h-32 w-32 rounded-2xl overflow-hidden border-2 border-brand-pink/30 bg-black shadow-md p-1 hover:scale-110 hover:rotate-3 transition-transform duration-500 cursor-pointer shrink-0">
-            <img 
-              src="https://github.com/usmc6123/images/blob/main/SweetTreatLogo.webp?raw=true" 
-              alt="Lainie's Sweet Treats Logo" 
-              className="h-full w-full object-contain rounded-xl"
-              referrerPolicy="no-referrer"
-            />
-          </div>
-          
-          <span className="bg-brand-rosegold/10 text-brand-rosegold px-5 py-2 rounded-full text-xs font-extrabold uppercase tracking-widest border border-brand-rosegold/20 animate-fade-in">
-            Welcome to Lainie's Kitchen
-          </span>
-          
-          <h2 className="text-4xl md:text-5xl lg:text-6xl text-brand-chocolate font-black tracking-tight font-heading leading-tight">
-            Lainie's <span className="italic font-normal text-brand-rosegold">Bespoke Bakery Menu</span>
-          </h2>
-          
-          <p className="max-w-2xl text-sm md:text-base text-brand-chocolate/85 leading-relaxed font-semibold">
-            Based right here in <strong className="text-brand-rosegold font-black font-sans text-base md:text-lg">Royse City, TX</strong>, Lainie custom-bakes every celebration treat completely from scratch with local ingredients. Experience personalized sizing, bespoke flavor options, and custom buttercream artistry!
-          </p>
-        </div>
+        <p className="max-w-2xl mx-auto text-sm md:text-base text-brand-chocolate/85 leading-relaxed font-normal">
+          Based in Royse City, TX. Lainie custom-bakes every celebration treat.<br />
+          Experience personalized designs and custom buttercream artistry.
+        </p>
 
-        {/* Custom Event Redirection Link - Elevated & Pop Design */}
-        <div className="mt-10 p-7 bg-gradient-to-r from-brand-pink/25 via-white/80 to-brand-pink/20 border-2 border-brand-rosegold/30 border-dashed rounded-[2.5rem] flex flex-col sm:flex-row items-center justify-between gap-6 shadow-md hover:shadow-lg transition-all duration-300 text-left max-w-2xl mx-auto relative group">
-          <div className="absolute top-0 right-0 p-1 text-[9px] bg-brand-rosegold text-white uppercase font-black tracking-widest rounded-bl-xl rounded-tr-md">Custom Artistry</div>
-          <div className="space-y-1">
-            <h4 className="text-sm md:text-base font-extrabold text-brand-chocolate uppercase tracking-wider flex items-center gap-2">
-              <Sparkles className="h-4.5 w-4.5 text-brand-rosegold animate-spin-slow shrink-0" />
-              Planning a wedding or major event?
-            </h4>
-            <p className="text-xs text-brand-chocolate/80 font-bold leading-relaxed max-w-md">
-              Need exquisite multi-tiered cake designs, custom color coordination, or complex buttercream styling?
-            </p>
-          </div>
+        <div className="mt-8 flex justify-center">
           <button
             onClick={onSwitchToQuote}
-            className="w-full sm:w-auto bg-brand-rosegold text-white text-xs uppercase tracking-widest px-7 py-4 rounded-full font-black hover:bg-brand-rosegold/90 hover:scale-105 active:scale-95 transition-all duration-250 shadow-md shrink-0 flex items-center justify-center space-x-2 cursor-pointer transform-gpu"
+            className="bg-brand-rosegold text-white text-xs uppercase tracking-widest px-8 py-3.5 rounded-full font-black hover:opacity-90 active:scale-95 transition-all duration-200 shadow-md flex items-center justify-center space-x-2 cursor-pointer transform-gpu"
           >
-            <span>Quote Builder</span>
-            <ChevronRight className="h-4 w-4" />
+            REQUEST A CUSTOM QUOTE
           </button>
         </div>
       </div>
 
-      {/* Horizontal category selector - Centered & Premium floating look at 100% full width */}
-      <div className="w-full bg-gradient-to-r from-brand-pink/15 via-white/85 to-brand-pink/15 border-2 border-brand-rosegold/30 rounded-[2.5rem] p-5 sm:p-7 shadow-md select-none animate-in fade-in duration-300 text-center relative overflow-hidden mb-8">
-        <span className="text-[10px] sm:text-xs uppercase font-black tracking-widest text-brand-rosegold mb-4 block bg-brand-pink/45 py-1 px-4 rounded-full border border-brand-pink/30 max-w-xs mx-auto text-center shadow-3xs">
-          Menu Catalogue
-        </span>
-        <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 mt-2 w-full">
+      {/* Redesigned Categories Selector */}
+      <div className="w-full text-center mb-10">
+        <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 w-full">
           {categories.map(cat => {
             const isActive = activeCategory === cat;
             
@@ -285,16 +265,13 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
                 key={cat}
                 type="button"
                 onClick={() => setActiveCategory(cat)}
-                className={`px-3 sm:px-4.5 py-2 sm:py-3 rounded-xl text-[10px] sm:text-xs md:text-sm font-black tracking-wide uppercase transition-all duration-300 cursor-pointer transform-gpu active:scale-95 flex items-center space-x-1.5 border-2 ${
+                className={`px-4.5 py-1.5 rounded-full text-xs font-semibold tracking-wider uppercase transition-all duration-200 cursor-pointer border ${
                   isActive 
-                    ? "bg-brand-chocolate border-brand-chocolate text-brand-cream shadow-md scale-103 ring-4 ring-brand-pink/60" 
-                    : "bg-white border-brand-rosegold/20 text-brand-chocolate hover:border-brand-rosegold/50 hover:bg-brand-pink/20 hover:text-brand-chocolate"
+                    ? "bg-[#FCAAA6] border-brand-rosegold text-brand-chocolate shadow-xs" 
+                    : "bg-brand-pink/30 border-brand-pink/60 text-brand-chocolate hover:bg-brand-pink/50"
                 }`}
               >
-                <span>{cat}</span>
-                {isActive && (
-                  <span className="h-1.5 w-1.5 rounded-full bg-brand-rosegold animate-ping shrink-0" />
-                )}
+                {cat === "All" ? "ALL" : cat.toUpperCase()}
               </button>
             );
           })}
@@ -312,17 +289,17 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search sweet treats by name, keywords, or ingredients..."
-                className="w-full bg-white border-2 border-brand-pink/15 text-xs sm:text-sm text-brand-chocolate font-bold px-5 py-4 sm:py-4.5 rounded-[2rem] pl-12 sm:pl-14 focus:outline-none focus:ring-2 focus:ring-brand-rosegold/40 focus:border-brand-rosegold/45 placeholder-brand-chocolate/35 transition-all shadow-xs"
+                placeholder="Search sweet treats by name, ingredient, or category..."
+                className="w-full bg-[#FFF8F0] border border-brand-pink/30 text-xs sm:text-sm text-brand-chocolate px-5 py-3.5 rounded-full pl-12 focus:outline-none focus:ring-1 focus:ring-brand-rosegold placeholder-brand-chocolate/40 transition-all font-medium"
               />
-              <svg className="h-5 w-5 text-brand-chocolate/40 absolute left-4.5 top-4 sm:top-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <svg className="h-4.5 w-4.5 text-brand-chocolate/40 absolute left-4.5 top-4 md:top-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
               </svg>
               {searchQuery && (
                 <button 
                   type="button"
                   onClick={() => setSearchQuery("")}
-                  className="absolute right-4.5 top-4 sm:top-4.5 text-brand-chocolate/60 hover:text-brand-chocolate hover:scale-110 text-xs font-black p-1 transition-transform"
+                  className="absolute right-4.5 top-3.5 md:top-4 text-brand-chocolate/60 hover:text-brand-chocolate hover:scale-110 text-xs font-black p-1 transition-transform"
                 >
                   ✕
                 </button>
@@ -337,11 +314,11 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
 
             {/* Product Items grid */}
             {filteredProducts.length === 0 ? (
-              <div className="bg-white border border-brand-pink/20 rounded-[2.5rem] p-12 text-center space-y-4 shadow-2xs">
-                <div className="text-4xl">🧁🔍</div>
+              <div className="bg-[#FFF8F0] border border-brand-pink/20 rounded-[1.5rem] p-12 text-center space-y-4 shadow-sm">
+                <div className="text-4xl text-brand-rosegold">🧁🔍</div>
                 <h3 className="text-lg font-bold text-brand-chocolate font-heading italic">No sweet matches found!</h3>
-                <p className="text-xs text-gray-500 max-w-sm mx-auto leading-relaxed font-semibold">
-                  We couldn't locate any treats named "<strong className="text-brand-rosegold font-bold font-sans">{searchQuery}</strong>". Try clicking another category tab or check back later!
+                <p className="text-xs text-brand-chocolate/70 max-w-sm mx-auto leading-relaxed font-normal">
+                  We couldn't locate any treats named "<strong>{searchQuery}</strong>". Try clicking another category tab or check back later!
                 </p>
                 <button
                   type="button"
@@ -349,7 +326,7 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
                     setSearchQuery("");
                     setActiveCategory("All");
                   }}
-                  className="bg-brand-chocolate text-brand-cream px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider hover:opacity-95 transition-all cursor-pointer"
+                  className="bg-brand-rosegold text-white px-5 py-2 rounded-full text-xs font-bold uppercase tracking-wider hover:opacity-95 transition-all cursor-pointer"
                 >
                   Reset Menu Filters
                 </button>
@@ -368,43 +345,34 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
                       exit={{ opacity: 0, scale: 0.95, y: -15 }}
                       transition={{ duration: 0.35, ease: "easeOut" }}
                       key={p.id}
-                      className="bg-white border-2 border-brand-rosegold/20 rounded-[2.5rem] overflow-hidden shadow-md hover:shadow-2xl hover:border-brand-chocolate hover:-translate-y-2 transition-all duration-300 flex flex-col group transform-gpu"
+                      className="bg-[#FFF8F0] border border-brand-pink/20 rounded-[1.5rem] overflow-hidden shadow-xs hover:shadow-md transition-all duration-300 flex flex-col group transform-gpu"
                     >
-                      <div className="relative h-60 bg-brand-pink/10 overflow-hidden">
+                      <div className="relative h-56 bg-brand-pink/10 overflow-hidden">
                         <img 
                           src={p.imgUrl || "https://images.unsplash.com/photo-1578985545062-69928b1d9587"} 
                           alt={p.name}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                           referrerPolicy="no-referrer"
                         />
-                        <div className="absolute top-4 right-4 bg-brand-chocolate border-2 border-brand-pink/50 text-brand-cream px-4.5 py-2 rounded-full text-xs font-black shadow-md">
-                          From ${p.basePrice.toFixed(2)}
+                        <div className="absolute top-3 right-3 bg-brand-rosegold text-white text-xs font-semibold px-3 py-1 rounded-full shadow-sm">
+                          ${p.basePrice.toFixed(2)}
                         </div>
                       </div>
 
-                      <div className="p-7 flex-1 flex flex-col justify-between">
-                        <div>
-                          <span className="text-[10px] uppercase tracking-widest text-brand-rosegold font-black bg-brand-pink/45 px-3.5 py-1.5 rounded-full border border-brand-pink/50 shadow-2xs">
-                            {p.category}
-                          </span>
-                          <h3 className="text-xl font-black text-brand-chocolate mt-3.5 leading-tight font-heading">
+                      <div className="p-4 flex-1 flex flex-col justify-between items-center bg-brand-cream">
+                        <div className="text-center">
+                          <h3 className="font-sans font-bold text-[15px] sm:text-base text-brand-chocolate leading-tight">
                             {p.name}
                           </h3>
-                          <p className="text-xs text-brand-chocolate/75 mt-2.5 line-clamp-3 leading-relaxed font-semibold">
-                            {p.description}
-                          </p>
                         </div>
 
-                        <div className="mt-6 pt-4.5 border-t border-brand-pink/30 flex items-center justify-between font-sans">
-                          <button
-                            type="button"
-                            onClick={() => handleProductSelect(p)}
-                            className="w-full bg-brand-rosegold hover:bg-brand-chocolate text-white hover:text-brand-cream border-2 border-brand-rosegold hover:border-brand-chocolate py-3.5 rounded-full text-xs sm:text-sm font-black transition-all duration-250 flex items-center justify-center space-x-2 cursor-pointer shadow-sm hover:shadow-md active:scale-98 transform-gpu"
-                          >
-                            <ShoppingBag className="h-4 w-4 text-white" />
-                            <span>Place & Configure Order</span>
-                          </button>
-                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleProductSelect(p)}
+                          className="text-brand-rosegold hover:text-brand-chocolate font-bold text-xs uppercase tracking-wider underline cursor-pointer mt-3.5 transition-colors duration-200"
+                        >
+                          Add to Bag
+                        </button>
                       </div>
                     </motion.div>
                   ))}
@@ -569,28 +537,25 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
           )}
         </div>
 
-        {/* RIGHT COLUMN: Interactive Cart & Checkout form (takes 1/3 desk space) - Integrated Sticky Design with Cottage Bakery Motif */}
+        {/* RIGHT COLUMN: Interactive Cart & Checkout form */}
         <div className="lg:col-span-1">
           <div 
             id="shop-cart" 
-            className="lg:sticky lg:top-32 bg-white border-2 border-brand-rosegold/20 rounded-[2.5rem] p-7 md:p-8 shadow-md h-fit transition-all duration-300 transform-gpu hover:shadow-lg"
+            className="lg:sticky lg:top-32 bg-[#FFF8F0] border border-brand-pink/30 rounded-[1.5rem] p-6 shadow-xs h-fit transition-all duration-300"
           >
-            <div className="border-b border-brand-pink/30 pb-4">
-              <span className="text-[9px] uppercase font-bold tracking-widest text-brand-rosegold bg-brand-pink/15 px-3 py-1 rounded-full border border-brand-pink/20">
-                Cottage Bakery Order Sheet
-              </span>
-              <h3 className="text-2xl font-black text-brand-chocolate flex items-center space-x-2.5 font-heading tracking-tight mt-3">
-                <ShoppingBag className="h-6 w-6 text-brand-rosegold" />
-                <span>Your Sweet Bag</span>
+            <div className="border-b border-brand-pink/20 pb-4 flex items-center space-x-2.5">
+              <ShoppingBag className="h-5.5 w-5.5 text-brand-rosegold" />
+              <h3 className="text-xl font-bold text-brand-chocolate font-heading leading-none">
+                Your Sweet Bag
               </h3>
             </div>
 
             {/* Cart Contents */}
             {cart.length === 0 ? (
-              <div className="py-12 px-4 text-center bg-brand-pink/10 rounded-3xl border border-dashed border-brand-pink/30 mt-5">
-                <p className="text-sm text-brand-chocolate/60 font-extrabold font-heading italic">No goods added to your bag yet.</p>
-                <p className="text-xs text-brand-rosegold font-bold mt-2 leading-relaxed">
-                  Select customizable items from Lainie's catalog on the left to start configuring your custom treats!
+              <div className="py-12 px-4 text-center mt-5 flex flex-col items-center justify-center space-y-3">
+                <ShoppingBag className="h-8 w-8 text-brand-rosegold/40" />
+                <p className="text-xs text-brand-chocolate/70 leading-relaxed font-normal max-w-[200px] mx-auto">
+                  Your bag is currently empty. Start adding delicious items!
                 </p>
               </div>
             ) : (
