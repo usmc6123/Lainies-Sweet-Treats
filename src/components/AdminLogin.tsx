@@ -65,7 +65,7 @@ export default function AdminLogin({ onLoginSuccess }: AdminLoginProps) {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="lainie@sweet-treats.com"
+                placeholder="elainiehoncoop@gmail.com"
                 className="w-full text-xs bg-brand-cream/20 border border-brand-pink/15 rounded-xl pl-9 pr-3 py-3 focus:outline-none focus:ring-1 focus:ring-brand-rosegold"
               />
             </div>
@@ -106,7 +106,7 @@ export default function AdminLogin({ onLoginSuccess }: AdminLoginProps) {
 
         <div className="mt-8 pt-4 border-t border-brand-pink/10 text-[10px] text-brand-chocolate/50 italic">
           Default developer login credentials: <br />
-          Email: <span className="font-semibold text-brand-rosegold">lainie@sweet-treats.com</span> • Password: <span className="font-semibold text-brand-rosegold">password123</span>
+          Email: <span className="font-semibold text-brand-rosegold">elainiehoncoop@gmail.com</span> • Password: <span className="font-semibold text-brand-rosegold">password123</span>
         </div>
       </div>
     </div>

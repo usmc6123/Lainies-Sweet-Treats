@@ -4,7 +4,12 @@ import fs from "fs";
 import { createServer as createViteServer } from "vite";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
+import adminModule from "firebase-admin";
+import { getFirestore } from "firebase-admin/firestore";
 import { dbService } from "./src/server/db.js";
+import loginHandler from "./api/user/login.js";
+
+const admin = adminModule as any;
 import { 
   Product, 
   Order, 
@@ -21,13 +26,59 @@ import {
 // CENTRAL CONFIGS
 // ==========================================
 const PORT = 3000;
-const JWT_SECRET = process.env.JWT_SECRET || "lainies_sweet_treats_secret_2026_xoxo";
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "lainie@sweet-treats.com";
+const JWT_SECRET = process.env.JWT_SECRET as string;
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "elainiehoncoop@gmail.com";
 
 // Store a hashed default password if none matches
 const ADMIN_PASSWORD_HASH = bcrypt.hashSync(process.env.ADMIN_PASSWORD || "password123", 10);
 
 async function startServer() {
+  // Real Firestore Admin Seeding at startup
+  const firebaseConfigEnv = process.env.FIREBASE_CONFIG;
+  if (firebaseConfigEnv) {
+    try {
+      if (admin.apps.length === 0) {
+        let credentials: any;
+        if (firebaseConfigEnv.trim().startsWith("{")) {
+          credentials = JSON.parse(firebaseConfigEnv);
+        } else {
+          credentials = { projectId: 'lainies-sweet-treats' };
+        }
+        if (credentials.private_key || credentials.client_email) {
+          admin.initializeApp({
+            credential: admin.credential.cert(credentials),
+          });
+        } else {
+          admin.initializeApp({
+            projectId: credentials.projectId || 'lainies-sweet-treats',
+          });
+        }
+      }
+      
+      const realDb = getFirestore(admin.app());
+      const adminEmail = "elainiehoncoop@gmail.com";
+      const adminUid = "ek8gF35yuiWH7VXEzjUsTFdLANG3";
+      
+      const adminDocRef = realDb.collection("admins").doc(adminUid);
+      const docSnap = await adminDocRef.get();
+      if (!docSnap.exists) {
+        const passwordHash = bcrypt.hashSync(process.env.ADMIN_PASSWORD || "password123", 10);
+        await adminDocRef.set({
+          email: adminEmail,
+          passwordHash: passwordHash,
+          name: "Lainie Smith",
+          displayName: "Lainie",
+          isDisabled: false,
+          role: "admin",
+          createdAt: new Date().toISOString()
+        });
+        console.log("🚀 Pre-seeded default admin account in real Firestore admins collection.");
+      }
+    } catch (err) {
+      console.error("⚠️ Failed to check/seed real Firestore admins collection on startup.", err);
+    }
+  }
+
   const app = express();
   app.use(express.json());
 
@@ -40,9 +91,13 @@ async function startServer() {
       return res.status(401).json({ error: "No authentication token provided." });
     }
     const token = authHeader.split(" ")[1];
+    if (!JWT_SECRET) {
+      console.error("JWT_SECRET environment variable is missing.");
+      return res.status(500).json({ error: "Access denied. Server is missing JWT_SECRET secret." });
+    }
     try {
       const decoded = jwt.verify(token, JWT_SECRET) as any;
-      if (decoded.role !== "admin") {
+      if (decoded.role !== "admin" && decoded.isAdmin !== true) {
         return res.status(403).json({ error: "Access denied. Admin role required." });
       }
       req.admin = decoded;
@@ -55,38 +110,18 @@ async function startServer() {
   // ==========================================
   // 1. ADMIN AUTHENTICATION
   // ==========================================
-  app.post("/api/auth/login", (req, res) => {
-    const { email, password } = req.body;
-    if (!email || !password) {
-      return res.status(400).json({ error: "Credentials are required." });
-    }
-
-    if (email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
-      const isMatch = bcrypt.compareSync(password, ADMIN_PASSWORD_HASH);
-      if (isMatch) {
-        const token = jwt.sign(
-          { uid: "lainie-sweet-treats-admin", email: ADMIN_EMAIL, role: "admin" },
-          JWT_SECRET,
-          { expiresIn: "24h" }
-        );
-        return res.json({
-          token,
-          admin: {
-            uid: "lainie-sweet-treats-admin",
-            email: ADMIN_EMAIL,
-            role: "admin"
-          }
-        });
-      }
-    }
-    return res.status(401).json({ error: "Invalid email or password. Please try again." });
-  });
+  // Mount custom Firestore/Local bridged login handler
+  app.post("/api/auth/login", loginHandler);
+  app.post("/api/user/login", loginHandler);
 
   // Verify token endpoint (for routing guards)
   app.get("/api/auth/verify", (req, res) => {
     const authHeader = req.headers.authorization;
     if (!authHeader) return res.status(401).json({ valid: false });
     const token = authHeader.split(" ")[1];
+    if (!JWT_SECRET) {
+      return res.status(500).json({ valid: false, error: "JWT_SECRET is missing." });
+    }
     try {
       const decoded = jwt.verify(token, JWT_SECRET) as any;
       return res.json({ valid: true, admin: decoded });

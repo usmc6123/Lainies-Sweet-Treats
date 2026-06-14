@@ -137,9 +137,47 @@
         "amount": { "type": "number" }
       },
       "required": ["date", "category", "amount"]
+    },
+    "Admin": {
+      "title": "Admin",
+      "description": "Admin accounts with hashed passcodes",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "email": { "type": "string" },
+        "passwordHash": { "type": "string" },
+        "name": { "type": "string" },
+        "displayName": { "type": "string" },
+        "isDisabled": { "type": "boolean" }
+      },
+      "required": ["email", "passwordHash"]
+    },
+    "User": {
+      "title": "User",
+      "description": "Customer/client registered user profiles",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "email": { "type": "string" },
+        "passwordHash": { "type": "string" },
+        "name": { "type": "string" },
+        "displayName": { "type": "string" },
+        "tier": { "type": "string" },
+        "subscriptionTier": { "type": "string" },
+        "isDisabled": { "type": "boolean" }
+      },
+      "required": ["email", "passwordHash"]
     }
   },
   "firestore": {
+    "/admins/{adminId}": {
+      "schema": "Admin",
+      "description": "Collection of admin account documents"
+    },
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "Collection of customer account documents"
+    },
     "/products/{productId}": {
       "schema": "Product",
       "description": "Collection of menu items"

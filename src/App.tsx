@@ -7,7 +7,7 @@ import AdminLogin from "./components/AdminLogin";
 import AdminDashboard from "./components/AdminDashboard";
 import AdminOrders from "./components/AdminOrders";
 import AdminQuotes from "./components/AdminQuotes";
-import AdminMenu from "./components/AdminMenu";
+import AdminProducts from "./components/AdminProducts";
 import AdminCalendar from "./components/AdminCalendar";
 import AdminIngredients from "./components/AdminIngredients";
 import AdminCustomers from "./components/AdminCustomers";
@@ -214,15 +214,15 @@ export default function App() {
               </button>
 
               <button
-                onClick={() => navigateTo("admin-menu")}
+                onClick={() => navigateTo("admin-products")}
                 className={`w-full flex items-center px-4 py-3 rounded-xl transition duration-200 text-left ${
-                  view === "admin-menu"
+                  view === "admin-products"
                     ? "bg-brand-pink/10 text-brand-pink font-semibold border-l-4 border-brand-rosegold"
                     : "text-white/60 hover:text-white hover:bg-white/5"
                 }`}
               >
                 <Tag className="h-4 w-4 mr-3 opacity-80" />
-                <span className="text-xs">Menu Config</span>
+                <span className="text-xs">Products</span>
               </button>
 
               <button
@@ -325,14 +325,14 @@ export default function App() {
                 Ingredients
               </button>
               <button
-                onClick={() => navigateTo("admin-menu")}
+                onClick={() => navigateTo("admin-products")}
                 className={`px-3 py-1.5 text-[11px] font-bold rounded-lg transition ${
-                  view === "admin-menu" 
+                  view === "admin-products" 
                     ? "bg-brand-chocolate text-brand-cream" 
                     : "text-brand-chocolate/75 hover:bg-brand-pink/20"
                 }`}
               >
-                Menu
+                Products
               </button>
               <button
                 onClick={() => navigateTo("admin-customers")}
@@ -384,7 +384,7 @@ export default function App() {
               {view === "admin-dashboard" && <AdminDashboard token={token} setView={navigateTo} triggerRefresh={triggerRefreshCount} />}
               {view === "admin-orders" && <AdminOrders token={token} triggerRefresh={incrementRefresh} />}
               {view === "admin-quotes" && <AdminQuotes token={token} triggerRefresh={incrementRefresh} />}
-              {view === "admin-menu" && <AdminMenu token={token} triggerRefresh={incrementRefresh} />}
+              {view === "admin-products" && <AdminProducts token={token} triggerRefresh={incrementRefresh} />}
               {view === "admin-calendar" && <AdminCalendar token={token} triggerRefresh={incrementRefresh} />}
               {view === "admin-ingredients" && <AdminIngredients token={token} triggerRefresh={incrementRefresh} />}
               {view === "admin-customers" && <AdminCustomers token={token} />}

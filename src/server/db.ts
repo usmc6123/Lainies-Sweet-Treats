@@ -1,6 +1,7 @@
 import * as admin from "firebase-admin";
 import fs from "fs";
 import path from "path";
+import bcrypt from "bcryptjs";
 
 // ==========================================
 // CONFIGURATION CONSTANTS
@@ -71,6 +72,8 @@ interface FallbackSchema {
   settings: any;
   blockedDates: any[];
   expenses: any[];
+  admins?: any[];
+  users?: any[];
 }
 
 const DEFAULT_MOCK_DATA: FallbackSchema = {
@@ -370,7 +373,7 @@ const DEFAULT_MOCK_DATA: FallbackSchema = {
   settings: {
     businessName: "Lainie's Sweet Treats",
     phone: "214-555-CAKE",
-    email: "lainie@sweet-treats.com",
+    email: "elainiehoncoop@gmail.com",
     address: "508 Sweetwood Lane, Royse City, TX 75189",
     leadTimeDays: 3,
     deliveryRadius: 15,
@@ -385,7 +388,18 @@ const DEFAULT_MOCK_DATA: FallbackSchema = {
   expenses: [
     { id: "exp-1", date: "2026-06-01", category: "Ingredients", description: "Bulk buying flour, sugar, butter from Costco", amount: 145.20 },
     { id: "exp-2", date: "2026-06-05", category: "Packaging", description: "Ordered cake boxes and cupcake inserts on Amazon", amount: 62.50 }
-  ]
+  ],
+  admins: [
+    {
+      id: "ek8gF35yuiWH7VXEzjUsTFdLANG3",
+      email: "elainiehoncoop@gmail.com",
+      passwordHash: bcrypt.hashSync("password123", 10),
+      name: "Lainie Smith",
+      displayName: "Lainie",
+      isDisabled: false
+    }
+  ],
+  users: []
 };
 
 // Initialize file if not exists
@@ -396,7 +410,20 @@ if (!fs.existsSync(FALLBACK_DB_PATH)) {
 function loadLocalDb(): FallbackSchema {
   try {
     const raw = fs.readFileSync(FALLBACK_DB_PATH, "utf8");
-    return JSON.parse(raw);
+    const parsed = JSON.parse(raw);
+    let dirty = false;
+    if (!parsed.admins) {
+      parsed.admins = DEFAULT_MOCK_DATA.admins;
+      dirty = true;
+    }
+    if (!parsed.users) {
+      parsed.users = DEFAULT_MOCK_DATA.users;
+      dirty = true;
+    }
+    if (dirty) {
+      saveLocalDb(parsed);
+    }
+    return parsed;
   } catch {
     return DEFAULT_MOCK_DATA;
   }

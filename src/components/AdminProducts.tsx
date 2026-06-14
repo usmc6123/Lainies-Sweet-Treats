@@ -2,12 +2,12 @@ import React, { useState, useEffect } from "react";
 import { PlusCircle, Edit2, Trash2, HelpCircle, FileText, Sparkles, DollarSign, Tag, Scale } from "lucide-react";
 import { Product, Ingredient, ProductIngredientLink } from "../types";
 
-interface AdminMenuProps {
+interface AdminProductsProps {
   token: string;
   triggerRefresh: () => void;
 }
 
-export default function AdminMenu({ token, triggerRefresh }: AdminMenuProps) {
+export default function AdminProducts({ token, triggerRefresh }: AdminProductsProps) {
   const [products, setProducts] = useState<Product[]>([]);
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
   const [loading, setLoading] = useState(true);
@@ -18,6 +18,8 @@ export default function AdminMenu({ token, triggerRefresh }: AdminMenuProps) {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("Custom Cakes");
+  const [customCategory, setCustomCategory] = useState("");
+  const [useCustomCategory, setUseCustomCategory] = useState(false);
   const [basePrice, setBasePrice] = useState<number>(0);
   const [imgUrl, setImgUrl] = useState("");
   
@@ -39,7 +41,8 @@ export default function AdminMenu({ token, triggerRefresh }: AdminMenuProps) {
   const [inputIngId, setInputIngId] = useState("");
   const [inputIngQty, setInputIngQty] = useState(0);
 
-  const categories = ["Mini Cakes", "Cupcakes", "Cookies", "Cake Pops", "Dessert Trays", "Custom Cakes", "Seasonal Specials"];
+  const defaultCategories = ["Custom Cakes", "Cupcakes", "Cookies", "Dessert Trays", "Mini Cakes", "Cake Pops", "Seasonal Specials"];
+  const [dynamicCategories, setDynamicCategories] = useState<string[]>(defaultCategories);
 
   const loadCatalogData = async () => {
     setLoading(true);
@@ -50,7 +53,15 @@ export default function AdminMenu({ token, triggerRefresh }: AdminMenuProps) {
           headers: { "Authorization": `Bearer ${token}` }
         })
       ]);
-      if (pRes.ok) setProducts(await pRes.json());
+      if (pRes.ok) {
+        const pList = await pRes.json();
+        setProducts(pList);
+        const uniqueCategories = Array.from(new Set([
+          ...defaultCategories,
+          ...pList.map((p: any) => p.category).filter(Boolean)
+        ]));
+        setDynamicCategories(uniqueCategories);
+      }
       if (iRes.ok) setIngredients(await iRes.json());
     } catch (err) {
       console.error("Failed to load catalog menu assets", err);
@@ -70,6 +81,8 @@ export default function AdminMenu({ token, triggerRefresh }: AdminMenuProps) {
     setName(p.name);
     setDescription(p.description);
     setCategory(p.category);
+    setUseCustomCategory(false);
+    setCustomCategory("");
     setBasePrice(p.basePrice);
     setImgUrl(p.imgUrl);
     
@@ -86,6 +99,8 @@ export default function AdminMenu({ token, triggerRefresh }: AdminMenuProps) {
     setName("");
     setDescription("");
     setCategory("Custom Cakes");
+    setUseCustomCategory(false);
+    setCustomCategory("");
     setBasePrice(0);
     setImgUrl("");
     
@@ -157,10 +172,16 @@ export default function AdminMenu({ token, triggerRefresh }: AdminMenuProps) {
     e.preventDefault();
     if (!name || basePrice < 0) return;
 
+    const finalCategory = useCustomCategory ? customCategory.trim() : category;
+    if (!finalCategory) {
+      alert("Please select or enter a valid category name.");
+      return;
+    }
+
     const payload = {
       name,
       description,
-      category,
+      category: finalCategory,
       basePrice: Number(basePrice),
       imgUrl: imgUrl || "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=500",
       options: { sizes, flavors, addOns },
@@ -196,10 +217,18 @@ export default function AdminMenu({ token, triggerRefresh }: AdminMenuProps) {
         } else {
           setProducts([...products, saved]);
         }
+        
+        if (useCustomCategory && customCategory.trim()) {
+          const newCat = customCategory.trim();
+          if (!dynamicCategories.includes(newCat)) {
+            setDynamicCategories([...dynamicCategories, newCat]);
+          }
+        }
+
         setEditingProduct(null);
         setIsAdding(false);
         triggerRefresh();
-        alert("Product menu configuration updated successfully.");
+        alert("Product catalog changes saved successfully.");
       }
     } catch {
       alert("Error uploading product payload.");
@@ -293,15 +322,35 @@ export default function AdminMenu({ token, triggerRefresh }: AdminMenuProps) {
 
               <div>
                 <label className="text-xs uppercase font-extrabold tracking-wider text-gray-500 block">Category</label>
-                <select
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                  className="w-full text-sm bg-brand-cream/10 border border-brand-pink/15 rounded-xl p-3 mt-1.5 text-brand-chocolate font-medium focus:outline-none focus:ring-1 focus:ring-brand-rosegold"
-                >
-                  {categories.map(cat => (
-                    <option key={cat} value={cat}>{cat}</option>
-                  ))}
-                </select>
+                <div className="space-y-2 mt-1.5">
+                  <select
+                    value={useCustomCategory ? "custom_other" : category}
+                    onChange={(e) => {
+                      if (e.target.value === "custom_other") {
+                        setUseCustomCategory(true);
+                      } else {
+                        setUseCustomCategory(false);
+                        setCategory(e.target.value);
+                      }
+                    }}
+                    className="w-full text-sm bg-brand-cream/10 border border-brand-pink/15 rounded-xl p-3 text-brand-chocolate font-medium focus:outline-none focus:ring-1 focus:ring-brand-rosegold"
+                  >
+                    {dynamicCategories.map(cat => (
+                      <option key={cat} value={cat}>{cat}</option>
+                    ))}
+                    <option value="custom_other">+ Enter Custom Category...</option>
+                  </select>
+                  {useCustomCategory && (
+                    <input
+                      type="text"
+                      required
+                      value={customCategory}
+                      onChange={(e) => setCustomCategory(e.target.value)}
+                      placeholder="e.g. Dessert Trays, Macarons, Pies"
+                      className="w-full text-sm bg-brand-cream/10 border border-brand-pink/15 rounded-xl p-3 focus:outline-none focus:ring-1 focus:ring-brand-rosegold text-brand-chocolate font-medium animate-in slide-in-from-top duration-200"
+                    />
+                  )}
+                </div>
               </div>
 
               <div>
@@ -326,6 +375,9 @@ export default function AdminMenu({ token, triggerRefresh }: AdminMenuProps) {
                   placeholder="https://images.unsplash.com/..."
                   className="w-full text-sm bg-brand-cream/10 border border-brand-pink/15 rounded-xl p-3 mt-1.5 text-brand-chocolate font-medium focus:outline-none focus:ring-1 focus:ring-brand-rosegold"
                 />
+                <p className="text-[10px] text-brand-chocolate/50 mt-1 font-semibold italic leading-relaxed">
+                  * Note: Image files uploads are coming soon. For now, please paste any direct web image URL (e.g. from unsplash.com) or leave blank for a default placeholder.
+                </p>
               </div>
 
               <div>
