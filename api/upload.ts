@@ -59,9 +59,11 @@ export default async function handler(req: any, res: any) {
       }
     });
 
-    // Construct the direct download URL for Firebase Storage
-    const encodedFilePath = encodeURIComponent(filePath);
-    const publicUrl = `https://firebasestorage.googleapis.com/v0/b/${bucketName}/o/${encodedFilePath}?alt=media`;
+    // Make the file publicly readable
+    await file.makePublic();
+
+    // Construct the direct public URL for Google Cloud Storage
+    const publicUrl = `https://storage.googleapis.com/${bucketName}/${filePath}`;
 
     return res.status(200).json({
       success: true,
