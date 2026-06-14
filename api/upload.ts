@@ -42,20 +42,7 @@ export default async function handler(req: any, res: any) {
     const buffer = Buffer.from(base64Data, 'base64');
 
     const app = getApp();
-    let bucketName = "";
-    try {
-      const credentials = JSON.parse(firebaseConfigEnv);
-      bucketName = credentials.storageBucket || `${credentials.projectId}.appspot.com` || `${credentials.projectId}.firebasestorage.app`;
-    } catch {
-      bucketName = "lainies-sweet-treats.appspot.com";
-    }
-
-    if (!bucketName) {
-      bucketName = "lainies-sweet-treats.appspot.com";
-    }
-
-    // Clean bucket prefix if configured as ga://
-    bucketName = bucketName.replace(/^gs:\/\//, "");
+    const bucketName = "lainies-sweet-treats.firebasestorage.app";
 
     const storage = getStorage(app);
     const bucket = storage.bucket(bucketName);
