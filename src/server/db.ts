@@ -4,6 +4,13 @@ export const FIRESTORE_DATABASE_ID = "default";
 
 let realDb: any = null;
 
+function resolveFirebaseAdmin(rawAdmin: any): any {
+  if (!rawAdmin) return rawAdmin;
+  if (rawAdmin.apps) return rawAdmin;
+  if (rawAdmin.default && rawAdmin.default.apps) return rawAdmin.default;
+  return rawAdmin.default || rawAdmin;
+}
+
 export function getDb(): any {
   if (realDb) return realDb;
 
@@ -13,7 +20,7 @@ export function getDb(): any {
   }
 
   try {
-    const firebaseAdmin = (admin as any).default || (admin as any);
+    const firebaseAdmin = resolveFirebaseAdmin(admin);
     if (firebaseAdmin.apps.length === 0) {
       let credentials: any;
       if (firebaseConfigEnv.trim().startsWith("{")) {

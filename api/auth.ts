@@ -4,7 +4,14 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import { setCorsHeaders } from './_lib/helper.js';
 
-const admin = (adminModule as any).default || (adminModule as any);
+function resolveFirebaseAdmin(rawAdmin: any): any {
+  if (!rawAdmin) return rawAdmin;
+  if (rawAdmin.apps) return rawAdmin;
+  if (rawAdmin.default && rawAdmin.default.apps) return rawAdmin.default;
+  return rawAdmin.default || rawAdmin;
+}
+
+const admin = resolveFirebaseAdmin(adminModule);
 const JWT_SECRET = process.env.JWT_SECRET as string;
 
 export default async function handler(req: any, res: any) {
