@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import { setCorsHeaders } from './_lib/helper.js';
 
-const admin = adminModule as any;
+const admin = (adminModule as any).default || (adminModule as any);
 const JWT_SECRET = process.env.JWT_SECRET as string;
 
 export default async function handler(req: any, res: any) {

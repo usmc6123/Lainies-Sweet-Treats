@@ -13,7 +13,7 @@ export function getDb(): any {
   }
 
   try {
-    const firebaseAdmin = admin as any;
+    const firebaseAdmin = (admin as any).default || (admin as any);
     if (firebaseAdmin.apps.length === 0) {
       let credentials: any;
       if (firebaseConfigEnv.trim().startsWith("{")) {
