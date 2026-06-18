@@ -17,6 +17,16 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
   
   // Cart state
   const [cart, setCart] = useState<OrderItem[]>([]);
+
+  // Feature 2 Image modal thumbnail state
+  const [activeModalPhotoIndex, setActiveModalPhotoIndex] = useState<number>(0);
+
+  // Feature 5 Coupon validations
+  const [enteredCoupon, setEnteredCoupon] = useState("");
+  const [couponMeta, setCouponMeta] = useState<{ code: string; type: string; value: number; minOrderAmount: number } | null>(null);
+  const [couponError, setCouponError] = useState("");
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [showCouponInput, setShowCouponInput] = useState(false);
   
   // Checkout form state
   const [customerName, setCustomerName] = useState("");
@@ -76,6 +86,7 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
   }, []);
 
   // Set default configurations when a product is clicked
+  const [activePhotoUrlIndex, setActivePhotoUrlIndex] = useState(0);
   const handleProductSelect = (p: Product) => {
     setSelectedProduct(p);
     setChoiceSize(p.options.sizes && p.options.sizes.length > 0 ? p.options.sizes[0].name : "");
@@ -83,6 +94,7 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
     setChoiceAddOns([]);
     setChoiceQty(1);
     setErrorMessage("");
+    setActiveModalPhotoIndex(0);
   };
 
   // Live item total calculation
@@ -132,12 +144,59 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
     setCart(updated);
   };
 
-  // Computed Cart metrics
+  // Computed Cart metrics with Feature 5 dynamic coupon logic
   const cartSubtotal = cart.reduce((sum, item) => sum + item.totalPrice, 0);
+
+  let calculatedDiscount = 0;
+  if (couponMeta) {
+    if (cartSubtotal >= couponMeta.minOrderAmount) {
+      if (couponMeta.type === "percentage") {
+        calculatedDiscount = parseFloat(((cartSubtotal * couponMeta.value) / 100).toFixed(2));
+      } else {
+        calculatedDiscount = Math.min(couponMeta.value, cartSubtotal);
+      }
+    }
+  }
+
   const taxRate = settings?.taxRate || 0.0825;
-  const cartTax = parseFloat((cartSubtotal * taxRate).toFixed(2));
+  const discountedSubtotal = Math.max(0, cartSubtotal - calculatedDiscount);
+  const cartTax = parseFloat((discountedSubtotal * taxRate).toFixed(2));
   const deliveryCost = fulfillmentType === "delivery" ? (settings?.deliveryFeePerMile ? settings.deliveryRadius * settings.deliveryFeePerMile : 15.00) : 0;
-  const cartTotal = parseFloat((cartSubtotal + cartTax + deliveryCost).toFixed(2));
+  const cartTotal = parseFloat((discountedSubtotal + cartTax + deliveryCost).toFixed(2));
+
+  const handleApplyCoupon = async () => {
+    if (!enteredCoupon.trim()) return;
+    setCouponError("");
+    setCouponLoading(true);
+
+    try {
+      const res = await fetch("/api/public/validate-coupon", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          code: enteredCoupon.toUpperCase().trim(),
+          subtotal: cartSubtotal
+        })
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Invalid promo code.");
+      }
+
+      setCouponMeta({
+        code: enteredCoupon.toUpperCase().trim(),
+        type: data.discountType,
+        value: data.value,
+        minOrderAmount: data.minOrderAmount || 0
+      });
+      setCouponError("");
+    } catch (err: any) {
+      setCouponError(err.message || "An error occurred.");
+    } finally {
+      setCouponLoading(false);
+    }
+  };
 
   // Determine minimum available date based on lead time settings
   const getMinFulfillmentDate = () => {
@@ -184,7 +243,9 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
       fulfillmentDate,
       type: fulfillmentType,
       deliveryAddress: fulfillmentType === "delivery" ? deliveryAddress : "",
-      notes: specialNotes
+      notes: specialNotes,
+      couponCode: couponMeta ? couponMeta.code : undefined,
+      discountAmount: calculatedDiscount > 0 ? calculatedDiscount : undefined
     };
 
     try {
@@ -203,6 +264,9 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
         setFulfillmentDate("");
         setDeliveryAddress("");
         setSpecialNotes("");
+        setEnteredCoupon("");
+        setCouponMeta(null);
+        setCouponError("");
       } else {
         setErrorMessage(data.error || "Something went wrong. Please check your order criteria.");
       }
@@ -349,7 +413,11 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
                     >
                       <div className="relative h-56 bg-brand-pink/10 overflow-hidden">
                         <img 
-                          src={p.imgUrl || "https://images.unsplash.com/photo-1578985545062-69928b1d9587"} 
+                          src={
+                            p.photos && p.photos.length > 0
+                              ? (p.photos.find(ph => ph.isPrimary)?.url || p.photos[0].url)
+                              : p.imgUrl || "https://images.unsplash.com/photo-1578985545062-69928b1d9587"
+                          } 
                           alt={p.name}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                           referrerPolicy="no-referrer"
@@ -398,6 +466,46 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
                 <p className="text-xs text-brand-rosegold font-bold uppercase tracking-wider mt-1">
                   {selectedProduct.name}
                 </p>
+
+                {/* Visual Carousel/Gallery of All Photos */}
+                <div className="mt-4">
+                  {(() => {
+                    const productPhotos = selectedProduct.photos && selectedProduct.photos.length > 0
+                      ? selectedProduct.photos
+                      : [{ url: selectedProduct.imgUrl || "https://images.unsplash.com/photo-1578985545062-69928b1d9587", isPrimary: true }];
+                    
+                    const activePhoto = productPhotos[activeModalPhotoIndex] || productPhotos[0];
+
+                    return (
+                      <div className="space-y-2">
+                        <div className="relative aspect-video w-full bg-brand-pink/10 rounded-2xl overflow-hidden border border-brand-pink/15">
+                          <img 
+                            src={activePhoto.url} 
+                            alt={`Preview of ${selectedProduct.name}`} 
+                            className="w-full h-full object-cover animate-in fade-in duration-200"
+                            referrerPolicy="no-referrer"
+                          />
+                        </div>
+                        {productPhotos.length > 1 && (
+                          <div className="flex gap-2 border border-brand-pink/10 rounded-xl p-1.5 overflow-x-auto bg-brand-cream/10">
+                            {productPhotos.map((ph, idx) => (
+                              <button
+                                key={idx}
+                                type="button"
+                                onClick={() => setActiveModalPhotoIndex(idx)}
+                                className={`relative w-12 h-12 rounded-lg overflow-hidden border-2 shrink-0 transition ${
+                                  idx === activeModalPhotoIndex ? 'border-brand-rosegold shadow-sm' : 'border-transparent'
+                                }`}
+                              >
+                                <img src={ph.url} alt="Thumbnail preview" className="w-full h-full object-cover" />
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
+                </div>
 
                 {/* Sizes Radio selections */}
                 {selectedProduct.options?.sizes && selectedProduct.options.sizes.length > 0 && (
@@ -640,6 +748,14 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
                   <span>Subtotal:</span>
                   <span>${cartSubtotal.toFixed(2)}</span>
                 </div>
+
+                {calculatedDiscount > 0 && (
+                  <div className="flex justify-between text-green-700 font-bold">
+                    <span>Promo Discount ({couponMeta?.code}):</span>
+                    <span>-${calculatedDiscount.toFixed(2)}</span>
+                  </div>
+                )}
+
                 <div className="flex justify-between text-brand-chocolate/85 font-medium">
                   <span>TX Sales Tax ({(taxRate * 100).toFixed(2)}%):</span>
                   <span>${cartTax.toFixed(2)}</span>
@@ -654,6 +770,75 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
                   <span>Total Amount:</span>
                   <span className="text-brand-rosegold font-black">${cartTotal.toFixed(2)}</span>
                 </div>
+              </div>
+            )}
+
+            {/* Feature 5 — Coupon Code Validation Interface */}
+            {cart.length > 0 && (
+              <div className="mt-5 pt-4 border-t border-brand-pink/20 space-y-3">
+                {!showCouponInput && !couponMeta && (
+                  <button
+                    type="button"
+                    onClick={() => setShowCouponInput(true)}
+                    className="text-xs font-bold text-brand-rosegold hover:text-brand-chocolate hover:underline transition cursor-pointer"
+                  >
+                    Have a promo/coupon code?
+                  </button>
+                )}
+
+                {(showCouponInput || couponMeta) && (
+                  <div className="space-y-2 animate-in slide-in-from-top duration-300">
+                    <label className="text-[10px] uppercase font-bold text-brand-chocolate/60 block">Promo Coupon Code</label>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        disabled={!!couponMeta || couponLoading}
+                        value={couponMeta ? couponMeta.code : enteredCoupon}
+                        onChange={(e) => setEnteredCoupon(e.target.value)}
+                        placeholder="E.g., BAKE10, CELEBRATE"
+                        className="flex-1 text-xs bg-white border border-brand-pink/25 rounded-xl px-3 py-2 text-brand-chocolate font-bold focus:outline-none focus:ring-1 focus:ring-brand-rosegold focus:border-transparent uppercase placeholder:normal-case disabled:bg-gray-100 disabled:text-gray-400"
+                      />
+                      {!couponMeta ? (
+                        <button
+                          type="button"
+                          onClick={handleApplyCoupon}
+                          disabled={couponLoading}
+                          className="bg-brand-chocolate text-brand-cream hover:opacity-90 font-bold px-4 rounded-xl text-xs flex items-center justify-center cursor-pointer transition"
+                        >
+                          {couponLoading ? "Checking..." : "Apply"}
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setCouponMeta(null);
+                            setEnteredCoupon("");
+                            setCouponError("");
+                          }}
+                          className="bg-red-50 hover:bg-red-100 text-red-700 font-bold px-3.5 rounded-xl text-xs cursor-pointer transition"
+                          title="Remove promocode"
+                        >
+                          Remove
+                        </button>
+                      )}
+                    </div>
+
+                    {couponError && (
+                      <p className="text-[11px] text-red-600 font-semibold leading-tight">{couponError}</p>
+                    )}
+
+                    {couponMeta && (
+                      <p className="text-[11px] text-green-700 font-semibold leading-tight">
+                        ✓ Promo code <strong className="uppercase">{couponMeta.code}</strong> applied!
+                        {cartSubtotal < couponMeta.minOrderAmount && (
+                          <span className="block text-red-600 font-bold mt-1 text-[10px]">
+                            * Cart subtotal falls below ${couponMeta.minOrderAmount} minimum order required for this promo code. Buy some more sweets to activate!
+                          </span>
+                        )}
+                      </p>
+                    )}
+                  </div>
+                )}
               </div>
             )}
 
@@ -799,6 +984,45 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
           </div>
         </div>
       </div>
+
+      {/* Feature 7 - Curated Instagram Feed Section */}
+      {settings?.instagramFeedUrls && settings.instagramFeedUrls.length > 0 && (
+        <div className="mt-16 pt-12 border-t border-brand-pink/20 space-y-6">
+          <div className="text-center space-y-1">
+            <div className="inline-flex items-center space-x-2 bg-brand-chocolate text-brand-cream px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-widest">
+              <span>★ INSTAGRAM SHOWCASE</span>
+            </div>
+            <h3 className="font-heading text-2xl lg:text-3xl font-bold text-brand-chocolate">Curated Daily Sweet Inspirations</h3>
+            <p className="text-xs text-brand-chocolate/70 max-w-md mx-auto leading-normal">
+              Follow us on Instagram <a href="https://www.instagram.com/" target="_blank" rel="noreferrer" className="text-brand-rosegold hover:underline font-bold">@LainiesSweetTreats</a> to view our freshly baked custom wedding designs and seasonal mini cakes!
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
+            {settings.instagramFeedUrls.slice(0, 6).map((url, idx) => (
+              <a
+                key={idx}
+                href="https://www.instagram.com/"
+                target="_blank"
+                rel="noreferrer"
+                className="relative aspect-square bg-[#FFF8F0] rounded-2xl overflow-hidden border border-brand-pink/20 block hover:-translate-y-1 hover:shadow-md transition-all duration-300 group"
+              >
+                <img 
+                  src={url} 
+                  alt="Lainies Sweet Treats Instagram Post" 
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  referrerPolicy="no-referrer"
+                />
+                <div className="absolute inset-0 bg-black/35 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                  <span className="text-white text-[10px] font-black uppercase tracking-wider bg-black/60 px-2.5 py-1.5 rounded-lg border border-white/20">
+                    Open Post ↗
+                  </span>
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

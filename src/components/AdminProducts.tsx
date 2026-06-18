@@ -21,12 +21,19 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
   const [customCategory, setCustomCategory] = useState("");
   const [useCustomCategory, setUseCustomCategory] = useState(false);
   const [basePrice, setBasePrice] = useState<number>(0);
-  const [imgUrl, setImgUrl] = useState("");
+  
+  // Feature 1: Catalog visibility toggle state
+  const [isVisible, setIsVisible] = useState(true);
+
+  // Feature 2: Photo Gallery state
+  const [photos, setPhotos] = useState<{ url: string; isPrimary: boolean }[]>([]);
+  const [externalImgUrl, setExternalImgUrl] = useState("");
+  const [activeUploadSlot, setActiveUploadSlot] = useState<number | null>(null);
 
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState("");
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSlotFileChange = async (e: React.ChangeEvent<HTMLInputElement>, slotIndex: number) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -52,7 +59,8 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
             body: JSON.stringify({
               filename: file.name,
               contentType: file.type,
-              base64: base64String
+              base64: base64String,
+              productId: editingProduct ? editingProduct.id : "new-product"
             })
           });
 
@@ -63,7 +71,16 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
 
           const uploadData = await uploadRes.json();
           if (uploadData.url) {
-            setImgUrl(uploadData.url);
+            const updatedPhotos = [...photos];
+            const isPrimary = photos.length === 0 || !photos.some(p => p.isPrimary);
+            const newPhoto = { url: uploadData.url, isPrimary };
+            
+            if (slotIndex < updatedPhotos.length) {
+              updatedPhotos[slotIndex] = { ...updatedPhotos[slotIndex], url: uploadData.url };
+            } else {
+              updatedPhotos.push(newPhoto);
+            }
+            setPhotos(updatedPhotos);
           } else {
             throw new Error("No URL returned from server");
           }
@@ -83,6 +100,31 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
       setUploadError(err.message || "File reading error.");
       setUploading(false);
     }
+  };
+
+  const handleRemovePhoto = (idx: number) => {
+    const photoToRemove = photos[idx];
+    let updatedPhotos = photos.filter((_, i) => i !== idx);
+    
+    if (photoToRemove.isPrimary && updatedPhotos.length > 0) {
+      updatedPhotos[0].isPrimary = true;
+    }
+    setPhotos(updatedPhotos);
+  };
+
+  const handleSetPrimary = (idx: number) => {
+    const updatedPhotos = photos.map((p, i) => ({
+      ...p,
+      isPrimary: i === idx
+    }));
+    setPhotos(updatedPhotos);
+  };
+
+  const handleAddExternalUrl = () => {
+    if (!externalImgUrl) return;
+    const isPrimary = photos.length === 0 || !photos.some(p => p.isPrimary);
+    setPhotos([...photos, { url: externalImgUrl, isPrimary }]);
+    setExternalImgUrl("");
   };
   
   // Options (simplified list editors)
@@ -146,7 +188,14 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
     setUseCustomCategory(false);
     setCustomCategory("");
     setBasePrice(p.basePrice);
-    setImgUrl(p.imgUrl);
+    
+    setIsVisible(p.isVisible !== false);
+
+    let pPhotos = p.photos || [];
+    if (pPhotos.length === 0 && p.imgUrl) {
+      pPhotos = [{ url: p.imgUrl, isPrimary: true }];
+    }
+    setPhotos(pPhotos);
     
     setSizes(p.options.sizes || []);
     setFlavors(p.options.flavors || []);
@@ -164,7 +213,9 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
     setUseCustomCategory(false);
     setCustomCategory("");
     setBasePrice(0);
-    setImgUrl("");
+    
+    setIsVisible(true);
+    setPhotos([]);
     
     setSizes([]);
     setFlavors([]);
@@ -240,12 +291,17 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
       return;
     }
 
+    const primaryPhoto = photos.find(ph => ph.isPrimary) || photos[0];
+    const finalImgUrl = primaryPhoto ? primaryPhoto.url : "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=500";
+
     const payload = {
       name,
       description,
       category: finalCategory,
       basePrice: Number(basePrice),
-      imgUrl: imgUrl || "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=500",
+      imgUrl: finalImgUrl,
+      photos: photos,
+      isVisible: isVisible !== false,
       options: { sizes, flavors, addOns },
       ingredients: prodIngredients
     };
@@ -428,67 +484,117 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
                 />
               </div>
 
-              <div className="space-y-3">
-                <label className="text-xs uppercase font-extrabold tracking-wider text-gray-500 block">Product Photo</label>
-                
-                {/* Image preview */}
-                {imgUrl && (
-                  <div className="relative group w-full h-36 bg-gray-50 rounded-2xl overflow-hidden border border-brand-pink/10 flex items-center justify-center">
-                    <img 
-                      src={imgUrl} 
-                      alt="Product preview" 
-                      className="w-full h-full object-cover"
-                      referrerPolicy="no-referrer"
+              {/* Feature 1 — Catalog Visibility Toggle switch */}
+              <div>
+                <div className="flex items-center justify-between p-3.5 bg-brand-cream/35 border border-brand-pink/15 rounded-2xl">
+                  <div>
+                    <span className="text-xs uppercase font-extrabold tracking-wider text-brand-chocolate block">Visibility Status</span>
+                    <span className="text-[10px] text-gray-500 font-semibold block leading-tight mt-0.5">Show this treat on the public storefront menu?</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setIsVisible(!isVisible)}
+                    className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${isVisible ? 'bg-brand-rosegold' : 'bg-gray-200'}`}
+                  >
+                    <span
+                      className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${isVisible ? 'translate-x-5' : 'translate-x-0'}`}
                     />
-                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                      <button
-                        type="button"
-                        onClick={() => setImgUrl("")}
-                        className="bg-white/90 text-brand-chocolate px-3 py-1.5 rounded-lg text-xs font-bold shadow hover:bg-white transition cursor-pointer"
-                      >
-                        Remove Image
-                      </button>
-                    </div>
-                  </div>
-                )}
+                  </button>
+                </div>
+              </div>
 
-                {/* Upload Section */}
-                <div id="product-photo-upload-container" className="border border-dashed border-brand-pink/30 hover:border-brand-rosegold rounded-2xl p-4 text-center bg-brand-cream/5 hover:bg-brand-cream/10 transition relative">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    id="product-photo-upload"
-                    onChange={handleFileChange}
-                    disabled={uploading}
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                  />
-                  <div className="flex flex-col items-center justify-center space-y-1">
-                    <PlusCircle className="h-5 w-5 text-brand-rosegold" />
-                    <span className="text-xs font-bold text-brand-chocolate">
-                      {uploading ? "Uploading File..." : "Click to select or drag photo"}
-                    </span>
-                    <span className="text-[10px] text-brand-chocolate/50 font-medium">
-                      PNG, JPG, WEBP up to 5MB
-                    </span>
-                  </div>
+              {/* Feature 2 — Photo Gallery up to 4 slots */}
+              <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <label className="text-xs uppercase font-extrabold tracking-wider text-gray-500 block">Treat Photo Gallery ({photos.length}/4)</label>
+                  {photos.length < 4 && (
+                    <span className="text-[10px] text-brand-chocolate bg-brand-pink/15 px-2 py-0.5 rounded-md font-bold">Slots Available</span>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  {Array.from({ length: 4 }).map((_, index) => {
+                    const photo = photos[index];
+                    if (photo) {
+                      return (
+                        <div key={index} className="relative group w-full h-24 bg-gray-50 rounded-xl overflow-hidden border border-brand-pink/10 flex flex-col justify-end">
+                          <img 
+                            src={photo.url} 
+                            alt={`Product gallery slot ${index + 1}`} 
+                            className="absolute inset-0 w-full h-full object-cover"
+                            referrerPolicy="no-referrer"
+                          />
+                          <div className="absolute top-1 right-1">
+                            <button
+                              type="button"
+                              onClick={() => handleRemovePhoto(index)}
+                              className="bg-black/60 text-white rounded-full w-5 h-5 flex items-center justify-center opacity-90 hover:opacity-100 hover:bg-red-600 transition cursor-pointer"
+                              title="Delete photo"
+                            >
+                              <span className="block text-[9px] font-extrabold leading-none">✕</span>
+                            </button>
+                          </div>
+                          
+                          <div 
+                            className={`absolute bottom-0 inset-x-0 p-1 text-center text-[9px] font-black tracking-wide leading-none transition-all select-none cursor-pointer ${
+                              photo.isPrimary ? 'bg-brand-chocolate text-brand-cream' : 'bg-black/45 text-gray-200 hover:bg-[#B76E79] hover:text-white'
+                            }`}
+                            onClick={() => !photo.isPrimary && handleSetPrimary(index)}
+                            title={photo.isPrimary ? "Primary photo" : "Click to make primary"}
+                          >
+                            {photo.isPrimary ? "★ Primary Photo" : "Set as Primary"}
+                          </div>
+                        </div>
+                      );
+                    } else {
+                      const isUploadingCurrent = uploading && activeUploadSlot === index;
+                      return (
+                        <div key={index} className="relative border border-dashed border-brand-pink/30 hover:border-[#B76E79] rounded-xl h-24 flex flex-col items-center justify-center bg-brand-cream/10 hover:bg-brand-cream/20 transition overflow-hidden">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => {
+                              setActiveUploadSlot(index);
+                              handleSlotFileChange(e, index);
+                            }}
+                            disabled={uploading}
+                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                          />
+                          <PlusCircle className="h-4 w-4 text-brand-rosegold mb-1" />
+                          <span className="text-[10px] font-extrabold text-brand-chocolate text-center px-1">
+                            {isUploadingCurrent ? "Uploading..." : "Add Photo"}
+                          </span>
+                        </div>
+                      );
+                    }
+                  })}
                 </div>
 
                 {uploadError && (
                   <p className="text-xs text-red-600 font-semibold">{uploadError}</p>
                 )}
 
-                {/* Manual Fallback Text Input */}
+                {/* Manual Add external URL */}
                 <div>
-                  <label className="text-[10px] uppercase font-bold tracking-wider text-gray-400 block mb-1">Or Paste Direct Image URL</label>
-                  <input
-                    type="text"
-                    value={imgUrl}
-                    onChange={(e) => setImgUrl(e.target.value)}
-                    placeholder="https://images.unsplash.com/..."
-                    className="w-full text-xs bg-brand-cream/10 border border-brand-pink/15 rounded-xl p-2.5 text-brand-chocolate font-medium focus:outline-none focus:ring-1 focus:ring-brand-rosegold"
-                  />
-                  <p className="text-[9px] text-brand-chocolate/40 mt-1 font-semibold italic leading-relaxed">
-                    * Paste an external image URL above if you prefer not to upload a custom file.
+                  <label className="text-[10px] uppercase font-bold tracking-wider text-gray-400 block mb-1">Add Image via external Link</label>
+                  <div className="flex gap-1.5">
+                    <input
+                      type="text"
+                      value={externalImgUrl}
+                      onChange={(e) => setExternalImgUrl(e.target.value)}
+                      placeholder="https://images.unsplash.com/..."
+                      className="flex-1 text-xs bg-brand-cream/10 border border-brand-pink/15 rounded-xl p-2 text-brand-chocolate focus:ring-1 focus:ring-brand-rosegold focus:outline-none font-medium"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleAddExternalUrl}
+                      className="bg-brand-chocolate text-brand-cream hover:opacity-90 px-3 py-2 rounded-xl text-xs font-bold transition cursor-pointer"
+                    >
+                      Add URL
+                    </button>
+                  </div>
+                  <p className="text-[9px] text-brand-chocolate/40 mt-1.5 font-semibold italic leading-snug">
+                    * Paste or upload up to 4 images to showcase this bakery item. First or starred photo becomes primary.
                   </p>
                 </div>
               </div>
@@ -709,7 +815,11 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
             return (
               <div
                 key={p.id}
-                className="bg-white border border-brand-pink/20 rounded-[2rem] p-6 shadow-sm hover:shadow-md transition flex flex-col justify-between group"
+                className={`border rounded-[2rem] p-6 shadow-sm hover:shadow-md transition flex flex-col justify-between group ${
+                  p.isVisible === false 
+                    ? "bg-slate-50/70 border-slate-200 opacity-70" 
+                    : "bg-white border-brand-pink/20"
+                }`}
               >
                 <div>
                   <div className="h-44 bg-brand-pink/10 rounded-2xl overflow-hidden mb-5 relative">
@@ -722,6 +832,11 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
                     <span className="absolute top-3 left-3 text-[10px] uppercase font-extrabold bg-brand-chocolate text-brand-cream px-3 py-1 rounded-lg">
                       {p.category}
                     </span>
+                    {p.isVisible === false && (
+                      <span className="absolute top-3 right-3 text-[10px] uppercase font-extrabold bg-red-600 text-white px-3 py-1 rounded-lg shadow">
+                        HIDDEN
+                      </span>
+                    )}
                   </div>
 
                   <h3 className="font-extrabold text-lg lg:text-xl text-brand-chocolate leading-tight font-heading">{p.name}</h3>

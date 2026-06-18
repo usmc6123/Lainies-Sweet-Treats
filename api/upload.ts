@@ -32,7 +32,7 @@ export default async function handler(req: any, res: any) {
       }
     }
 
-    const { filename, contentType, base64 } = req.body;
+    const { filename, contentType, base64, productId } = req.body;
     if (!base64 || !filename) {
       return res.status(400).json({ error: "Missing file base64 data or filename in request" });
     }
@@ -47,9 +47,10 @@ export default async function handler(req: any, res: any) {
     const storage = getStorage(app);
     const bucket = storage.bucket(bucketName);
 
-    // Sanitize filename and create a unique path
+    // Sanitize filename and create a unique path under specified folder
     const cleanFilename = filename.replace(/[^a-zA-Z0-9.-]/g, "_");
-    const filePath = `products/${Date.now()}-${cleanFilename}`;
+    const folderId = productId ? productId : "new-product";
+    const filePath = `products/${folderId}/photo_${Date.now()}_${cleanFilename}`;
     const file = bucket.file(filePath);
 
     await file.save(buffer, {

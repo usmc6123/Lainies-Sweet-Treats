@@ -12,7 +12,60 @@ export default async function handler(req: any, res: any) {
 
     if (action === "menu" && req.method === "GET") {
       const products = await dbService.list("products");
-      return res.status(200).json(products);
+      const visibleProducts = products.filter((p: any) => p.isVisible !== false);
+      return res.status(200).json(visibleProducts);
+    }
+
+    if (action === "validate-coupon" && req.method === "POST") {
+      const { code, subtotal } = req.body;
+      if (!code) {
+        return res.status(400).json({ error: "Coupon code is required." });
+      }
+
+      const cleanCode = code.toUpperCase().trim();
+      const coupons = await dbService.list("coupons");
+      const coupon = coupons.find(c => c.code === cleanCode);
+
+      if (!coupon) {
+        return res.status(400).json({ error: "Invalid coupon code." });
+      }
+
+      if (!coupon.isActive) {
+        return res.status(400).json({ error: "This coupon is no longer active." });
+      }
+
+      if (coupon.expirationDate) {
+        const today = new Date().toISOString().slice(0, 10);
+        if (today > coupon.expirationDate) {
+          return res.status(400).json({ error: "This coupon has expired." });
+        }
+      }
+
+      if (coupon.maxUses !== undefined && coupon.maxUses !== null) {
+        const usageCount = coupon.usageCount || 0;
+        if (usageCount >= coupon.maxUses) {
+          return res.status(400).json({ error: "This coupon is fully claimed." });
+        }
+      }
+
+      if (coupon.minOrderAmount) {
+        if (subtotal < coupon.minOrderAmount) {
+          return res.status(400).json({ error: `This coupon requires a minimum order subtotal of $${coupon.minOrderAmount.toFixed(2)}.` });
+        }
+      }
+
+      let discountAmount = 0;
+      if (coupon.discountType === "percentage") {
+        discountAmount = parseFloat(((subtotal * coupon.discountValue) / 100).toFixed(2));
+      } else {
+        discountAmount = Math.min(coupon.discountValue, subtotal);
+      }
+
+      return res.status(200).json({
+        success: true,
+        coupon,
+        discountAmount
+      });
     }
 
     if (action === "order" && req.method === "POST") {
@@ -98,6 +151,23 @@ export default async function handler(req: any, res: any) {
       orderData.paymentStatus = "Unpaid";
 
       const savedOrder = await dbService.insert("orders", orderData);
+
+      // Increment coupon usage count if couponCode is used
+      if (orderData.couponCode) {
+        try {
+          const cleanCouponCode = orderData.couponCode.toUpperCase().trim();
+          const coupons = await dbService.list("coupons");
+          const couponToInc = coupons.find(c => c.code === cleanCouponCode);
+          if (couponToInc) {
+            await dbService.update("coupons", couponToInc.id, {
+              usageCount: (couponToInc.usageCount || 0) + 1
+            });
+          }
+        } catch (cErr) {
+          console.error("Failed to increment coupon utilization:", cErr);
+        }
+      }
+
       return res.status(201).json(savedOrder);
     }
 

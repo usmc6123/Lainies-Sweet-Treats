@@ -22,7 +22,9 @@ export interface Product {
   basePrice: number;
   options: ProductOptions;
   ingredients: ProductIngredientLink[];
-  imgUrl: string;
+  imgUrl?: string; // Keep for fallback/backward compatibility
+  isVisible?: boolean; // New visible/hidden toggle
+  photos?: { url: string; isPrimary: boolean }[]; // Multiple photos array
 }
 
 export interface OrderItem {
@@ -59,6 +61,8 @@ export interface Order {
   status: OrderStatus;
   paymentStatus: PaymentStatus;
   notes?: string;
+  couponCode?: string;
+  discountAmount?: number;
 }
 
 export type QuoteStatus = "Pending Review" | "Sent" | "Accepted" | "Declined";
@@ -112,6 +116,22 @@ export interface Settings {
   deliveryFeePerMile: number;
   taxRate: number; // e.g., 0.0825 for 8.25% in Royse City / TX
   emailTemplateConfirmation: string;
+  announcementBanner?: string; // Customizable Announcement Banner text
+  bannerVisible?: boolean; // Customizable Announcement Banner visibility
+}
+
+export type DiscountType = "percentage" | "fixed";
+
+export interface Coupon {
+  id: string;
+  code: string; // Uppercase, alphanumeric, no spaces
+  discountType: DiscountType;
+  discountValue: number;
+  minOrderAmount?: number;
+  maxUses?: number;
+  expirationDate?: string; // YYYY-MM-DD
+  isActive: boolean;
+  usageCount: number;
 }
 
 export interface BlockedDate {

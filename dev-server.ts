@@ -32,15 +32,19 @@ async function startServer() {
   // Route API paths explicitly to Vercel handlers
   app.all("/api/auth/login", adapt(authHandler));
   app.all("/api/auth/verify", adapt(authHandler));
+  app.all("/api/auth/change-password", adapt(authHandler));
   app.all("/api/user/login", adapt(authHandler));
   
   app.all("/api/settings", adapt(settingsHandler));
+  app.all("/api/coupons", adapt(settingsHandler));
+  app.all("/api/coupons/:id", adapt(settingsHandler));
 
   app.all("/api/blocked-dates", adapt(blockedDatesHandler));
   app.all("/api/blocked-dates/:id", adapt(blockedDatesHandler));
 
   app.all("/api/public/menu", adapt(publicHandler));
   app.all("/api/public/order", adapt(publicHandler));
+  app.all("/api/public/validate-coupon", adapt(publicHandler));
 
   app.all("/api/ingredients", adapt(ingredientsHandler));
   app.all("/api/ingredients/:id", adapt(ingredientsHandler));

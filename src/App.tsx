@@ -12,6 +12,7 @@ import AdminCalendar from "./components/AdminCalendar";
 import AdminIngredients from "./components/AdminIngredients";
 import AdminCustomers from "./components/AdminCustomers";
 import AdminSettings from "./components/AdminSettings";
+import AdminCoupons from "./components/AdminCoupons";
 
 import { 
   Sparkles, ShieldCheck, LogOut, LayoutDashboard, 
@@ -23,6 +24,19 @@ export default function App() {
   const [token, setToken] = useState<string | null>(null);
   const [adminEmail, setAdminEmail] = useState<string | null>(null);
   const [triggerRefreshCount, setTriggerRefreshCount] = useState(0);
+  const [settings, setSettings] = useState<any>(null);
+
+  // Load customizable settings
+  useEffect(() => {
+    fetch("/api/settings")
+      .then(res => {
+        if (res.ok) return res.json();
+      })
+      .then(data => {
+        if (data) setSettings(data);
+      })
+      .catch(err => console.error("Error loading store settings:", err));
+  }, [triggerRefreshCount]);
 
   // Load token of admin if exists in localStorage
   useEffect(() => {
@@ -73,11 +87,13 @@ export default function App() {
     <div className="min-h-screen bg-brand-pink text-brand-chocolate font-sans flex flex-col justify-between selection:bg-brand-rosegold/30">
       
       {/* Top Welcome Ribbon */}
-      <div className="bg-brand-chocolate text-brand-cream text-[10.5px] font-semibold tracking-wider text-center py-2 px-4 shadow-sm flex items-center justify-center space-x-1.5 shrink-0 z-40">
-        <Sparkles className="h-3.5 w-3.5 text-brand-pink animate-pulse" />
-        <span>Now taking custom graduation & bridal sweet requests for Royse City, Rockwall & Dallas communities!</span>
-        <Gift className="h-3.5 w-3.5 text-brand-pink" />
-      </div>
+      {(!settings || settings.bannerVisible !== false) && (
+        <div className="bg-brand-chocolate text-brand-cream text-[10.5px] font-semibold tracking-wider text-center py-2 px-4 shadow-sm flex items-center justify-center space-x-1.5 shrink-0 z-40 animate-in fade-in slide-in-from-top duration-300">
+          <Sparkles className="h-3.5 w-3.5 text-brand-pink animate-pulse" />
+          <span>{settings?.announcementBanner || "Now taking custom graduation & bridal sweet requests for Royse City, Rockwall & Dallas communities!"}</span>
+          <Gift className="h-3.5 w-3.5 text-[#F9D5D3]" />
+        </div>
+      )}
 
       {/* Main Header Integration */}
       {!isAdminView ? (
@@ -226,6 +242,18 @@ export default function App() {
               </button>
 
               <button
+                onClick={() => navigateTo("admin-coupons")}
+                className={`w-full flex items-center px-4 py-3 rounded-xl transition duration-200 text-left ${
+                  view === "admin-coupons"
+                    ? "bg-brand-pink/10 text-brand-pink font-semibold border-l-4 border-brand-rosegold"
+                    : "text-white/60 hover:text-white hover:bg-white/5"
+                }`}
+              >
+                <Gift className="h-4 w-4 mr-3 opacity-80" />
+                <span className="text-xs">Promo Codes</span>
+              </button>
+
+              <button
                 onClick={() => navigateTo("admin-customers")}
                 className={`w-full flex items-center px-4 py-3 rounded-xl transition duration-200 text-left ${
                   view === "admin-customers"
@@ -335,6 +363,16 @@ export default function App() {
                 Products
               </button>
               <button
+                onClick={() => navigateTo("admin-coupons")}
+                className={`px-3 py-1.5 text-[11px] font-bold rounded-lg transition ${
+                  view === "admin-coupons" 
+                    ? "bg-brand-chocolate text-brand-cream" 
+                    : "text-brand-chocolate/75 hover:bg-brand-pink/20"
+                }`}
+              >
+                Coupons
+              </button>
+              <button
                 onClick={() => navigateTo("admin-customers")}
                 className={`px-3 py-1.5 text-[11px] font-bold rounded-lg transition ${
                   view === "admin-customers" 
@@ -387,6 +425,7 @@ export default function App() {
               {view === "admin-products" && <AdminProducts token={token} triggerRefresh={incrementRefresh} />}
               {view === "admin-calendar" && <AdminCalendar token={token} triggerRefresh={incrementRefresh} />}
               {view === "admin-ingredients" && <AdminIngredients token={token} triggerRefresh={incrementRefresh} />}
+              {view === "admin-coupons" && <AdminCoupons token={token} triggerRefresh={incrementRefresh} />}
               {view === "admin-customers" && <AdminCustomers token={token} />}
               {view === "admin-settings" && <AdminSettings token={token} triggerRefresh={incrementRefresh} />}
             </div>
