@@ -409,7 +409,8 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
                       exit={{ opacity: 0, scale: 0.95, y: -15 }}
                       transition={{ duration: 0.35, ease: "easeOut" }}
                       key={p.id}
-                      className="bg-[#FFF8F0] border border-brand-pink/20 rounded-[1.5rem] overflow-hidden shadow-xs hover:shadow-md transition-all duration-300 flex flex-col group transform-gpu"
+                      onClick={() => handleProductSelect(p)}
+                      className="bg-[#FFF8F0] border border-brand-pink/20 rounded-[1.5rem] overflow-hidden shadow-xs hover:shadow-md transition-all duration-300 flex flex-col group transform-gpu cursor-pointer"
                     >
                       <div className="relative h-56 bg-brand-pink/10 overflow-hidden">
                         <img 
@@ -436,7 +437,10 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
 
                         <button
                           type="button"
-                          onClick={() => handleProductSelect(p)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleProductSelect(p);
+                          }}
                           className="text-brand-rosegold hover:text-brand-chocolate font-bold text-xs uppercase tracking-wider underline cursor-pointer mt-3.5 transition-colors duration-200"
                         >
                           Add to Bag
@@ -466,6 +470,12 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
                 <p className="text-xs text-brand-rosegold font-bold uppercase tracking-wider mt-1">
                   {selectedProduct.name}
                 </p>
+
+                {selectedProduct.description && (
+                  <p className="font-sans text-[13px] text-brand-chocolate/70 leading-normal mt-2">
+                    {selectedProduct.description}
+                  </p>
+                )}
 
                 {/* Visual Carousel/Gallery of All Photos */}
                 <div className="mt-4">
