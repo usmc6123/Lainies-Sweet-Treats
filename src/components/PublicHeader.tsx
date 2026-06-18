@@ -57,19 +57,6 @@ export default function PublicHeader({ currentView, setView, isAdminLoggedIn, on
 
             <span className="text-brand-chocolate/20">|</span>
 
-            <button
-              id="nav-custom-cakes"
-              onClick={() => {
-                sessionStorage.setItem("lainie_shop_category", "Custom Cakes");
-                setView("shop");
-                window.dispatchEvent(new Event("lainie_category_change"));
-              }}
-              className="text-xs uppercase tracking-widest font-black text-brand-chocolate hover:text-brand-rosegold transition-colors duration-200"
-            >
-              Custom Cakes
-            </button>
-
-            <span className="text-brand-chocolate/20">|</span>
 
             <button
               id="nav-quote"
