@@ -16,12 +16,26 @@ export function setCorsHeaders(req: any, res: any): boolean {
 }
 
 export function authenticateAdmin(req: any, res: any): any {
+  let token = "";
   const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    token = authHeader.split(" ")[1];
+  } else {
+    try {
+      const url = new URL(req.url || '', `http://${req.headers.host || 'localhost'}`);
+      const queryToken = url.searchParams.get('token');
+      if (queryToken) {
+        token = queryToken;
+      }
+    } catch (e) {
+      // url parsing fallback
+    }
+  }
+
+  if (!token) {
     res.status(401).json({ error: "No authentication token provided." });
     return null;
   }
-  const token = authHeader.split(" ")[1];
   if (!JWT_SECRET) {
     res.status(500).json({ error: "Access denied. Server is missing JWT_SECRET secret." });
     return null;

@@ -13,6 +13,9 @@ export default function AdminOrders({ token, triggerRefresh }: AdminOrdersProps)
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("All");
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [batchLabelDate, setBatchLabelDate] = useState<string>(() => {
+    return new Date().toISOString().slice(0, 10);
+  });
 
   const fetchOrders = async () => {
     setLoading(true);
@@ -101,6 +104,25 @@ export default function AdminOrders({ token, triggerRefresh }: AdminOrdersProps)
     }
   };
 
+  const handleDownloadReceipt = (orderId: string) => {
+    const downloadUrl = `/api/orders/receipt?orderId=${orderId}&token=${token}`;
+    window.location.href = downloadUrl;
+  };
+
+  const handlePrintSingleLabel = (orderId: string) => {
+    const downloadUrl = `/api/orders/labels?orderId=${orderId}&token=${token}`;
+    window.open(downloadUrl, '_blank');
+  };
+
+  const handlePrintBatchLabels = () => {
+    if (!batchLabelDate) {
+      alert("Please select a date first.");
+      return;
+    }
+    const downloadUrl = `/api/orders/labels/date?date=${batchLabelDate}&token=${token}`;
+    window.open(downloadUrl, '_blank');
+  };
+
   // Filter criteria
   const filteredOrders = orders.filter(o => {
     const matchesSearch = 
@@ -126,41 +148,64 @@ export default function AdminOrders({ token, triggerRefresh }: AdminOrdersProps)
   return (
     <div id="admin-orders-tab" className="space-y-6 animate-in fade-in duration-300">
       {/* Search and Filters Header */}
-      <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center bg-white border border-brand-pink/20 rounded-2xl p-5 shadow-sm">
-        <div className="flex items-center space-x-2">
-          <ClipboardList className="h-6 w-6 text-brand-rosegold" />
-          <h2 className="text-2xl lg:text-3xl font-bold text-brand-chocolate font-heading">
-            Order Management Console
-          </h2>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
-          {/* Search bar */}
-          <div className="relative flex-1 sm:flex-initial">
-            <Search className="h-4 w-4 text-brand-chocolate/40 absolute left-3 top-3.5" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by name, number..."
-              className="w-full sm:w-64 text-sm bg-brand-cream/30 border border-brand-pink/15 rounded-xl pl-9 pr-4 py-2.5 focus:outline-none focus:ring-1 focus:ring-brand-rosegold"
-            />
+      <div className="flex flex-col gap-4 bg-white border border-brand-pink/20 rounded-2xl p-5 shadow-sm">
+        <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
+          <div className="flex items-center space-x-2">
+            <ClipboardList className="h-6 w-6 text-brand-rosegold" />
+            <h2 className="text-2xl lg:text-3xl font-bold text-brand-chocolate font-heading">
+              Order Management Console
+            </h2>
           </div>
 
-          {/* Status selector */}
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="text-sm bg-brand-cream/30 border border-brand-pink/15 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-1 focus:ring-brand-rosegold font-medium text-brand-chocolate"
+          <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
+            {/* Search bar */}
+            <div className="relative flex-1 sm:flex-initial">
+              <Search className="h-4 w-4 text-brand-chocolate/40 absolute left-3 top-3.5" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search by name, number..."
+                className="w-full sm:w-64 text-sm bg-brand-cream/30 border border-brand-pink/15 rounded-xl pl-9 pr-4 py-2.5 focus:outline-none focus:ring-1 focus:ring-brand-rosegold"
+              />
+            </div>
+
+            {/* Status selector */}
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="text-sm bg-brand-cream/30 border border-brand-pink/15 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-1 focus:ring-brand-rosegold font-medium text-brand-chocolate"
+            >
+              <option value="All">All Statuses</option>
+              <option value="Pending">Pending Review</option>
+              <option value="Confirmed">Confirmed</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Ready">Ready</option>
+              <option value="Delivered/Picked Up">Delivered/Picked Up</option>
+              <option value="Cancelled">Cancelled</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Bulk Labels Generator section */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-t border-brand-pink/10 pt-4 gap-4">
+          <div className="flex items-center space-x-2 text-xs font-bold text-brand-chocolate/75">
+            <Calendar className="h-4 w-4 text-brand-rosegold" />
+            <span>Fulfillment Date for Batch Labels:</span>
+            <input
+              type="date"
+              value={batchLabelDate}
+              onChange={(e) => setBatchLabelDate(e.target.value)}
+              className="ml-2 text-xs bg-brand-cream/30 border border-brand-pink/15 rounded-lg px-2.5 py-1 focus:outline-none focus:ring-1 focus:ring-brand-rosegold font-bold text-brand-chocolate"
+            />
+          </div>
+          <button
+            onClick={handlePrintBatchLabels}
+            className="w-full sm:w-auto bg-[#B76E79] hover:opacity-90 text-white font-bold text-xs uppercase px-4 py-2 rounded-xl transition flex items-center justify-center gap-1.5 cursor-pointer"
           >
-            <option value="All">All Statuses</option>
-            <option value="Pending">Pending Review</option>
-            <option value="Confirmed">Confirmed</option>
-            <option value="In Progress">In Progress</option>
-            <option value="Ready">Ready</option>
-            <option value="Delivered/Picked Up">Delivered/Picked Up</option>
-            <option value="Cancelled">Cancelled</option>
-          </select>
+            <CheckSquare className="h-4 w-4" />
+            Print Daily Label Sheets ({orders.filter(o => o.fulfillmentDate === batchLabelDate && o.status !== 'Cancelled').length})
+          </button>
         </div>
       </div>
 
@@ -391,10 +436,31 @@ export default function AdminOrders({ token, triggerRefresh }: AdminOrdersProps)
                     </div>
                   </div>
 
+                  {/* PDF & Printing tools */}
+                  <div className="space-y-2 pt-2 border-t border-brand-pink/10">
+                    <p className="font-bold uppercase tracking-wider text-[10px] text-brand-chocolate/50 mb-1 block">PRINTING & ARCHIVES</p>
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        onClick={() => handleDownloadReceipt(selectedOrder.id)}
+                        className="py-2 px-3 border border-[#B76E79] hover:bg-[#B76E79]/5 text-[11px] font-bold rounded-xl text-[#B76E79] flex items-center justify-center gap-1.5 transition cursor-pointer"
+                      >
+                        <FileText className="h-3.5 w-3.5" />
+                        Invoice PDF
+                      </button>
+                      <button
+                        onClick={() => handlePrintSingleLabel(selectedOrder.id)}
+                        className="py-2 px-3 border border-[#B76E79] hover:bg-[#B76E79]/5 text-[11px] font-bold rounded-xl text-[#B76E79] flex items-center justify-center gap-1.5 transition cursor-pointer"
+                      >
+                        <CheckSquare className="h-3.5 w-3.5" />
+                        Print Label
+                      </button>
+                    </div>
+                  </div>
+
                   {/* Delete Button */}
                   <button
                     onClick={() => handleDeleteOrder(selectedOrder.id)}
-                    className="w-full text-center py-2.5 border border-red-200 hover:bg-red-50 text-red-750 text-xs font-bold rounded-xl transition"
+                    className="w-full text-center py-2.5 border border-red-200 hover:bg-red-50 text-red-750 text-xs font-bold rounded-xl transition mt-2"
                   >
                     Delete Custody Sheet
                   </button>

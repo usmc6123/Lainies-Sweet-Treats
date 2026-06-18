@@ -12,6 +12,99 @@ export default function AdminIngredients({ token, triggerRefresh }: AdminIngredi
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Shopping list generator states
+  const [shoppingStartDate, setShoppingStartDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [shoppingEndDate, setShoppingEndDate] = useState(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 7);
+    return d.toISOString().slice(0, 10);
+  });
+  const [shoppingListInput, setShoppingListInput] = useState<any | null>(null);
+  const [calculatingList, setCalculatingList] = useState(false);
+
+  const handleGenerateShoppingList = async () => {
+    setCalculatingList(true);
+    setShoppingListInput(null);
+    try {
+      const [ordersRes, productsRes] = await Promise.all([
+        fetch("/api/orders", {
+          headers: { "Authorization": `Bearer ${token}` }
+        }),
+        fetch("/api/products", {
+          headers: { "Authorization": `Bearer ${token}` }
+        })
+      ]);
+
+      if (ordersRes.ok && productsRes.ok) {
+        const ordersData = await ordersRes.json();
+        const productsData = await productsRes.json();
+
+        // Filter active orders (Confirmed or In Progress within range)
+        const activeOrders = ordersData.filter((o: any) => {
+          return (o.status === "Confirmed" || o.status === "In Progress") &&
+                 o.fulfillmentDate >= shoppingStartDate &&
+                 o.fulfillmentDate <= shoppingEndDate;
+        });
+
+        // Map requirements
+        const requiredMap: { [id: string]: number } = {};
+        const missingIngredientProducts = new Set<string>();
+
+        activeOrders.forEach((order: any) => {
+          order.items.forEach((item: any) => {
+            const p = productsData.find((prod: any) => prod.id === item.productId);
+            if (!p || !p.ingredients || p.ingredients.length === 0) {
+              missingIngredientProducts.add(item.name);
+            } else {
+              p.ingredients.forEach((link: any) => {
+                const qtyRequired = parseFloat(link.quantity) * parseInt(item.quantity);
+                requiredMap[link.ingredientId] = (requiredMap[link.ingredientId] || 0) + qtyRequired;
+              });
+            }
+          });
+        });
+
+        // Form results lists
+        const needToBuy: any[] = [];
+        const alreadyHave: any[] = [];
+
+        ingredients.forEach((ing: any) => {
+          const needed = requiredMap[ing.id] || 0;
+          if (needed > 0) {
+            const stock = ing.stock || 0;
+            const diff = needed - stock;
+            const row = {
+              id: ing.id,
+              name: ing.name,
+              unit: ing.unit,
+              need: needed,
+              have: stock,
+              toBuy: diff > 0 ? diff : 0
+            };
+            if (diff > 0) {
+              needToBuy.push(row);
+            } else {
+              alreadyHave.push(row);
+            }
+          }
+        });
+
+        setShoppingListInput({
+          needToBuy,
+          alreadyHave,
+          missingProducts: Array.from(missingIngredientProducts)
+        });
+      } else {
+        alert("Could not load backend products or orders data.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error calculating shopping list details.");
+    } finally {
+      setCalculatingList(false);
+    }
+  };
+
   // Ingredient Form
   const [ingName, setIngName] = useState("");
   const [ingCostUnit, setIngCostUnit] = useState<number>(0);
@@ -386,6 +479,154 @@ export default function AdminIngredients({ token, triggerRefresh }: AdminIngredi
           </div>
 
         </div>
+      </div>
+
+      {/* Feature 3: Consolidated Shopping List Generator */}
+      <div className="bg-white border border-brand-pink/25 rounded-[2.5rem] p-6 shadow-sm space-y-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-brand-pink/10 pb-4 gap-4">
+          <div className="flex items-center space-x-2.5">
+            <ClipboardList className="h-6 w-6 text-brand-rosegold" />
+            <div>
+              <h3 className="text-xl font-bold text-brand-chocolate font-heading">
+                Consolidated Grocery & Supply Shopping List
+              </h3>
+              <p className="text-xs text-brand-chocolate/65">
+                Aggregate supply requirements across confirmed upcoming bakes within a delivery date range.
+              </p>
+            </div>
+          </div>
+          
+          <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto text-xs">
+            <div className="flex items-center gap-2 bg-brand-cream/35 border border-brand-pink/15 px-3 py-2 rounded-xl">
+              <span className="font-bold text-brand-chocolate/75">From:</span>
+              <input
+                type="date"
+                value={shoppingStartDate}
+                onChange={(e) => setShoppingStartDate(e.target.value)}
+                className="bg-transparent font-bold text-brand-chocolate focus:outline-none"
+              />
+              <span className="font-bold text-brand-chocolate/75 ml-1">To:</span>
+              <input
+                type="date"
+                value={shoppingEndDate}
+                onChange={(e) => setShoppingEndDate(e.target.value)}
+                className="bg-transparent font-bold text-brand-chocolate focus:outline-none"
+              />
+            </div>
+            
+            <button
+               type="button"
+               disabled={calculatingList}
+               onClick={handleGenerateShoppingList}
+               className="bg-[#B76E79] hover:opacity-95 text-white px-4 py-2.5 rounded-xl font-bold uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-1.5"
+            >
+              {calculatingList ? "Calculating..." : "Generate List"}
+            </button>
+            
+            {shoppingListInput && (
+              <a
+                href={`/api/ingredients/shopping-list?startDate=${shoppingStartDate}&endDate=${shoppingEndDate}&token=${token}`}
+                target="_blank"
+                rel="noreferrer"
+                className="bg-brand-chocolate text-brand-cream text-center px-4 py-2.5 rounded-xl font-bold uppercase tracking-wider hover:opacity-90 transition flex items-center justify-center gap-1.5 cursor-pointer"
+              >
+                <FileText className="h-4 w-4" />
+                Download PDF
+              </a>
+            )}
+          </div>
+        </div>
+
+        {/* Results Screen */}
+        {shoppingListInput ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in duration-300">
+            {/* Column 1: Need to buy */}
+            <div className="bg-red-50/20 border border-red-200/50 p-5 rounded-3xl space-y-3.5">
+              <div className="flex justify-between items-center pb-2 border-b border-red-200/45">
+                <h4 className="font-bold text-red-800 text-sm flex items-center gap-2">
+                  <span className="h-2 w-2 rounded-full bg-red-650 animate-pulse" />
+                  <span>Out of Stock deficit ("Need to shop")</span>
+                </h4>
+                <span className="text-xs bg-red-100 text-red-800 font-bold px-2 py-0.5 rounded-md">
+                  {shoppingListInput.needToBuy.length} items deficit
+                </span>
+              </div>
+              
+              {shoppingListInput.needToBuy.length === 0 ? (
+                <p className="text-xs text-gray-400 italic text-center py-6">
+                  Perfect! All items are fully covered by in-store ingredients inventory.
+                </p>
+              ) : (
+                <div className="divide-y divide-red-100/40 max-h-80 overflow-y-auto pr-1">
+                  {shoppingListInput.needToBuy.map((item: any) => (
+                    <div key={item.id} className="flex justify-between items-center py-2.5 text-xs">
+                      <span className="font-semibold text-brand-chocolate">{item.name}</span>
+                      <div className="text-right shrink-0">
+                        <p className="text-[11px] text-gray-500 font-medium">Req: {item.need.toFixed(1)} / Has: {item.have.toFixed(1)}</p>
+                        <p className="text-[11px] text-red-700 font-bold">To Buy: {item.toBuy.toFixed(1)} {item.unit}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Column 2: Already have enough */}
+            <div className="bg-green-50/25 border border-green-200/50 p-5 rounded-3xl space-y-3.5">
+              <div className="flex justify-between items-center pb-2 border-b border-green-200/40">
+                <h4 className="font-bold text-green-800 text-sm flex items-center gap-2">
+                  <span className="h-2 w-2 rounded-full bg-green-650" />
+                  <span>Inventory Sufficient ("Already covered")</span>
+                </h4>
+                <span className="text-xs bg-green-150 text-green-800 font-bold px-2 py-0.5 rounded-md">
+                  {shoppingListInput.alreadyHave.length} items ok
+                </span>
+              </div>
+              
+              {shoppingListInput.alreadyHave.length === 0 ? (
+                <p className="text-xs text-gray-400 italic text-center py-6">
+                  No active ingredients have already satisfied conditions.
+                </p>
+              ) : (
+                <div className="divide-y divide-green-100/40 max-h-80 overflow-y-auto pr-1">
+                  {shoppingListInput.alreadyHave.map((item: any) => (
+                    <div key={item.id} className="flex justify-between items-center py-2.5 text-xs">
+                      <span className="font-medium text-brand-chocolate/75">{item.name}</span>
+                      <div className="text-right shrink-0">
+                        <p className="text-[11px] text-gray-500">Needed: {item.need.toFixed(1)} {item.unit}</p>
+                        <p className="text-[11px] text-green-700 font-bold">Covered (Instore: {item.have.toFixed(1)})</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Products missing recipe profiles */}
+            {shoppingListInput.missingProducts.length > 0 && (
+              <div className="md:col-span-2 bg-yellow-50/30 border border-yellow-200/60 p-5 rounded-3xl space-y-2">
+                <h4 className="font-bold text-yellow-800 text-sm">
+                  ⚠️ Products with no ingredient database metrics — check profiles manually:
+                </h4>
+                <div className="flex flex-wrap gap-2 pt-1 font-medium text-xs">
+                  {shoppingListInput.missingProducts.map((pName: string, idx: number) => (
+                    <span key={idx} className="bg-yellow-100 text-yellow-800 px-2.5 py-1 rounded-lg border border-yellow-250">
+                      • {pName}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center p-12 bg-brand-cream/5 border border-dashed border-brand-pink/20 rounded-3xl">
+            <ClipboardList className="h-8 w-8 text-brand-pink mb-2" />
+            <p className="text-sm font-semibold text-brand-chocolate/70">Shopping aggregation list is uncalculated yet.</p>
+            <p className="text-xs text-gray-400 mt-1 text-center max-w-sm">
+              Press "Generate List" to automatically compute deficits against your real-time ingredients repository stock!
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -36,6 +36,8 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
   const [deliveryAddress, setDeliveryAddress] = useState("");
   const [fulfillmentDate, setFulfillmentDate] = useState("");
   const [specialNotes, setSpecialNotes] = useState("");
+  const [tipType, setTipType] = useState<"none" | "10" | "15" | "20" | "custom">("none");
+  const [customTip, setCustomTip] = useState("");
   
   // Selection helpers for active product
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -160,9 +162,23 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
 
   const taxRate = settings?.taxRate || 0.0825;
   const discountedSubtotal = Math.max(0, cartSubtotal - calculatedDiscount);
+
+  // Calculate tip value based on discounted subtotal
+  let cartTipAmount = 0;
+  if (tipType === "10") {
+    cartTipAmount = parseFloat((discountedSubtotal * 0.10).toFixed(2));
+  } else if (tipType === "15") {
+    cartTipAmount = parseFloat((discountedSubtotal * 0.15).toFixed(2));
+  } else if (tipType === "20") {
+    cartTipAmount = parseFloat((discountedSubtotal * 0.20).toFixed(2));
+  } else if (tipType === "custom") {
+    const parsed = parseFloat(customTip);
+    cartTipAmount = isNaN(parsed) || parsed < 0 ? 0 : parsed;
+  }
+
   const cartTax = parseFloat((discountedSubtotal * taxRate).toFixed(2));
   const deliveryCost = fulfillmentType === "delivery" ? (settings?.deliveryFeePerMile ? settings.deliveryRadius * settings.deliveryFeePerMile : 15.00) : 0;
-  const cartTotal = parseFloat((discountedSubtotal + cartTax + deliveryCost).toFixed(2));
+  const cartTotal = parseFloat((discountedSubtotal + cartTipAmount + cartTax + deliveryCost).toFixed(2));
 
   const handleApplyCoupon = async () => {
     if (!enteredCoupon.trim()) return;
@@ -237,6 +253,7 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
       customerPhone,
       items: cart,
       subtotal: cartSubtotal,
+      tipAmount: cartTipAmount,
       tax: cartTax,
       deliveryFee: deliveryCost,
       total: cartTotal,
@@ -267,6 +284,8 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
         setEnteredCoupon("");
         setCouponMeta(null);
         setCouponError("");
+        setTipType("none");
+        setCustomTip("");
       } else {
         setErrorMessage(data.error || "Something went wrong. Please check your order criteria.");
       }
@@ -472,7 +491,7 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
                 </p>
 
                 {selectedProduct.description && (
-                  <p className="font-sans text-[13px] text-brand-chocolate/70 leading-normal mt-2">
+                  <p className="font-sans text-[13px] font-normal text-[#8D6E63] leading-normal mt-1.5 select-none">
                     {selectedProduct.description}
                   </p>
                 )}
@@ -763,6 +782,73 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
                   <div className="flex justify-between text-green-700 font-bold">
                     <span>Promo Discount ({couponMeta?.code}):</span>
                     <span>-${calculatedDiscount.toFixed(2)}</span>
+                  </div>
+                )}
+
+                {/* Interactive Tip Option Selector */}
+                <div className="bg-brand-cream/30 border border-brand-pink/15 rounded-2xl p-3 my-2.5 space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="font-extrabold text-[#3E2723] text-[10px] uppercase tracking-wider">Add a baking tip to support Lainie:</span>
+                    {cartTipAmount > 0 && (
+                      <span className="font-black text-brand-rosegold text-xs">+${cartTipAmount.toFixed(2)}</span>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-4 gap-1">
+                    {(["10", "15", "20"] as const).map((pct) => (
+                      <button
+                        key={pct}
+                        type="button"
+                        onClick={() => {
+                          setTipType(pct);
+                          setCustomTip("");
+                        }}
+                        className={`py-1 rounded-full text-[10px] font-extrabold border transition cursor-pointer text-center ${
+                          tipType === pct
+                            ? "bg-[#B76E79] border-[#B76E79] text-white"
+                            : "bg-white border-brand-pink/25 text-[#B76E79] hover:bg-brand-pink/10"
+                        }`}
+                      >
+                        {pct}%
+                      </button>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setTipType("custom");
+                        setCustomTip("");
+                      }}
+                      className={`py-1 rounded-full text-[10px] font-extrabold border transition cursor-pointer text-center ${
+                        tipType === "custom"
+                          ? "bg-[#B76E79] border-[#B76E79] text-white"
+                          : "bg-white border-brand-pink/25 text-[#B76E79] hover:bg-brand-pink/10"
+                      }`}
+                    >
+                      Custom
+                    </button>
+                  </div>
+                  {tipType === "custom" && (
+                    <div className="flex items-center space-x-1.5 animate-in slide-in-from-top-1 duration-200">
+                      <span className="text-xs text-brand-chocolate font-bold">$</span>
+                      <input
+                        type="number"
+                        min="0"
+                        step="any"
+                        placeholder="0.00"
+                        value={customTip}
+                        onChange={(e) => setCustomTip(e.target.value)}
+                        className="flex-1 text-[11px] font-bold border border-brand-pink/20 bg-white text-brand-chocolate px-2.5 py-1 rounded-xl focus:outline-none focus:ring-1 focus:ring-brand-rosegold"
+                      />
+                    </div>
+                  )}
+                  <p className="text-[10px] text-brand-chocolate/65 text-center italic mt-1 font-medium leading-none">
+                    Tips are never expected but always appreciated 🍰
+                  </p>
+                </div>
+
+                {cartTipAmount > 0 && (
+                  <div className="flex justify-between text-brand-chocolate/85 font-medium">
+                    <span>Tip ({tipType === 'custom' ? 'Custom' : `${tipType}%`}):</span>
+                    <span>${cartTipAmount.toFixed(2)}</span>
                   </div>
                 )}
 
