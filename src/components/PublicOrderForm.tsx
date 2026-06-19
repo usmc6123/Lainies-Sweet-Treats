@@ -325,26 +325,26 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
           backgroundPosition: "center",
         }}
       >
-        <div className="max-w-4xl mx-auto px-4">
+        <div className="max-w-5xl mx-auto px-4 relative">
           {/* Brand Logo & Headline Container */}
-          <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-5 mb-4">
+          <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8 mb-4 w-full">
             {/* Brand Logo Decorative Badge (Option A with vignette fade & subtle drop shadow) */}
-            <div className="w-[135px] h-[135px] flex-shrink-0 flex items-center justify-center transform-gpu hover:scale-105 transition-transform duration-300">
+            <div className="w-[143px] h-[143px] flex-shrink-0 flex items-center justify-center relative transform-gpu hover:scale-105 transition-transform duration-300">
               <img 
                 src="https://firebasestorage.googleapis.com/v0/b/lainies-sweet-treats.firebasestorage.app/o/site-assets%2F3dlogo.jpg?alt=media&token=98c5f20f-3e18-4a91-805a-6a4d145fc042"
                 alt="Lainie's Sweet Treats Logo"
-                className="w-full h-full object-cover scale-[1.02] filter drop-shadow-[0_4px_8px_rgba(0,0,0,0.4)]"
+                className="absolute w-[210px] h-[210px] max-w-none object-cover scale-[0.68] filter drop-shadow-[0_4px_8px_rgba(0,0,0,0.4)]"
                 style={{
-                  maskImage: 'radial-gradient(circle, rgba(0,0,0,1) 54%, rgba(0,0,0,0) 73%)',
-                  WebkitMaskImage: 'radial-gradient(circle, rgba(0,0,0,1) 54%, rgba(0,0,0,0) 73%)'
+                  maskImage: 'radial-gradient(circle, rgba(0,0,0,1) 62%, rgba(0,0,0,0) 75%)',
+                  WebkitMaskImage: 'radial-gradient(circle, rgba(0,0,0,1) 62%, rgba(0,0,0,0) 75%)'
                 }}
                 referrerPolicy="no-referrer"
               />
             </div>
 
             <h2 
-              className="text-3xl md:text-4xl lg:text-[45px] text-brand-cream font-medium tracking-tight font-heading leading-tight text-center md:text-left md:whitespace-nowrap"
-              style={{ textShadow: "0 2px 12px rgba(0,0,0,0.4)" }}
+              className="text-3xl md:text-[38px] lg:text-[42px] text-brand-cream font-bold font-heading leading-tight text-center md:text-left md:whitespace-nowrap z-10"
+              style={{ textShadow: "0 2px 12px rgba(0,0,0,0.4)", letterSpacing: "0.8px" }}
             >
               Lainie's Bespoke Bakery Menu
             </h2>
