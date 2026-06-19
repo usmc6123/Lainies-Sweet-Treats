@@ -158,7 +158,13 @@ export default function App() {
       )}
 
       {/* Dynamic Main Body */}
-      <main className={`flex-1 w-full pb-16 pt-6 ${isAdminView && token ? "max-w-none px-6 md:px-10 lg:px-12 md:flex md:space-x-8" : "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"}`}>
+      <main className={`flex-1 w-full pb-16 ${
+        view === "shop"
+          ? "pt-0 px-0 max-w-none"
+          : isAdminView && token
+            ? "pt-6 max-w-none px-6 md:px-10 lg:px-12 md:flex md:space-x-8"
+            : "pt-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
+      }`}>
         
         {/* Admin LEFT Navigation Sidebar: visible on md style screens */}
         {isAdminView && token && (

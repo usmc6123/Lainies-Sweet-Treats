@@ -315,53 +315,72 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
   }
 
   return (
-    <div id="shop-view" className="max-w-[96rem] mx-auto px-4 sm:px-6 lg:px-8 py-8 xl:py-12 animate-fade-in">
-      {/* Redesigned Hero Section */}
-      <div className="text-center max-w-4xl mx-auto mt-6 mb-12 px-4 py-8 animate-in fade-in duration-500">
-        <h2 className="text-4xl md:text-5xl lg:text-[54px] text-brand-chocolate font-medium tracking-tight font-heading leading-tight mb-4">
-          Lainie's Bespoke Bakery Menu
-        </h2>
-        
-        <p className="max-w-2xl mx-auto text-sm md:text-base text-brand-chocolate/85 leading-relaxed font-normal">
-          Based in Royse City, TX. Lainie custom-bakes every celebration treat.<br />
-          Experience personalized designs and custom buttercream artistry.
-        </p>
-
-        <div className="mt-8 flex justify-center">
-          <button
-            onClick={onSwitchToQuote}
-            className="bg-brand-rosegold text-white text-xs uppercase tracking-widest px-8 py-3.5 rounded-full font-black hover:opacity-90 active:scale-95 transition-all duration-200 shadow-md flex items-center justify-center space-x-2 cursor-pointer transform-gpu"
+    <div id="shop-view" className="w-full animate-fade-in">
+      {/* Premium brand-integrated Hero Section with glassmorphism filtering */}
+      <div 
+        className="w-full relative pt-16 pb-16 md:pt-20 md:pb-20 text-center flex flex-col justify-between animate-in fade-in duration-500"
+        style={{
+          backgroundImage: `linear-gradient(to bottom, rgba(62,39,35,0.55) 0%, rgba(62,39,35,0.4) 45%, rgba(62,39,35,0.5) 75%, rgba(249,213,211,0.85) 100%), url("https://firebasestorage.googleapis.com/v0/b/lainies-sweet-treats.firebasestorage.app/o/site-assets%2Fhero-background.jpg?alt=media&token=7902610f-34b3-4083-a28a-1691fb6040b1")`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      >
+        <div className="max-w-4xl mx-auto px-4">
+          <h2 
+            className="text-4xl md:text-5xl lg:text-[54px] text-brand-cream font-medium tracking-tight font-heading leading-tight mb-4"
+            style={{ textShadow: "0 2px 12px rgba(0,0,0,0.4)" }}
           >
-            REQUEST A CUSTOM QUOTE
-          </button>
+            Lainie's Bespoke Bakery Menu
+          </h2>
+          
+          <p 
+            className="max-w-2xl mx-auto text-sm md:text-base text-brand-cream/90 leading-relaxed font-normal"
+            style={{ textShadow: "0 2px 12px rgba(0,0,0,0.4)" }}
+          >
+            Based in Royse City, TX. Lainie custom-bakes every celebration treat.<br />
+            Experience personalized designs and custom buttercream artistry.
+          </p>
+
+          <div className="mt-8 flex justify-center">
+            <button
+              onClick={onSwitchToQuote}
+              className="bg-[#B76E79] text-white text-xs uppercase tracking-widest px-8 py-3.5 rounded-full font-black hover:opacity-90 active:scale-95 transition-all duration-200 shadow-[0_4px_20px_rgba(183,110,121,0.4)] flex items-center justify-center space-x-2 cursor-pointer transform-gpu"
+            >
+              REQUEST A CUSTOM QUOTE
+            </button>
+          </div>
+        </div>
+
+        {/* Categories selector embedded at the bottom of the hero background portion */}
+        <div className="w-full mt-10 md:mt-14 px-4 sm:px-6 lg:px-8">
+          <div className="max-w-3xl mx-auto bg-[rgba(255,248,240,0.15)] border border-[rgba(255,248,240,0.25)] backdrop-blur-md rounded-2xl md:rounded-full p-2.5 sm:p-3.5 shadow-lg">
+            <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 w-full">
+              {categories.map(cat => {
+                const isActive = activeCategory === cat;
+                
+                return (
+                  <button
+                    key={cat}
+                    type="button"
+                    onClick={() => setActiveCategory(cat)}
+                    className={`px-4.5 py-1.5 rounded-full text-xs font-semibold tracking-wider uppercase transition-all duration-200 cursor-pointer border ${
+                      isActive 
+                        ? "bg-[#B76E79] border-[#B76E79] text-white shadow-xs font-bold" 
+                        : "bg-transparent border-[rgba(255,248,240,0.35)] text-[#FFF8F0] hover:bg-[rgba(255,248,240,0.1)]"
+                    }`}
+                  >
+                    {cat === "All" ? "ALL" : cat.toUpperCase()}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Redesigned Categories Selector */}
-      <div className="w-full text-center mb-10">
-        <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 w-full">
-          {categories.map(cat => {
-            const isActive = activeCategory === cat;
-            
-            return (
-              <button
-                key={cat}
-                type="button"
-                onClick={() => setActiveCategory(cat)}
-                className={`px-4.5 py-1.5 rounded-full text-xs font-semibold tracking-wider uppercase transition-all duration-200 cursor-pointer border ${
-                  isActive 
-                    ? "bg-[#FCAAA6] border-brand-rosegold text-brand-chocolate shadow-xs" 
-                    : "bg-brand-pink/30 border-brand-pink/60 text-brand-chocolate hover:bg-brand-pink/50"
-                }`}
-              >
-                {cat === "All" ? "ALL" : cat.toUpperCase()}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+      {/* Main product view grid, search bar, and cart layout wrapper */}
+      <div className="max-w-[96rem] mx-auto px-4 sm:px-6 lg:px-8 py-8 xl:py-12">
+        <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-8">
         {/* LEFT COLUMN: Catalog list (takes 3/4 space on desktop) */}
         <div className="lg:col-span-2 xl:col-span-3 space-y-8">
           {/* Search & Product items block */}
@@ -1119,6 +1138,7 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }
