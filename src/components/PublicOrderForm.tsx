@@ -381,7 +381,7 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
         <div 
           className="absolute bottom-[-100px] left-0 right-0 h-[200px] pointer-events-none z-10"
           style={{
-            background: "linear-gradient(to bottom, rgba(62,39,35,0.5) 0%, rgba(120,80,75,0.4) 50%, rgba(249,213,211,0.55) 100%)"
+            background: "linear-gradient(to bottom, rgba(62,39,35,0.5) 0%, rgba(74,47,43,0.48) 10%, rgba(85,55,51,0.46) 20%, rgba(97,63,59,0.44) 30%, rgba(108,72,67,0.42) 40%, rgba(120,80,75,0.4) 50%, rgba(146,106,102,0.43) 60%, rgba(172,133,129,0.46) 70%, rgba(198,160,156,0.49) 80%, rgba(223,186,184,0.52) 90%, rgba(249,213,211,0.55) 100%)"
           }}
         />
       </div>
