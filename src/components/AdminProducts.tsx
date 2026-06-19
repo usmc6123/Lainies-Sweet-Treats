@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { PlusCircle, Edit2, Trash2, HelpCircle, FileText, Sparkles, DollarSign, Tag, Scale } from "lucide-react";
+import { PlusCircle, Edit2, Trash2, HelpCircle, FileText, Sparkles, DollarSign, Tag, Scale, Search } from "lucide-react";
 import { Product, Ingredient, ProductIngredientLink } from "../types";
 
 interface AdminProductsProps {
@@ -13,6 +13,11 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
   const [loading, setLoading] = useState(true);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [isAdding, setIsAdding] = useState(false);
+
+  // Search, Filter, and Sort states
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [sortBy, setSortBy] = useState("name-asc");
 
   // Form Fields
   const [name, setName] = useState("");
@@ -280,6 +285,33 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
       return sum;
     }, 0);
   };
+
+  const filteredAndSortedProducts = products.filter(p => {
+    const matchesSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = selectedCategory === "All" || p.category === selectedCategory;
+    return matchesSearch && matchesCategory;
+  }).sort((a, b) => {
+    if (sortBy === "name-asc") {
+      return a.name.localeCompare(b.name);
+    }
+    if (sortBy === "name-desc") {
+      return b.name.localeCompare(a.name);
+    }
+    if (sortBy === "price-asc") {
+      return a.basePrice - b.basePrice;
+    }
+    if (sortBy === "price-desc") {
+      return b.basePrice - a.basePrice;
+    }
+    if (sortBy === "margin-desc") {
+      const aCost = calculateIngredientTotalCost(a.ingredients || []);
+      const aMargin = a.basePrice > 0 ? ((a.basePrice - aCost) / a.basePrice) * 100 : 0;
+      const bCost = calculateIngredientTotalCost(b.ingredients || []);
+      const bMargin = b.basePrice > 0 ? ((b.basePrice - bCost) / b.basePrice) * 100 : 0;
+      return bMargin - aMargin;
+    }
+    return 0;
+  });
 
   const handleSaveProduct = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -806,71 +838,159 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
           </button>
         </form>
       ) : (
-        /* MASTER CATALOG DISPLAYS */
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
-          {products.map(p => {
-            const ingCost = calculateIngredientTotalCost(p.ingredients || []);
-            const margin = p.basePrice > 0 ? ((p.basePrice - ingCost) / p.basePrice) * 100 : 0;
+      /* MASTER CATALOG DISPLAYS WITH SEARCH & FILTER PANEL */
+      <div className="space-y-5">
+        <div className="bg-white border border-brand-pink/15 rounded-2xl p-4 shadow-xs space-y-4">
+          <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-center">
+            {/* Real-time Search input */}
+            <div className="relative flex-1">
+              <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                <Search className="h-4 w-4 text-brand-chocolate/50" />
+              </span>
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search Lainie's catalog by product name..."
+                className="w-full pl-9 pr-8 py-2.5 text-xs bg-slate-50/50 border border-brand-pink/20 rounded-xl text-brand-chocolate font-medium placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-brand-rosegold focus:bg-white"
+              />
+              {searchTerm && (
+                <button
+                  type="button"
+                  onClick={() => setSearchTerm("")}
+                  className="absolute inset-y-0 right-0 flex items-center pr-3 text-brand-chocolate/50 hover:text-brand-chocolate text-xs"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
 
-            return (
-              <div
-                key={p.id}
-                className={`border rounded-2xl p-4 shadow-sm hover:shadow-md transition flex flex-col justify-between group ${
-                  p.isVisible === false 
-                    ? "bg-slate-50/70 border-slate-200 opacity-70" 
-                    : "bg-white border-brand-pink/20"
-                }`}
+            {/* Sort query dropdown */}
+            <div className="flex items-center space-x-2">
+              <span className="text-[10px] font-bold text-brand-chocolate uppercase tracking-wider shrink-0">Sorted By:</span>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="bg-white border border-brand-pink/15 rounded-xl px-3 py-2 text-xs text-brand-chocolate font-semibold focus:outline-none focus:ring-1 focus:ring-brand-rosegold cursor-pointer"
               >
-                <div>
-                  <div className="h-40 bg-brand-pink/10 rounded-xl overflow-hidden mb-3 relative">
-                    <img 
-                      src={p.imgUrl} 
-                      alt={p.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
-                      referrerPolicy="no-referrer"
-                    />
-                    <span className="absolute top-2.5 left-2.5 text-[9px] uppercase font-extrabold bg-brand-chocolate text-brand-cream px-2 py-0.5 rounded-md">
-                      {p.category}
-                    </span>
-                    {p.isVisible === false && (
-                      <span className="absolute top-2.5 right-2.5 text-[9px] uppercase font-extrabold bg-red-600 text-white px-2 py-0.5 rounded-md shadow">
-                        HIDDEN
-                      </span>
-                    )}
-                  </div>
+                <option value="name-asc">Name (A-Z)</option>
+                <option value="name-desc">Name (Z-A)</option>
+                <option value="price-asc">Price (Low to High)</option>
+                <option value="price-desc">Price (High to Low)</option>
+                <option value="margin-desc">Profit Margin (High to Low)</option>
+              </select>
+            </div>
+          </div>
 
-                  <h3 className="font-extrabold text-base text-brand-chocolate leading-tight font-heading">{p.name}</h3>
-                  <p className="text-[11px] text-gray-500 mt-1 line-clamp-2 font-medium leading-relaxed">{p.description}</p>
-                </div>
-
-                <div className="mt-4 pt-3 border-t border-brand-pink/10">
-                  <div className="flex justify-between items-center text-xs font-semibold">
-                    <div>
-                      <span className="text-[9px] text-gray-400 block uppercase font-bold tracking-wider">Price</span>
-                      <strong className="text-brand-chocolate font-extrabold text-base">${p.basePrice.toFixed(2)}</strong>
-                    </div>
-                    <div className="text-right">
-                      <span className="text-[9px] text-gray-400 block uppercase font-bold tracking-wider">Margin</span>
-                      <span className={`font-extrabold text-[10px] px-1.5 py-0.5 rounded-md ${
-                        margin > 65 ? "bg-green-50 text-green-700" : margin > 40 ? "bg-blue-50 text-blue-700" : "bg-yellow-50 text-yellow-755"
-                      }`}>
-                        {margin.toFixed(0)}% Profit
-                      </span>
-                    </div>
-                  </div>
-
+          {/* Category filter pills */}
+          <div className="border-t border-brand-pink/10 pt-3">
+            <label className="text-[10px] font-extrabold text-brand-chocolate uppercase tracking-wider block mb-2">
+              Filter by Category:
+            </label>
+            <div className="flex flex-wrap gap-1.5">
+              {["All", ...dynamicCategories].map((cat) => {
+                const isActive = selectedCategory === cat;
+                return (
                   <button
-                    onClick={() => handleEditClick(p)}
-                    className="w-full mt-3 bg-brand-cream hover:bg-brand-pink/30 text-brand-chocolate border border-brand-pink/20 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center space-x-1.5 cursor-pointer"
+                    key={cat}
+                    type="button"
+                    onClick={() => setSelectedCategory(cat)}
+                    className={`px-3 py-1.5 rounded-lg text-[10px] font-bold transition cursor-pointer select-none ${
+                      isActive
+                        ? "bg-brand-rosegold text-white shadow-xs"
+                        : "bg-brand-cream/40 text-brand-chocolate border border-brand-pink/10 hover:bg-brand-pink/20"
+                    }`}
                   >
-                    <Edit2 className="h-3.5 w-3.5 text-brand-rosegold" />
-                    <span>Edit Configuration & Costing</span>
+                    {cat}
                   </button>
-                </div>
-              </div>
-            );
-          })}
+                );
+              })}
+            </div>
+          </div>
         </div>
+
+        {/* Dense Responsive catalog grid */}
+        {filteredAndSortedProducts.length === 0 ? (
+          <div className="text-center py-16 bg-white border border-brand-pink/10 rounded-2xl">
+            <p className="text-sm text-brand-chocolate/60">No treats match your active filters or search term.</p>
+            <button
+              onClick={() => { setSearchTerm(""); setSelectedCategory("All"); }}
+              className="mt-3 text-xs font-semibold text-brand-rosegold hover:underline"
+            >
+              Clear filter presets
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+            {filteredAndSortedProducts.map(p => {
+              const ingCost = calculateIngredientTotalCost(p.ingredients || []);
+              const margin = p.basePrice > 0 ? ((p.basePrice - ingCost) / p.basePrice) * 100 : 0;
+
+              return (
+                <div
+                  key={p.id}
+                  className={`border rounded-xl p-3 shadow-xs hover:shadow-sm transition flex flex-col justify-between group ${
+                    p.isVisible === false 
+                      ? "bg-slate-50/70 border-slate-200 opacity-70" 
+                      : "bg-white border-brand-pink/20"
+                  }`}
+                >
+                  <div>
+                    <div className="h-28 bg-brand-pink/10 rounded-lg overflow-hidden mb-2 relative">
+                      <img 
+                        src={p.imgUrl || "https://images.unsplash.com/photo-1578985545062-69928b1d9587"} 
+                        alt={p.name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                        referrerPolicy="no-referrer"
+                      />
+                      <span className="absolute top-1.5 left-1.5 text-[8px] uppercase font-extrabold bg-brand-chocolate text-brand-cream px-1.5 py-0.5 rounded">
+                        {p.category}
+                      </span>
+                      {p.isVisible === false && (
+                        <span className="absolute top-1.5 right-1.5 text-[8px] uppercase font-extrabold bg-red-600 text-white px-1.5 py-0.5 rounded shadow">
+                          HIDDEN
+                        </span>
+                      )}
+                    </div>
+
+                    <h3 className="font-extrabold text-xs text-brand-chocolate leading-tight font-heading line-clamp-1" title={p.name}>
+                      {p.name}
+                    </h3>
+                    <p className="text-[10px] text-gray-500 mt-0.5 line-clamp-2 font-medium leading-tight">
+                      {p.description}
+                    </p>
+                  </div>
+
+                  <div className="mt-2 text-left">
+                    <div className="flex justify-between items-center text-[10px] font-semibold pt-2 border-t border-brand-pink/10">
+                      <div>
+                        <span className="text-[8px] text-gray-400 block uppercase font-bold tracking-wider leading-none">Price</span>
+                        <strong className="text-brand-chocolate font-extrabold text-xs">${p.basePrice.toFixed(2)}</strong>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-[8px] text-gray-400 block uppercase font-bold tracking-wider leading-none">Margin</span>
+                        <span className={`font-extrabold text-[9px] px-1 py-0.25 rounded ${
+                          margin > 65 ? "bg-green-50 text-green-700" : margin > 40 ? "bg-blue-50 text-blue-700" : "bg-yellow-50 text-yellow-755"
+                        }`}>
+                          {margin.toFixed(0)}%
+                        </span>
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={() => handleEditClick(p)}
+                      className="w-full mt-2 bg-brand-cream hover:bg-brand-pink/30 text-brand-chocolate border border-brand-pink/20 py-1.5 rounded-lg text-[9px] font-extrabold transition flex items-center justify-center space-x-1 cursor-pointer"
+                    >
+                      <Edit2 className="h-2.5 w-2.5 text-brand-rosegold" />
+                      <span>Configure</span>
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
       )}
     </div>
   );
