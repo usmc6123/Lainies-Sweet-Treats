@@ -1035,7 +1035,9 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
 
                 return (
                   <div className="space-y-2">
-                    <div className="relative h-32 sm:h-36 w-full bg-brand-pink/10 rounded-xl overflow-hidden border border-brand-pink/15">
+                    <div className={`relative w-full bg-brand-pink/5 rounded-2xl overflow-hidden border border-brand-pink/15 ${
+                      productPhotos.length > 1 ? "aspect-[4/3]" : "aspect-square"
+                    }`}>
                       <img 
                         src={activePhoto.url} 
                         alt={`Preview of ${selectedProduct.name}`} 
