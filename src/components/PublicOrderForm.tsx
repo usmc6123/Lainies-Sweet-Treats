@@ -326,45 +326,58 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
         }}
       >
         <div className="max-w-5xl mx-auto px-4 relative">
-          {/* Brand Logo & Headline Container */}
-          <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8 mb-4 w-full">
-            {/* Brand Logo Decorative Badge (Option A with vignette fade & subtle drop shadow) */}
-            <div className="w-[143px] h-[143px] flex-shrink-0 flex items-center justify-center relative transform-gpu hover:scale-105 transition-transform duration-300">
-              <img 
-                src="https://firebasestorage.googleapis.com/v0/b/lainies-sweet-treats.firebasestorage.app/o/site-assets%2F3dlogo.jpg?alt=media&token=98c5f20f-3e18-4a91-805a-6a4d145fc042"
-                alt="Lainie's Sweet Treats Logo"
-                className="absolute w-[210px] h-[210px] max-w-none object-cover scale-[0.68] filter drop-shadow-[0_4px_8px_rgba(0,0,0,0.4)]"
-                style={{
-                  maskImage: 'radial-gradient(circle, rgba(0,0,0,1) 62%, rgba(0,0,0,0) 75%)',
-                  WebkitMaskImage: 'radial-gradient(circle, rgba(0,0,0,1) 62%, rgba(0,0,0,0) 75%)'
-                }}
-                referrerPolicy="no-referrer"
-              />
-            </div>
+          {/* Large desktop-only floating logo, absolutely positioned relative to the centered header container */}
+          <div className="hidden lg:flex absolute lg:-left-[155px] xl:-left-[215px] lg:-top-[15px] xl:-top-[35px] lg:w-[130px] lg:h-[130px] xl:w-[220px] xl:h-[220px] flex-shrink-0 items-center justify-center transform-gpu hover:scale-105 transition-all duration-300 z-20">
+            <img 
+              src="https://firebasestorage.googleapis.com/v0/b/lainies-sweet-treats.firebasestorage.app/o/site-assets%2F3dlogo.jpg?alt=media&token=98c5f20f-3e18-4a91-805a-6a4d145fc042"
+              alt="Lainie's Sweet Treats Logo"
+              className="absolute lg:w-[190px] lg:h-[190px] xl:w-[320px] xl:h-[320px] max-w-none object-cover scale-[0.68] filter drop-shadow-[0_4px_8px_rgba(0,0,0,0.4)]"
+              style={{
+                maskImage: 'radial-gradient(circle, rgba(0,0,0,1) 62%, rgba(0,0,0,0) 75%)',
+                WebkitMaskImage: 'radial-gradient(circle, rgba(0,0,0,1) 62%, rgba(0,0,0,0) 75%)'
+              }}
+              referrerPolicy="no-referrer"
+            />
+          </div>
+          {/* Mobile-only stacked logo */}
+          <div className="lg:hidden relative mx-auto mb-6 w-[150px] h-[150px] flex-shrink-0 flex items-center justify-center transform-gpu hover:scale-105 transition-all duration-300 z-20">
+            <img 
+              src="https://firebasestorage.googleapis.com/v0/b/lainies-sweet-treats.firebasestorage.app/o/site-assets%2F3dlogo.jpg?alt=media&token=98c5f20f-3e18-4a91-805a-6a4d145fc042"
+              alt="Lainie's Sweet Treats Logo"
+              className="absolute w-[220px] h-[220px] max-w-none object-cover scale-[0.68] filter drop-shadow-[0_4px_8px_rgba(0,0,0,0.4)]"
+              style={{
+                maskImage: 'radial-gradient(circle, rgba(0,0,0,1) 62%, rgba(0,0,0,0) 75%)',
+                WebkitMaskImage: 'radial-gradient(circle, rgba(0,0,0,1) 62%, rgba(0,0,0,0) 75%)'
+              }}
+              referrerPolicy="no-referrer"
+            />
+          </div>
 
+          {/* Centered Headline, Subtext, and CTA Button Group */}
+          <div className="max-w-2xl mx-auto text-center relative z-10">
             <h2 
-              className="text-3xl md:text-[38px] lg:text-[42px] text-brand-cream font-bold font-heading leading-tight text-center md:text-left md:whitespace-nowrap z-10"
+              className="text-3xl md:text-[38px] lg:text-[42px] text-brand-cream font-bold font-heading leading-tight mb-4"
               style={{ textShadow: "0 2px 12px rgba(0,0,0,0.4)", letterSpacing: "0.8px" }}
             >
               Lainie's Bespoke Bakery Menu
             </h2>
-          </div>
-          
-          <p 
-            className="max-w-2xl mx-auto text-sm md:text-base text-brand-cream/90 leading-relaxed font-normal"
-            style={{ textShadow: "0 2px 12px rgba(0,0,0,0.4)" }}
-          >
-            Based in Royse City, TX. Lainie custom-bakes every celebration treat.<br />
-            Experience personalized designs and custom buttercream artistry.
-          </p>
-
-          <div className="mt-8 flex justify-center">
-            <button
-              onClick={onSwitchToQuote}
-              className="bg-[#B76E79] text-white text-xs uppercase tracking-widest px-8 py-3.5 rounded-full font-black hover:opacity-90 active:scale-95 transition-all duration-200 shadow-[0_4px_20px_rgba(183,110,121,0.4)] flex items-center justify-center space-x-2 cursor-pointer transform-gpu"
+            
+            <p 
+              className="text-sm md:text-base text-brand-cream/90 leading-relaxed font-normal mb-8"
+              style={{ textShadow: "0 2px 12px rgba(0,0,0,0.4)" }}
             >
-              REQUEST A CUSTOM QUOTE
-            </button>
+              Based in Royse City, TX. Lainie custom-bakes every celebration treat.<br />
+              Experience personalized designs and custom buttercream artistry.
+            </p>
+
+            <div className="flex justify-center">
+              <button
+                onClick={onSwitchToQuote}
+                className="bg-[#B76E79] text-white text-xs uppercase tracking-widest px-8 py-3.5 rounded-full font-black hover:opacity-90 active:scale-95 transition-all duration-200 shadow-[0_4px_20px_rgba(183,110,121,0.4)] flex items-center justify-center space-x-2 cursor-pointer transform-gpu"
+              >
+                REQUEST A CUSTOM QUOTE
+              </button>
+            </div>
           </div>
         </div>
 
