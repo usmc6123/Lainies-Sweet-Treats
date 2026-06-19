@@ -549,206 +549,7 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
             )}
           </div>
 
-          {/* CUSTOMIZABLE SELECTION MODAL PANELS (IF PRODUCT SELECTED) */}
-          {selectedProduct && (
-            <div className="fixed inset-0 bg-brand-chocolate/40 backdrop-blur-xs flex items-center justify-center z-50 p-4">
-              <div className="bg-white rounded-[2.5rem] max-w-lg w-full max-h-[90vh] overflow-y-auto border border-brand-pink/30 p-8 shadow-xl relative animate-in fade-in duration-300">
-                <button
-                  onClick={() => setSelectedProduct(null)}
-                  className="absolute top-5 right-5 text-brand-chocolate/60 hover:text-brand-chocolate text-xl font-bold p-1"
-                >
-                  ✕
-                </button>
-                
-                <h3 className="text-xl font-bold text-brand-chocolate font-heading italic">
-                  Configure Your treats
-                </h3>
-                <p className="text-xs text-brand-rosegold font-bold uppercase tracking-wider mt-1">
-                  {selectedProduct.name}
-                </p>
 
-                {selectedProduct.description && (
-                  <p className="font-sans text-[13px] font-normal text-[#8D6E63] leading-normal mt-1.5 select-none">
-                    {selectedProduct.description}
-                  </p>
-                )}
-
-                {/* Visual Carousel/Gallery of All Photos */}
-                <div className="mt-4">
-                  {(() => {
-                    const productPhotos = selectedProduct.photos && selectedProduct.photos.length > 0
-                      ? selectedProduct.photos
-                      : [{ url: selectedProduct.imgUrl || "https://images.unsplash.com/photo-1578985545062-69928b1d9587", isPrimary: true }];
-                    
-                    const activePhoto = productPhotos[activeModalPhotoIndex] || productPhotos[0];
-
-                    return (
-                      <div className="space-y-2">
-                        <div className="relative aspect-video w-full bg-brand-pink/10 rounded-2xl overflow-hidden border border-brand-pink/15">
-                          <img 
-                            src={activePhoto.url} 
-                            alt={`Preview of ${selectedProduct.name}`} 
-                            className="w-full h-full object-cover animate-in fade-in duration-200"
-                            referrerPolicy="no-referrer"
-                          />
-                        </div>
-                        {productPhotos.length > 1 && (
-                          <div className="flex gap-2 border border-brand-pink/10 rounded-xl p-1.5 overflow-x-auto bg-brand-cream/10">
-                            {productPhotos.map((ph, idx) => (
-                              <button
-                                key={idx}
-                                type="button"
-                                onClick={() => setActiveModalPhotoIndex(idx)}
-                                className={`relative w-12 h-12 rounded-lg overflow-hidden border-2 shrink-0 transition ${
-                                  idx === activeModalPhotoIndex ? 'border-brand-rosegold shadow-sm' : 'border-transparent'
-                                }`}
-                              >
-                                <img src={ph.url} alt="Thumbnail preview" className="w-full h-full object-cover" />
-                              </button>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })()}
-                </div>
-
-                {/* Sizes Radio selections */}
-                {selectedProduct.options?.sizes && selectedProduct.options.sizes.length > 0 && (
-                  <div className="mt-5">
-                    <label className="text-xs font-bold text-brand-chocolate uppercase tracking-wider block mb-2">
-                      1. Highlight Size / Serving Count:
-                    </label>
-                    <div className="space-y-2">
-                       {selectedProduct.options.sizes.map(sz => (
-                        <label 
-                          key={sz.name}
-                          className={`flex items-center justify-between p-3 rounded-xl border text-xs cursor-pointer transition-all ${
-                            choiceSize === sz.name 
-                              ? "bg-brand-pink/20 border-brand-rosegold font-semibold" 
-                              : "border-gray-100 hover:bg-brand-cream/50"
-                          }`}
-                        >
-                          <div className="flex items-center space-x-2">
-                            <input 
-                              type="radio" 
-                              name="options-sizes"
-                              checked={choiceSize === sz.name}
-                              onChange={() => setChoiceSize(sz.name)}
-                              className="accent-brand-rosegold"
-                            />
-                            <span>{sz.name}</span>
-                          </div>
-                          <span className="text-brand-rosegold font-semibold">
-                            {sz.priceAdd > 0 ? `+$${sz.priceAdd.toFixed(2)}` : "Included"}
-                          </span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Flavors selections */}
-                {selectedProduct.options?.flavors && selectedProduct.options.flavors.length > 0 && (
-                  <div className="mt-5">
-                    <label className="text-xs font-bold text-brand-chocolate uppercase tracking-wider block mb-2">
-                      2. Selected Flavor Preference:
-                    </label>
-                    <select
-                      value={choiceFlavor}
-                      onChange={(e) => setChoiceFlavor(e.target.value)}
-                      className="w-full border border-brand-pink/20 rounded-xl px-3 py-2 text-xs bg-brand-cream/30 focus:outline-none focus:ring-1 focus:ring-brand-rosegold"
-                    >
-                      {selectedProduct.options.flavors.map(f => (
-                        <option key={f} value={f}>{f}</option>
-                      ))}
-                    </select>
-                  </div>
-                )}
-
-                {/* AddOns checkboxes */}
-                {selectedProduct.options?.addOns && selectedProduct.options.addOns.length > 0 && (
-                  <div className="mt-5">
-                    <label className="text-xs font-bold text-brand-chocolate uppercase tracking-wider block mb-2">
-                      3. Premium Add-ons / Embellishments:
-                    </label>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                      {selectedProduct.options.addOns.map(add => (
-                        <label 
-                          key={add.name}
-                          className={`flex items-center justify-between p-2.5 rounded-lg border text-xs cursor-pointer transition-all ${
-                            choiceAddOns.includes(add.name)
-                              ? "bg-brand-pink/20 border-brand-rosegold font-semibold"
-                              : "border-gray-50 hover:bg-brand-cream/30"
-                          }`}
-                        >
-                          <div className="flex items-center space-x-1.5">
-                            <input 
-                              type="checkbox"
-                              checked={choiceAddOns.includes(add.name)}
-                              onChange={(e) => {
-                                if (e.target.checked) {
-                                  setChoiceAddOns([...choiceAddOns, add.name]);
-                                } else {
-                                  setChoiceAddOns(choiceAddOns.filter(x => x !== add.name));
-                                }
-                              }}
-                              className="accent-brand-rosegold"
-                            />
-                            <span>{add.name}</span>
-                          </div>
-                          <span className="text-[10px] text-brand-rosegold font-bold">
-                            +${add.priceAdd}
-                          </span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Quantity and Checkout action */}
-                <div className="mt-6 pt-4 border-t border-brand-pink/10 flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <button 
-                      onClick={() => setChoiceQty(Math.max(1, choiceQty - 1))}
-                      className="bg-brand-cream hover:bg-brand-pink px-2.5 py-1 rounded-md text-sm font-bold"
-                    >
-                      -
-                    </button>
-                    <span className="text-sm font-bold w-6 text-center">{choiceQty}</span>
-                    <button 
-                      onClick={() => setChoiceQty(choiceQty + 1)}
-                      className="bg-brand-cream hover:bg-brand-pink px-2.5 py-1 rounded-md text-sm font-bold"
-                    >
-                      +
-                    </button>
-                  </div>
-                  
-                  <div className="text-right">
-                    <span className="text-[10px] text-brand-chocolate/60 block uppercase font-medium">Bake Unit Price</span>
-                    <span className="text-lg font-bold text-brand-rosegold">
-                      ${(getSelectedProductPrice() * choiceQty).toFixed(2)}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="mt-5 flex gap-2">
-                  <button
-                    onClick={() => setSelectedProduct(null)}
-                    className="flex-1 bg-gray-100 hover:bg-gray-200 text-brand-chocolate py-2.5 rounded-full text-xs font-semibold transition"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleAddToBag}
-                    className="flex-1 bg-brand-rosegold hover:bg-brand-rosegold/90 text-white py-2.5 rounded-full text-xs font-semibold transition shadow-xs"
-                  >
-                    Add to Baking Bag
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
 
         {/* RIGHT COLUMN: Interactive Cart & Checkout form */}
@@ -1198,6 +999,211 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
       )}
       </div>
       </div>
+
+      {/* CUSTOMIZABLE SELECTION MODAL PANELS (IF PRODUCT SELECTED) */}
+      {selectedProduct && (
+        <div className="fixed inset-0 bg-brand-chocolate/40 backdrop-blur-xs flex items-center justify-center z-[100] p-4">
+          <div className="bg-white rounded-3xl max-w-md w-full max-h-[90vh] overflow-y-auto border border-brand-pink/30 p-6 shadow-xl relative animate-in fade-in duration-300">
+            <button
+              onClick={() => setSelectedProduct(null)}
+              className="absolute top-4 right-4 text-brand-chocolate/60 hover:text-brand-chocolate text-xl font-bold p-1 animate-hover-pulse"
+            >
+              ✕
+            </button>
+            
+            <h3 className="text-lg font-bold text-brand-chocolate font-heading italic">
+              Configure Your Treats
+            </h3>
+            <p className="text-[11px] text-brand-rosegold font-bold uppercase tracking-wider mt-0.5">
+              {selectedProduct.name}
+            </p>
+
+            {selectedProduct.description && (
+              <p className="font-sans text-[12px] font-normal text-[#8D6E63] leading-normal mt-1 select-none">
+                {selectedProduct.description}
+              </p>
+            )}
+
+            {/* Visual Carousel/Gallery of All Photos */}
+            <div className="mt-3">
+              {(() => {
+                const productPhotos = selectedProduct.photos && selectedProduct.photos.length > 0
+                  ? selectedProduct.photos
+                  : [{ url: selectedProduct.imgUrl || "https://images.unsplash.com/photo-1578985545062-69928b1d9587", isPrimary: true }];
+                
+                const activePhoto = productPhotos[activeModalPhotoIndex] || productPhotos[0];
+
+                return (
+                  <div className="space-y-2">
+                    <div className="relative h-32 sm:h-36 w-full bg-brand-pink/10 rounded-xl overflow-hidden border border-brand-pink/15">
+                      <img 
+                        src={activePhoto.url} 
+                        alt={`Preview of ${selectedProduct.name}`} 
+                        className="w-full h-full object-cover animate-in fade-in duration-200"
+                        referrerPolicy="no-referrer"
+                      />
+                    </div>
+                    {productPhotos.length > 1 && (
+                      <div className="flex gap-2 border border-brand-pink/10 rounded-xl p-1.5 overflow-x-auto bg-brand-cream/10">
+                        {productPhotos.map((ph, idx) => (
+                          <button
+                            key={idx}
+                            type="button"
+                            onClick={() => setActiveModalPhotoIndex(idx)}
+                            className={`relative w-12 h-12 rounded-lg overflow-hidden border-2 shrink-0 transition ${
+                              idx === activeModalPhotoIndex ? 'border-brand-rosegold shadow-sm' : 'border-transparent'
+                            }`}
+                          >
+                            <img src={ph.url} alt="Thumbnail preview" className="w-full h-full object-cover" />
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
+            </div>
+
+            {/* Sizes Radio selections */}
+            {selectedProduct.options?.sizes && selectedProduct.options.sizes.length > 0 && (
+              <div className="mt-5">
+                <label className="text-xs font-bold text-brand-chocolate uppercase tracking-wider block mb-2">
+                  1. Highlight Size / Serving Count:
+                </label>
+                <div className="space-y-2">
+                   {selectedProduct.options.sizes.map(sz => (
+                    <label 
+                      key={sz.name}
+                      className={`flex items-center justify-between p-3 rounded-xl border text-xs cursor-pointer transition-all ${
+                        choiceSize === sz.name 
+                          ? "bg-brand-pink/20 border-brand-rosegold font-semibold" 
+                          : "border-gray-100 hover:bg-brand-cream/50"
+                      }`}
+                    >
+                      <div className="flex items-center space-x-2">
+                        <input 
+                          type="radio" 
+                          name="options-sizes"
+                          checked={choiceSize === sz.name}
+                          onChange={() => setChoiceSize(sz.name)}
+                          className="accent-brand-rosegold"
+                        />
+                        <span>{sz.name}</span>
+                      </div>
+                      <span className="text-brand-rosegold font-semibold">
+                        {sz.priceAdd > 0 ? `+$${sz.priceAdd.toFixed(2)}` : "Included"}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Flavors selections */}
+            {selectedProduct.options?.flavors && selectedProduct.options.flavors.length > 0 && (
+              <div className="mt-5">
+                <label className="text-xs font-bold text-brand-chocolate uppercase tracking-wider block mb-2">
+                  2. Selected Flavor Preference:
+                </label>
+                <select
+                  value={choiceFlavor}
+                  onChange={(e) => setChoiceFlavor(e.target.value)}
+                  className="w-full border border-brand-pink/20 rounded-xl px-3 py-2 text-xs bg-brand-cream/30 focus:outline-none focus:ring-1 focus:ring-brand-rosegold"
+                >
+                  {selectedProduct.options.flavors.map(f => (
+                    <option key={f} value={f}>{f}</option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            {/* AddOns checkboxes */}
+            {selectedProduct.options?.addOns && selectedProduct.options.addOns.length > 0 && (
+              <div className="mt-5">
+                <label className="text-xs font-bold text-brand-chocolate uppercase tracking-wider block mb-2">
+                  3. Premium Add-ons / Embellishments:
+                </label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {selectedProduct.options.addOns.map(add => (
+                    <label 
+                      key={add.name}
+                      className={`flex items-center justify-between p-2.5 rounded-lg border text-xs cursor-pointer transition-all ${
+                        choiceAddOns.includes(add.name)
+                          ? "bg-brand-pink/20 border-brand-rosegold font-semibold"
+                          : "border-gray-50 hover:bg-brand-cream/30"
+                      }`}
+                    >
+                      <div className="flex items-center space-x-1.5">
+                        <input 
+                          type="checkbox"
+                          checked={choiceAddOns.includes(add.name)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setChoiceAddOns([...choiceAddOns, add.name]);
+                            } else {
+                              setChoiceAddOns(choiceAddOns.filter(x => x !== add.name));
+                            }
+                          }}
+                          className="accent-brand-rosegold"
+                        />
+                        <span>{add.name}</span>
+                      </div>
+                      <span className="text-[10px] text-brand-rosegold font-bold">
+                        +${add.priceAdd}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Quantity and Checkout action */}
+            <div className="mt-6 pt-4 border-t border-brand-pink/10 flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <button 
+                  type="button"
+                  onClick={() => setChoiceQty(Math.max(1, choiceQty - 1))}
+                  className="bg-brand-cream hover:bg-brand-pink px-2.5 py-1 rounded-md text-sm font-bold"
+                >
+                  -
+                </button>
+                <span className="text-sm font-bold w-6 text-center">{choiceQty}</span>
+                <button 
+                  type="button"
+                  onClick={() => setChoiceQty(choiceQty + 1)}
+                  className="bg-brand-cream hover:bg-brand-pink px-2.5 py-1 rounded-md text-sm font-bold"
+                >
+                  +
+                </button>
+              </div>
+              
+              <div className="text-right">
+                <span className="text-[10px] text-brand-chocolate/60 block uppercase font-medium">Bake Unit Price</span>
+                <span className="text-lg font-bold text-brand-rosegold">
+                  ${(getSelectedProductPrice() * choiceQty).toFixed(2)}
+                </span>
+              </div>
+            </div>
+
+            <div className="mt-5 flex gap-2">
+              <button
+                type="button"
+                onClick={() => setSelectedProduct(null)}
+                className="flex-1 bg-gray-100 hover:bg-gray-200 text-brand-chocolate py-2.5 rounded-full text-xs font-semibold transition"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleAddToBag}
+                className="flex-1 bg-brand-rosegold hover:bg-brand-rosegold/90 text-white py-2.5 rounded-full text-xs font-semibold transition shadow-xs"
+              >
+                Add to Baking Bag
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
