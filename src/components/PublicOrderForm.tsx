@@ -315,10 +315,10 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
   }
 
   return (
-    <div id="shop-view" className="w-full animate-fade-in">
+    <div id="shop-view" className="w-full animate-fade-in relative">
       {/* Premium brand-integrated Hero Section with glassmorphism filtering */}
       <div 
-        className="w-full relative pt-16 pb-16 md:pt-20 md:pb-20 text-center flex flex-col justify-between animate-in fade-in duration-500"
+        className="w-full relative z-20 pt-16 pb-16 md:pt-20 md:pb-20 text-center flex flex-col justify-between animate-in fade-in duration-500"
         style={{
           backgroundImage: `linear-gradient(to bottom, rgba(62,39,35,0.55) 0%, rgba(62,39,35,0.4) 45%, rgba(62,39,35,0.5) 75%, rgba(249,213,211,0.85) 100%), url("https://firebasestorage.googleapis.com/v0/b/lainies-sweet-treats.firebasestorage.app/o/site-assets%2Fhero-background.jpg?alt=media&token=7902610f-34b3-4083-a28a-1691fb6040b1")`,
           backgroundSize: "cover",
@@ -352,9 +352,9 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
         </div>
 
         {/* Categories selector embedded at the bottom of the hero background portion */}
-        <div className="w-full mt-10 md:mt-14 px-4 sm:px-6 lg:px-8">
-          <div className="max-w-3xl mx-auto bg-[rgba(255,248,240,0.15)] border border-[rgba(255,248,240,0.25)] backdrop-blur-md rounded-2xl md:rounded-full p-2.5 sm:p-3.5 shadow-lg">
-            <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 w-full">
+        <div className="w-full mt-10 md:mt-14 px-4 sm:px-6 lg:px-8 relative z-20">
+          <div className="max-w-5xl mx-auto bg-[rgba(255,248,240,0.15)] border border-[rgba(255,248,240,0.25)] backdrop-blur-md rounded-2xl md:rounded-full p-2.5 sm:p-3 sm:px-4 shadow-lg">
+            <div className="flex flex-wrap md:flex-nowrap items-center justify-center gap-1.5 sm:gap-2.5 w-full">
               {categories.map(cat => {
                 const isActive = activeCategory === cat;
                 
@@ -363,7 +363,7 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
                     key={cat}
                     type="button"
                     onClick={() => setActiveCategory(cat)}
-                    className={`px-4.5 py-1.5 rounded-full text-xs font-semibold tracking-wider uppercase transition-all duration-200 cursor-pointer border ${
+                    className={`px-3.5 sm:px-4.5 py-1.5 rounded-full text-[10px] sm:text-xs font-semibold tracking-wider uppercase transition-all duration-200 cursor-pointer border whitespace-nowrap ${
                       isActive 
                         ? "bg-[#B76E79] border-[#B76E79] text-white shadow-xs font-bold" 
                         : "bg-transparent border-[rgba(255,248,240,0.35)] text-[#FFF8F0] hover:bg-[rgba(255,248,240,0.1)]"
@@ -376,24 +376,52 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
             </div>
           </div>
         </div>
+
+        {/* Seamless sunset-style gradient transition zone overlapping the boundary by 200px */}
+        <div 
+          className="absolute bottom-[-100px] left-0 right-0 h-[200px] pointer-events-none z-10"
+          style={{
+            background: "linear-gradient(to bottom, rgba(62,39,35,0.5) 0%, rgba(120,80,75,0.4) 50%, rgba(249,213,211,0.55) 100%)"
+          }}
+        />
       </div>
 
-      {/* Main product view grid, search bar, and cart layout wrapper */}
-      <div className="max-w-[96rem] mx-auto px-4 sm:px-6 lg:px-8 py-8 xl:py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-        {/* LEFT COLUMN: Catalog list (takes 3/4 space on desktop) */}
-        <div className="lg:col-span-2 xl:col-span-3 space-y-8">
-          {/* Search & Product items block */}
-          <div className="w-full space-y-6">
-            {/* Search Bar Block */}
-            <div className="relative">
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search sweet treats by name, ingredient, or category..."
-                className="w-full bg-[#FFF8F0] border border-brand-pink/30 text-xs sm:text-sm text-brand-chocolate px-5 py-3.5 rounded-full pl-12 focus:outline-none focus:ring-1 focus:ring-brand-rosegold placeholder-brand-chocolate/40 transition-all font-medium"
-              />
+      {/* Lower section with real-world bakery backdrop (blurred/filtered) */}
+      <div id="storefront-content-section" className="w-full relative overflow-hidden z-10">
+        {/* Fixed background image with blur filter applied to offset edge leak */}
+        <div 
+          className="absolute -inset-4 pointer-events-none select-none filter blur-[3px]"
+          style={{
+            backgroundImage: `url("https://firebasestorage.googleapis.com/v0/b/lainies-sweet-treats.firebasestorage.app/o/site-assets%2Fbackground2.jpg?alt=media&token=1d962c6e-eb11-4f47-b98e-3dbc5863f473")`,
+            backgroundAttachment: "fixed",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+          }}
+        />
+        {/* Soft pink to warm cream gradient overlay with lower opacity to reveal the backdrop warmth */}
+        <div 
+          className="absolute inset-0 pointer-events-none select-none"
+          style={{
+            background: "linear-gradient(to bottom, rgba(249,213,211,0.55) 0%, rgba(255,248,240,0.6) 100%)"
+          }}
+        />
+
+        {/* Content container layer */}
+        <div className="relative z-30 max-w-[96rem] mx-auto px-4 sm:px-6 lg:px-8 py-8 xl:py-12">
+          <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+          {/* LEFT COLUMN: Catalog list (takes 3/4 space on desktop) */}
+          <div className="lg:col-span-2 xl:col-span-3 space-y-8">
+            {/* Search & Product items block */}
+            <div className="w-full space-y-6">
+              {/* Search Bar Block */}
+              <div className="relative">
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search sweet treats by name, ingredient, or category..."
+                  className="w-full bg-[#FFF8F0] border border-brand-pink/30 text-xs sm:text-sm text-brand-chocolate px-5 py-3.5 rounded-full pl-12 focus:outline-none focus:ring-1 focus:ring-brand-rosegold placeholder-brand-chocolate/40 transition-all font-medium shadow-md"
+                />
               <svg className="h-4.5 w-4.5 text-brand-chocolate/40 absolute left-4.5 top-4 md:top-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
               </svg>
@@ -448,7 +476,7 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
                       transition={{ duration: 0.35, ease: "easeOut" }}
                       key={p.id}
                       onClick={() => handleProductSelect(p)}
-                      className="bg-[#FFF8F0] border border-brand-pink/20 rounded-[1.5rem] overflow-hidden shadow-xs hover:shadow-md transition-all duration-300 flex flex-col group transform-gpu cursor-pointer"
+                      className="bg-[#FFF8F0] border border-brand-pink/20 rounded-[1.5rem] overflow-hidden shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col group transform-gpu cursor-pointer"
                     >
                       <div className="relative h-56 bg-brand-pink/10 overflow-hidden">
                         <img 
@@ -697,7 +725,7 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
         <div className="lg:col-span-1">
           <div 
             id="shop-cart" 
-            className="lg:sticky lg:top-32 bg-[#FFF8F0] border border-brand-pink/30 rounded-[1.5rem] p-6 shadow-xs h-fit transition-all duration-300"
+            className="lg:sticky lg:top-32 bg-[#FFF8F0] border border-brand-pink/30 rounded-[1.5rem] p-6 shadow-md h-fit transition-all duration-300"
           >
             <div className="border-b border-brand-pink/20 pb-4 flex items-center space-x-2.5">
               <ShoppingBag className="h-5.5 w-5.5 text-brand-rosegold" />
@@ -1138,6 +1166,7 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
           </div>
         </div>
       )}
+      </div>
       </div>
     </div>
   );
