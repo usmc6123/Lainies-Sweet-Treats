@@ -807,7 +807,7 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
         </form>
       ) : (
         /* MASTER CATALOG DISPLAYS */
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
           {products.map(p => {
             const ingCost = calculateIngredientTotalCost(p.ingredients || []);
             const margin = p.basePrice > 0 ? ((p.basePrice - ingCost) / p.basePrice) * 100 : 0;
@@ -815,44 +815,44 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
             return (
               <div
                 key={p.id}
-                className={`border rounded-[2rem] p-6 shadow-sm hover:shadow-md transition flex flex-col justify-between group ${
+                className={`border rounded-2xl p-4 shadow-sm hover:shadow-md transition flex flex-col justify-between group ${
                   p.isVisible === false 
                     ? "bg-slate-50/70 border-slate-200 opacity-70" 
                     : "bg-white border-brand-pink/20"
                 }`}
               >
                 <div>
-                  <div className="h-44 bg-brand-pink/10 rounded-2xl overflow-hidden mb-5 relative">
+                  <div className="h-40 bg-brand-pink/10 rounded-xl overflow-hidden mb-3 relative">
                     <img 
                       src={p.imgUrl} 
                       alt={p.name}
                       className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
                       referrerPolicy="no-referrer"
                     />
-                    <span className="absolute top-3 left-3 text-[10px] uppercase font-extrabold bg-brand-chocolate text-brand-cream px-3 py-1 rounded-lg">
+                    <span className="absolute top-2.5 left-2.5 text-[9px] uppercase font-extrabold bg-brand-chocolate text-brand-cream px-2 py-0.5 rounded-md">
                       {p.category}
                     </span>
                     {p.isVisible === false && (
-                      <span className="absolute top-3 right-3 text-[10px] uppercase font-extrabold bg-red-600 text-white px-3 py-1 rounded-lg shadow">
+                      <span className="absolute top-2.5 right-2.5 text-[9px] uppercase font-extrabold bg-red-600 text-white px-2 py-0.5 rounded-md shadow">
                         HIDDEN
                       </span>
                     )}
                   </div>
 
-                  <h3 className="font-extrabold text-lg lg:text-xl text-brand-chocolate leading-tight font-heading">{p.name}</h3>
-                  <p className="text-xs text-gray-500 mt-2 line-clamp-3 font-medium leading-relaxed">{p.description}</p>
+                  <h3 className="font-extrabold text-base text-brand-chocolate leading-tight font-heading">{p.name}</h3>
+                  <p className="text-[11px] text-gray-500 mt-1 line-clamp-2 font-medium leading-relaxed">{p.description}</p>
                 </div>
 
-                <div className="mt-5 pt-4 border-t border-brand-pink/10">
-                  <div className="flex justify-between items-center text-sm font-semibold">
+                <div className="mt-4 pt-3 border-t border-brand-pink/10">
+                  <div className="flex justify-between items-center text-xs font-semibold">
                     <div>
-                      <span className="text-[10px] text-gray-400 block uppercase font-bold tracking-wider">Price</span>
-                      <strong className="text-brand-chocolate font-extrabold text-lg">${p.basePrice.toFixed(2)}</strong>
+                      <span className="text-[9px] text-gray-400 block uppercase font-bold tracking-wider">Price</span>
+                      <strong className="text-brand-chocolate font-extrabold text-base">${p.basePrice.toFixed(2)}</strong>
                     </div>
                     <div className="text-right">
-                      <span className="text-[10px] text-gray-400 block uppercase font-bold tracking-wider">Margin</span>
-                      <span className={`font-extrabold text-sm px-2 py-0.5 rounded-lg ${
-                        margin > 65 ? "bg-green-50 text-green-700" : margin > 40 ? "bg-blue-50 text-blue-700" : "bg-yellow-50 text-yellow-750"
+                      <span className="text-[9px] text-gray-400 block uppercase font-bold tracking-wider">Margin</span>
+                      <span className={`font-extrabold text-[10px] px-1.5 py-0.5 rounded-md ${
+                        margin > 65 ? "bg-green-50 text-green-700" : margin > 40 ? "bg-blue-50 text-blue-700" : "bg-yellow-50 text-yellow-755"
                       }`}>
                         {margin.toFixed(0)}% Profit
                       </span>
@@ -861,9 +861,9 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
 
                   <button
                     onClick={() => handleEditClick(p)}
-                    className="w-full mt-4 bg-brand-cream hover:bg-brand-pink/30 text-brand-chocolate border border-brand-pink/20 py-3 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center space-x-1.5 cursor-pointer"
+                    className="w-full mt-3 bg-brand-cream hover:bg-brand-pink/30 text-brand-chocolate border border-brand-pink/20 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center space-x-1.5 cursor-pointer"
                   >
-                    <Edit2 className="h-4 w-4 text-brand-rosegold" />
+                    <Edit2 className="h-3.5 w-3.5 text-brand-rosegold" />
                     <span>Edit Configuration & Costing</span>
                   </button>
                 </div>
