@@ -7,6 +7,61 @@ interface AdminProductsProps {
   triggerRefresh: () => void;
 }
 
+interface AdminProductCardImageProps {
+  product: Product;
+}
+
+function AdminProductCardImage({ product }: AdminProductCardImageProps) {
+  const [aspectType, setAspectType] = useState<"portrait" | "landscape" | "square">("square");
+
+  useEffect(() => {
+    setAspectType("square");
+  }, [product]);
+
+  const handleImageLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    const { naturalWidth, naturalHeight } = e.currentTarget;
+    if (naturalWidth && naturalHeight) {
+      const ratio = naturalWidth / naturalHeight;
+      if (ratio < 0.85) {
+        setAspectType("portrait");
+      } else if (ratio > 1.15) {
+        setAspectType("landscape");
+      } else {
+        setAspectType("square");
+      }
+    }
+  };
+
+  let aspectClass = "aspect-square";
+  if (aspectType === "portrait") {
+    aspectClass = "aspect-[4/5]";
+  } else if (aspectType === "landscape") {
+    aspectClass = "aspect-[4/3]";
+  }
+
+  const imageUrl = product.imgUrl || "https://images.unsplash.com/photo-1578985545062-69928b1d9587";
+
+  return (
+    <div className={`relative w-full bg-brand-pink/5 rounded-lg overflow-hidden mb-1.5 border border-brand-pink/15 transition-all duration-300 ${aspectClass}`}>
+      <img 
+        src={imageUrl} 
+        alt={product.name}
+        onLoad={handleImageLoad}
+        className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+        referrerPolicy="no-referrer"
+      />
+      <span className="absolute top-1 left-1 text-[7px] uppercase font-extrabold bg-brand-chocolate text-brand-cream px-1 py-0.25 rounded z-10">
+        {product.category}
+      </span>
+      {product.isVisible === false && (
+        <span className="absolute top-1 right-1 text-[7px] uppercase font-extrabold bg-red-600 text-white px-1 py-0.25 rounded shadow z-10">
+          HIDDEN
+        </span>
+      )}
+    </div>
+  );
+}
+
 export default function AdminProducts({ token, triggerRefresh }: AdminProductsProps) {
   const [products, setProducts] = useState<Product[]>([]);
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
@@ -921,7 +976,7 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-2.5">
             {filteredAndSortedProducts.map(p => {
               const ingCost = calculateIngredientTotalCost(p.ingredients || []);
               const margin = p.basePrice > 0 ? ((p.basePrice - ingCost) / p.basePrice) * 100 : 0;
@@ -929,47 +984,32 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
               return (
                 <div
                   key={p.id}
-                  className={`border rounded-xl p-3 shadow-xs hover:shadow-sm transition flex flex-col justify-between group ${
+                  className={`border rounded-xl p-2.5 shadow-xs hover:shadow-sm transition flex flex-col justify-between group ${
                     p.isVisible === false 
                       ? "bg-slate-50/70 border-slate-200 opacity-70" 
                       : "bg-white border-brand-pink/20"
                   }`}
                 >
                   <div>
-                    <div className="h-28 bg-brand-pink/10 rounded-lg overflow-hidden mb-2 relative">
-                      <img 
-                        src={p.imgUrl || "https://images.unsplash.com/photo-1578985545062-69928b1d9587"} 
-                        alt={p.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
-                        referrerPolicy="no-referrer"
-                      />
-                      <span className="absolute top-1.5 left-1.5 text-[8px] uppercase font-extrabold bg-brand-chocolate text-brand-cream px-1.5 py-0.5 rounded">
-                        {p.category}
-                      </span>
-                      {p.isVisible === false && (
-                        <span className="absolute top-1.5 right-1.5 text-[8px] uppercase font-extrabold bg-red-600 text-white px-1.5 py-0.5 rounded shadow">
-                          HIDDEN
-                        </span>
-                      )}
-                    </div>
+                    <AdminProductCardImage product={p} />
 
-                    <h3 className="font-extrabold text-xs text-brand-chocolate leading-tight font-heading line-clamp-1" title={p.name}>
+                    <h3 className="font-extrabold text-[11px] text-brand-chocolate leading-tight font-heading line-clamp-1" title={p.name}>
                       {p.name}
                     </h3>
-                    <p className="text-[10px] text-gray-500 mt-0.5 line-clamp-2 font-medium leading-tight">
+                    <p className="text-[9px] text-gray-500 mt-0.5 line-clamp-2 font-medium leading-tight">
                       {p.description}
                     </p>
                   </div>
 
-                  <div className="mt-2 text-left">
-                    <div className="flex justify-between items-center text-[10px] font-semibold pt-2 border-t border-brand-pink/10">
+                  <div className="mt-1.5 text-left">
+                    <div className="flex justify-between items-center text-[9px] font-semibold pt-1.5 border-t border-brand-pink/10">
                       <div>
-                        <span className="text-[8px] text-gray-400 block uppercase font-bold tracking-wider leading-none">Price</span>
-                        <strong className="text-brand-chocolate font-extrabold text-xs">${p.basePrice.toFixed(2)}</strong>
+                        <span className="text-[7px] text-gray-400 block uppercase font-bold tracking-wider leading-none">Price</span>
+                        <strong className="text-brand-chocolate font-extrabold text-[10px]">${p.basePrice.toFixed(2)}</strong>
                       </div>
                       <div className="text-right">
-                        <span className="text-[8px] text-gray-400 block uppercase font-bold tracking-wider leading-none">Margin</span>
-                        <span className={`font-extrabold text-[9px] px-1 py-0.25 rounded ${
+                        <span className="text-[7px] text-gray-400 block uppercase font-bold tracking-wider leading-none">Margin</span>
+                        <span className={`font-extrabold text-[8px] px-1 py-0.25 rounded ${
                           margin > 65 ? "bg-green-50 text-green-700" : margin > 40 ? "bg-blue-50 text-blue-700" : "bg-yellow-50 text-yellow-755"
                         }`}>
                           {margin.toFixed(0)}%
@@ -979,7 +1019,7 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
 
                     <button
                       onClick={() => handleEditClick(p)}
-                      className="w-full mt-2 bg-brand-cream hover:bg-brand-pink/30 text-brand-chocolate border border-brand-pink/20 py-1.5 rounded-lg text-[9px] font-extrabold transition flex items-center justify-center space-x-1 cursor-pointer"
+                      className="w-full mt-1.5 bg-brand-cream hover:bg-brand-pink/30 text-brand-chocolate border border-brand-pink/20 py-1 rounded-lg text-[9px] font-extrabold transition flex items-center justify-center space-x-1 cursor-pointer"
                     >
                       <Edit2 className="h-2.5 w-2.5 text-brand-rosegold" />
                       <span>Configure</span>
