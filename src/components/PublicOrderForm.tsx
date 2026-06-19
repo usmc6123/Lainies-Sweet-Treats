@@ -7,6 +7,77 @@ interface PublicOrderFormProps {
   onSwitchToQuote: () => void;
 }
 
+interface ProductPhotoGalleryProps {
+  product: Product;
+}
+
+function ProductPhotoGallery({ product }: ProductPhotoGalleryProps) {
+  const [activeIndex, setActiveIndex] = useState<number>(0);
+  const [aspectType, setAspectType] = useState<"portrait" | "landscape" | "square">("square");
+
+  const productPhotos = product.photos && product.photos.length > 0
+    ? product.photos
+    : [{ url: product.imgUrl || "https://images.unsplash.com/photo-1578985545062-69928b1d9587", isPrimary: true }];
+
+  const activePhoto = productPhotos[activeIndex] || productPhotos[0];
+
+  useEffect(() => {
+    setActiveIndex(0);
+    setAspectType("square");
+  }, [product]);
+
+  const handleImageLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    const { naturalWidth, naturalHeight } = e.currentTarget;
+    if (naturalWidth && naturalHeight) {
+      const ratio = naturalWidth / naturalHeight;
+      if (ratio < 0.85) {
+        setAspectType("portrait");
+      } else if (ratio > 1.15) {
+        setAspectType("landscape");
+      } else {
+        setAspectType("square");
+      }
+    }
+  };
+
+  let aspectClass = "aspect-square";
+  if (aspectType === "portrait") {
+    aspectClass = "aspect-[3/4]";
+  } else if (aspectType === "landscape") {
+    aspectClass = "aspect-[4/3]";
+  }
+
+  return (
+    <div className="space-y-2">
+      <div className={`relative w-full bg-brand-pink/5 rounded-2xl overflow-hidden border border-brand-pink/15 transition-all duration-300 ${aspectClass}`}>
+        <img 
+          src={activePhoto.url} 
+          alt={`Preview of ${product.name}`} 
+          onLoad={handleImageLoad}
+          className="w-full h-full object-cover animate-in fade-in duration-200"
+          referrerPolicy="no-referrer"
+        />
+      </div>
+      {productPhotos.length > 1 && (
+        <div className="flex gap-2 border border-brand-pink/10 rounded-xl p-1.5 overflow-x-auto bg-brand-cream/10">
+          {productPhotos.map((ph, idx) => (
+            <button
+              key={idx}
+              type="button"
+              onClick={() => setActiveIndex(idx)}
+              className={`relative w-12 h-12 rounded-lg overflow-hidden border-2 shrink-0 transition ${
+                idx === activeIndex ? 'border-brand-rosegold shadow-sm' : 'border-transparent'
+              }`}
+            >
+              <img src={ph.url} alt="Thumbnail preview" className="w-full h-full object-cover" />
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProps) {
   // States
   const [products, setProducts] = useState<Product[]>([]);
@@ -17,9 +88,6 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
   
   // Cart state
   const [cart, setCart] = useState<OrderItem[]>([]);
-
-  // Feature 2 Image modal thumbnail state
-  const [activeModalPhotoIndex, setActiveModalPhotoIndex] = useState<number>(0);
 
   // Feature 5 Coupon validations
   const [enteredCoupon, setEnteredCoupon] = useState("");
@@ -96,7 +164,6 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
     setChoiceAddOns([]);
     setChoiceQty(1);
     setErrorMessage("");
-    setActiveModalPhotoIndex(0);
   };
 
   // Live item total calculation
@@ -1026,44 +1093,7 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
 
             {/* Visual Carousel/Gallery of All Photos */}
             <div className="mt-3">
-              {(() => {
-                const productPhotos = selectedProduct.photos && selectedProduct.photos.length > 0
-                  ? selectedProduct.photos
-                  : [{ url: selectedProduct.imgUrl || "https://images.unsplash.com/photo-1578985545062-69928b1d9587", isPrimary: true }];
-                
-                const activePhoto = productPhotos[activeModalPhotoIndex] || productPhotos[0];
-
-                return (
-                  <div className="space-y-2">
-                    <div className={`relative w-full bg-brand-pink/5 rounded-2xl overflow-hidden border border-brand-pink/15 ${
-                      productPhotos.length > 1 ? "aspect-[4/3]" : "aspect-square"
-                    }`}>
-                      <img 
-                        src={activePhoto.url} 
-                        alt={`Preview of ${selectedProduct.name}`} 
-                        className="w-full h-full object-cover animate-in fade-in duration-200"
-                        referrerPolicy="no-referrer"
-                      />
-                    </div>
-                    {productPhotos.length > 1 && (
-                      <div className="flex gap-2 border border-brand-pink/10 rounded-xl p-1.5 overflow-x-auto bg-brand-cream/10">
-                        {productPhotos.map((ph, idx) => (
-                          <button
-                            key={idx}
-                            type="button"
-                            onClick={() => setActiveModalPhotoIndex(idx)}
-                            className={`relative w-12 h-12 rounded-lg overflow-hidden border-2 shrink-0 transition ${
-                              idx === activeModalPhotoIndex ? 'border-brand-rosegold shadow-sm' : 'border-transparent'
-                            }`}
-                          >
-                            <img src={ph.url} alt="Thumbnail preview" className="w-full h-full object-cover" />
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                );
-              })()}
+              <ProductPhotoGallery product={selectedProduct} />
             </div>
 
             {/* Sizes Radio selections */}
