@@ -326,12 +326,29 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
         }}
       >
         <div className="max-w-4xl mx-auto px-4">
-          <h2 
-            className="text-4xl md:text-5xl lg:text-[54px] text-brand-cream font-medium tracking-tight font-heading leading-tight mb-4"
-            style={{ textShadow: "0 2px 12px rgba(0,0,0,0.4)" }}
-          >
-            Lainie's Bespoke Bakery Menu
-          </h2>
+          {/* Brand Logo & Headline Container */}
+          <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-6 mb-4">
+            {/* Brand Logo Decorative Badge (Option A with vignette fade & subtle drop shadow) */}
+            <div className="w-[105px] h-[105px] flex-shrink-0 flex items-center justify-center transform-gpu hover:scale-105 transition-transform duration-300">
+              <img 
+                src="https://firebasestorage.googleapis.com/v0/b/lainies-sweet-treats.firebasestorage.app/o/site-assets%2F3dlogo.jpg?alt=media&token=98c5f20f-3e18-4a91-805a-6a4d145fc042"
+                alt="Lainie's Sweet Treats Logo"
+                className="w-full h-full object-cover scale-[1.3] filter drop-shadow-[0_4px_8px_rgba(0,0,0,0.4)]"
+                style={{
+                  maskImage: 'radial-gradient(circle, rgba(0,0,0,1) 48%, rgba(0,0,0,0) 74%)',
+                  WebkitMaskImage: 'radial-gradient(circle, rgba(0,0,0,1) 48%, rgba(0,0,0,0) 74%)'
+                }}
+                referrerPolicy="no-referrer"
+              />
+            </div>
+
+            <h2 
+              className="text-4xl md:text-5xl lg:text-[54px] text-brand-cream font-medium tracking-tight font-heading leading-tight text-center md:text-left"
+              style={{ textShadow: "0 2px 12px rgba(0,0,0,0.4)" }}
+            >
+              Lainie's Bespoke Bakery Menu
+            </h2>
+          </div>
           
           <p 
             className="max-w-2xl mx-auto text-sm md:text-base text-brand-cream/90 leading-relaxed font-normal"
