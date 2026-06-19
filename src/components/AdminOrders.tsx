@@ -10,7 +10,9 @@ interface AdminOrdersProps {
 export default function AdminOrders({ token, triggerRefresh }: AdminOrdersProps) {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState(() => {
+    return localStorage.getItem("admin_order_search") || "";
+  });
   const [statusFilter, setStatusFilter] = useState<string>("All");
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [batchLabelDate, setBatchLabelDate] = useState<string>(() => {
@@ -39,6 +41,20 @@ export default function AdminOrders({ token, triggerRefresh }: AdminOrdersProps)
   useEffect(() => {
     fetchOrders();
   }, [token]);
+
+  useEffect(() => {
+    const savedSearch = localStorage.getItem("admin_order_search");
+    if (savedSearch && orders.length > 0) {
+      const matched = orders.find(o => 
+        o.orderNumber === savedSearch || 
+        o.orderNumber.toLowerCase() === savedSearch.toLowerCase()
+      );
+      if (matched) {
+        setSelectedOrder(matched);
+      }
+      localStorage.removeItem("admin_order_search");
+    }
+  }, [orders]);
 
   const handleStatusUpdate = async (orderId: string, status: OrderStatus) => {
     try {

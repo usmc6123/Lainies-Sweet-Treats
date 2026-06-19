@@ -5,9 +5,10 @@ import { Order } from "../types";
 interface AdminCalendarProps {
   token: string;
   triggerRefresh: () => void;
+  setView?: (viewStr: string) => void;
 }
 
-export default function AdminCalendar({ token, triggerRefresh }: AdminCalendarProps) {
+export default function AdminCalendar({ token, triggerRefresh, setView }: AdminCalendarProps) {
   const [orders, setOrders] = useState<Order[]>([]);
   const [blockedDates, setBlockedDates] = useState<{ date: string; reason: string }[]>([]);
   const [loading, setLoading] = useState(true);
@@ -17,6 +18,66 @@ export default function AdminCalendar({ token, triggerRefresh }: AdminCalendarPr
   const [blockDateStr, setBlockDateStr] = useState("");
   const [blockReasonStr, setBlockReasonStr] = useState("");
   const [blockMessage, setBlockMessage] = useState("");
+
+  // Interactive selected date popup states
+  const [selectedDayStr, setSelectedDayStr] = useState<string | null>(null);
+  const [directReason, setDirectReason] = useState("");
+
+  const formatDateNicely = (dateStr: string) => {
+    const [y, m, d] = dateStr.split("-").map(Number);
+    const dateObj = new Date(y, m - 1, d);
+    const mNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    return `${mNames[dateObj.getMonth()]} ${d}, ${y}`;
+  };
+
+  const handlePopupBlock = async (dateStr: string) => {
+    if (!dateStr) return;
+    try {
+      const reason = directReason.trim() || "Bakery Closed / Unavailable";
+      const res = await fetch("/api/blocked-dates", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ date: dateStr, reason })
+      });
+      if (res.ok) {
+        setBlockedDates([...blockedDates, { date: dateStr, reason }]);
+        triggerRefresh();
+        setSelectedDayStr(null);
+        setDirectReason("");
+      } else {
+        const errorData = await res.json();
+        alert(errorData.error || "Failed to block date.");
+      }
+    } catch {
+      alert("Error communicating with calendar backend.");
+    }
+  };
+
+  const handlePopupUnblock = async (dateStr: string) => {
+    try {
+      const res = await fetch(`/api/blocked-dates/${dateStr}`, {
+        method: "DELETE",
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      if (res.ok) {
+        setBlockedDates(blockedDates.filter(b => b.date !== dateStr));
+        triggerRefresh();
+        setSelectedDayStr(null);
+      }
+    } catch {
+      alert("Error unblocking calendar date.");
+    }
+  };
+
+  const handleOrderClick = (orderNumber: string) => {
+    localStorage.setItem("admin_order_search", orderNumber);
+    if (setView) {
+      setView("admin-orders");
+    }
+  };
 
   const loadCalendarData = async () => {
     setLoading(true);
@@ -199,10 +260,14 @@ export default function AdminCalendar({ token, triggerRefresh }: AdminCalendarPr
               return (
                 <div
                   key={index}
-                  className={`min-h-[75px] p-2.5 border rounded-2xl flex flex-col justify-between transition-all relative group ${
-                    slot.isCurrentMonth ? "bg-white border-brand-pink/10" : "bg-gray-50/50 border-gray-100 opacity-40"
+                  onClick={() => {
+                    setSelectedDayStr(slot.dateStr);
+                    setBlockDateStr(slot.dateStr);
+                  }}
+                  className={`min-h-[75px] p-2.5 border rounded-2xl flex flex-col justify-between transition-all relative group cursor-pointer hover:border-brand-rosegold hover:shadow-xs hover:scale-[1.02] duration-150 ${
+                    slot.isCurrentMonth ? "bg-white border-brand-pink/15" : "bg-gray-50/50 border-gray-100 opacity-40"
                   } ${
-                    isBlocked ? "bg-red-50/40 border-red-200 text-red-800" : ""
+                    isBlocked ? "bg-red-50/30 border-red-200 text-red-800" : ""
                   }`}
                 >
                   <div className="flex justify-between items-start">
@@ -210,7 +275,7 @@ export default function AdminCalendar({ token, triggerRefresh }: AdminCalendarPr
                       {slot.dayNum}
                     </span>
                     {isBlocked && (
-                      <span className="text-[10px] bg-red-650 text-red-800 bg-red-100 border border-red-200 rounded-md px-1.5 py-0.5 leading-normal font-bold">Closed</span>
+                      <span className="text-[10px] bg-red-100 text-red-800 border border-red-200 rounded-md px-1.5 py-0.5 leading-normal font-bold">Closed</span>
                     )}
                   </div>
 
@@ -227,10 +292,10 @@ export default function AdminCalendar({ token, triggerRefresh }: AdminCalendarPr
                   </div>
 
                   {/* hover info tooltip */}
-                  <div className="hidden group-hover:block absolute bg-brand-chocolate text-brand-cream text-xs p-3 rounded-xl z-20 shadow-md -top-14 left-1/2 -translate-x-1/2 w-44 pointer-events-none text-center">
+                  <div className="hidden group-hover:block absolute bg-brand-chocolate text-brand-cream text-[10px] p-2 rounded-lg z-25 shadow-md -top-12 left-1/2 -translate-x-1/2 w-36 pointer-events-none text-center">
                     <p className="font-bold">{slot.dateStr}</p>
-                    <p className="mt-1 font-semibold text-brand-pink">
-                      {isBlocked ? "CLOSED: Custom Block" : `${orderCount}/10 Order Limit Filled`}
+                    <p className="mt-0.5 text-brand-pink font-semibold">
+                      {isBlocked ? "CLOSED: Custom Block" : `${orderCount}/10 Orders`}
                     </p>
                   </div>
                 </div>
@@ -339,6 +404,152 @@ export default function AdminCalendar({ token, triggerRefresh }: AdminCalendarPr
           </div>
         </div>
       </div>
+
+      {/* Date Detail Popup Modal */}
+      {selectedDayStr && (() => {
+        const { orderCount, orders: dayOrders, isBlocked, blockedReason } = getDayMetrics(selectedDayStr);
+        const isFull = orderCount >= 10;
+        const isBusy = orderCount >= 5 && orderCount < 10;
+        
+        let workloadTag = "Light Load";
+        let workloadClass = "bg-blue-50 text-blue-700 border-blue-200";
+        if (isBlocked) {
+          workloadTag = "Bake Shop Closed";
+          workloadClass = "bg-red-50 text-red-700 border-red-200";
+        } else if (isFull) {
+          workloadTag = "Limit Fully Occupied (10)";
+          workloadClass = "bg-red-50 text-red-700 border-red-200";
+        } else if (isBusy) {
+          workloadTag = "Moderate Workload (5-9)";
+          workloadClass = "bg-amber-50 text-amber-700 border-amber-200";
+        }
+
+        return (
+          <div className="fixed inset-0 bg-brand-chocolate/40 backdrop-blur-xs flex items-center justify-center z-[100] p-4 animate-in fade-in duration-100">
+            <div className="bg-white rounded-3xl max-w-sm w-full border border-brand-pink/30 p-5 shadow-xl relative animate-in fade-in zoom-in-95 duration-200">
+              <button
+                type="button"
+                onClick={() => setSelectedDayStr(null)}
+                className="absolute top-4 right-4 text-brand-chocolate/60 hover:text-brand-chocolate text-lg font-bold p-1 cursor-pointer transition select-none"
+              >
+                ✕
+              </button>
+
+              <h3 className="text-base font-bold text-brand-chocolate font-heading italic">
+                {formatDateNicely(selectedDayStr)}
+              </h3>
+              <p className="text-[10px] text-brand-rosegold font-bold uppercase tracking-wider mt-0.5">
+                Workload & Holiday Schedule
+              </p>
+
+              {/* Status Indicator Badge */}
+              <div className="mt-3 flex items-center space-x-2">
+                <span className="text-[10px] text-brand-chocolate font-extrabold uppercase tracking-wide">Day Status:</span>
+                <span className={`text-[10px] font-extrabold px-2 py-0.5 border rounded ${workloadClass}`}>
+                  {workloadTag}
+                </span>
+              </div>
+
+              {/* Orders Scheduled on this Date */}
+              <div className="mt-4 space-y-2">
+                <div className="flex justify-between items-center border-b border-brand-pink/10 pb-1">
+                  <span className="text-[10px] font-bold text-brand-chocolate uppercase tracking-wider">
+                    Scheduled Orders ({orderCount})
+                  </span>
+                  {!isBlocked && (
+                    <span className="text-[9px] text-gray-500 font-semibold">{orderCount}/10 limits</span>
+                  )}
+                </div>
+
+                {dayOrders.length === 0 ? (
+                  <p className="text-[11px] text-gray-400 italic font-medium py-2">
+                    No client order submissions are scheduled on this date.
+                  </p>
+                ) : (
+                  <div className="space-y-1.5 max-h-40 overflow-y-auto pr-1">
+                    {dayOrders.map(o => (
+                      <div 
+                        key={o.id}
+                        onClick={() => handleOrderClick(o.orderNumber)}
+                        className="bg-brand-cream/20 hover:bg-brand-pink/15 border border-brand-pink/5 hover:border-brand-pink/30 p-2.5 rounded-xl text-left cursor-pointer transition flex items-center justify-between group"
+                      >
+                        <div className="space-y-0.5 max-w-[70%]">
+                          <p className="text-[11px] font-bold text-brand-chocolate leading-tight">
+                            {o.customerName}
+                          </p>
+                          <p className="text-[9px] text-gray-500 font-medium truncate leading-tight">
+                            {o.items.length} item{o.items.length !== 1 ? 's' : ''} • {o.items.map(it => `${it.quantity}x ${it.name}`).join(", ")}
+                          </p>
+                        </div>
+                        <div className="text-right shrink-0">
+                          <span className="text-[9px] font-mono font-bold text-brand-rosegold bg-brand-pink/20 px-1.5 py-0.5 rounded block">
+                            {o.orderNumber}
+                          </span>
+                          <span className="text-[8px] text-brand-rosegold/80 group-hover:text-brand-rosegold font-extrabold uppercase mt-0.5 block">
+                            View →
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Toggle Date Closure Block Blockout Section */}
+              <div className="mt-4 pt-3 border-t border-brand-pink/10 space-y-2">
+                {isBlocked ? (
+                  <div className="space-y-1.5 text-left bg-red-50/20 border border-red-100 p-2.5 rounded-xl">
+                    <p className="text-[10px] font-bold text-red-800 flex items-center space-x-1">
+                      <Lock className="h-3 w-3 inline" />
+                      <span>Closed: {blockedReason}</span>
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => handlePopupUnblock(selectedDayStr)}
+                      className="w-full bg-red-650 hover:bg-red-750 text-white font-bold text-[10px] py-1.5 rounded-lg transition cursor-pointer"
+                    >
+                      Unlock & Re-open Date
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-1.5 text-left bg-brand-cream/10 border border-brand-pink/10 p-2.5 rounded-xl">
+                    <p className="text-[10px] font-bold text-brand-chocolate">
+                      Block/Close this day?
+                    </p>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        placeholder="Reason (e.g., Vacation/Holiday)"
+                        value={directReason}
+                        onChange={(e) => setDirectReason(e.target.value)}
+                        className="flex-1 text-[10px] bg-white border border-brand-pink/15 rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-brand-rosegold text-brand-chocolate font-medium"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handlePopupBlock(selectedDayStr)}
+                        className="bg-brand-chocolate hover:opacity-95 text-brand-cream font-bold text-[10px] px-2.5 py-1 rounded-lg transition cursor-pointer shrink-0"
+                      >
+                        Block Out
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Close Button at bottom */}
+              <div className="mt-4 flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setSelectedDayStr(null)}
+                  className="w-full bg-slate-100 hover:bg-slate-200 text-brand-chocolate py-1.5 rounded-xl text-[10px] font-bold transition cursor-pointer"
+                >
+                  Done
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }

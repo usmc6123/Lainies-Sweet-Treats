@@ -429,7 +429,7 @@ export default function App() {
               {view === "admin-orders" && <AdminOrders token={token} triggerRefresh={incrementRefresh} />}
               {view === "admin-quotes" && <AdminQuotes token={token} triggerRefresh={incrementRefresh} />}
               {view === "admin-products" && <AdminProducts token={token} triggerRefresh={incrementRefresh} />}
-              {view === "admin-calendar" && <AdminCalendar token={token} triggerRefresh={incrementRefresh} />}
+              {view === "admin-calendar" && <AdminCalendar token={token} triggerRefresh={incrementRefresh} setView={navigateTo} />}
               {view === "admin-ingredients" && <AdminIngredients token={token} triggerRefresh={incrementRefresh} />}
               {view === "admin-coupons" && <AdminCoupons token={token} triggerRefresh={incrementRefresh} />}
               {view === "admin-customers" && <AdminCustomers token={token} />}
