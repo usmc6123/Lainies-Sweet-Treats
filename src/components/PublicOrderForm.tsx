@@ -129,7 +129,14 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
           fetch("/api/settings"),
           fetch("/api/blocked-dates")
         ]);
-        if (pRes.ok) setProducts(await pRes.json());
+        if (pRes.ok) {
+          const rawProducts = await pRes.json();
+          const mapped = rawProducts.map((p: any) => ({
+            ...p,
+            category: p.category === "Custom Cakes" ? "Mini Cakes" : p.category
+          }));
+          setProducts(mapped);
+        }
         if (sRes.ok) setSettings(await sRes.json());
         if (bRes.ok) setBlockedDates(await bRes.json());
       } catch (err) {
@@ -363,7 +370,7 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
     }
   };
 
-  const categories = ["All", "Custom Cakes", "Cupcakes", "Cookies", "Cake Pops", "Dessert Trays", "Seasonal Specials"];
+  const categories = ["All", "Mini Cakes", "Cupcakes", "Cookies", "Cake Pops", "Dessert Trays", "Seasonal Specials"];
   const filteredProducts = products.filter(p => {
     const matchesCategory = activeCategory === "All" || p.category === activeCategory;
     const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 

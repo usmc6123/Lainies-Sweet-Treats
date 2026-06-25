@@ -77,7 +77,7 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
   // Form Fields
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [category, setCategory] = useState("Custom Cakes");
+  const [category, setCategory] = useState("Mini Cakes");
   const [customCategory, setCustomCategory] = useState("");
   const [useCustomCategory, setUseCustomCategory] = useState(false);
   const [basePrice, setBasePrice] = useState<number>(0);
@@ -205,7 +205,7 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
   const [inputIngId, setInputIngId] = useState("");
   const [inputIngQty, setInputIngQty] = useState(0);
 
-  const defaultCategories = ["Custom Cakes", "Cupcakes", "Cookies", "Dessert Trays", "Mini Cakes", "Cake Pops", "Seasonal Specials"];
+  const defaultCategories = ["Mini Cakes", "Cupcakes", "Cookies", "Dessert Trays", "Cake Pops", "Seasonal Specials"];
   const [dynamicCategories, setDynamicCategories] = useState<string[]>(defaultCategories);
 
   const loadCatalogData = async () => {
@@ -219,10 +219,14 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
       ]);
       if (pRes.ok) {
         const pList = await pRes.json();
-        setProducts(pList);
+        const mappedProducts = pList.map((p: any) => ({
+          ...p,
+          category: p.category === "Custom Cakes" ? "Mini Cakes" : p.category
+        }));
+        setProducts(mappedProducts);
         const uniqueCategories = Array.from(new Set([
           ...defaultCategories,
-          ...pList.map((p: any) => p.category).filter(Boolean)
+          ...mappedProducts.map((p: any) => p.category).filter(Boolean)
         ]));
         setDynamicCategories(uniqueCategories);
       }
@@ -269,7 +273,7 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
     
     setName("");
     setDescription("");
-    setCategory("Custom Cakes");
+    setCategory("Mini Cakes");
     setUseCustomCategory(false);
     setCustomCategory("");
     setBasePrice(0);
