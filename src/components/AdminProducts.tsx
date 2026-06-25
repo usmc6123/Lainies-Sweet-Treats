@@ -205,7 +205,7 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
   const [inputIngId, setInputIngId] = useState("");
   const [inputIngQty, setInputIngQty] = useState(0);
 
-  const defaultCategories = ["Mini Cakes", "Cupcakes", "Cookies", "Dessert Trays", "Cake Pops", "Seasonal Specials"];
+  const defaultCategories = ["Mini Cakes", "Cupcakes", "Cookies", "Seasonal Specials"];
   const [dynamicCategories, setDynamicCategories] = useState<string[]>(defaultCategories);
 
   const loadCatalogData = async () => {
