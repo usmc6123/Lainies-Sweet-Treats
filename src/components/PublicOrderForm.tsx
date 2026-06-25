@@ -437,7 +437,7 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
             </h2>
             
             <p 
-              className="text-sm md:text-base text-brand-cream/90 leading-relaxed font-normal mb-8"
+              className="text-sm md:text-base text-brand-cream/90 leading-relaxed font-normal mb-8 font-heading"
               style={{ textShadow: "0 2px 12px rgba(0,0,0,0.4)" }}
             >
               Based in Royse City, TX. Lainie custom-bakes every celebration treat.<br />
