@@ -217,7 +217,7 @@ export default function AdminOrders({ token, triggerRefresh }: AdminOrdersProps)
           </div>
           <button
             onClick={handlePrintBatchLabels}
-            className="w-full sm:w-auto bg-[#B76E79] hover:opacity-90 text-white font-bold text-xs uppercase px-4 py-2 rounded-xl transition flex items-center justify-center gap-1.5 cursor-pointer"
+            className="w-full sm:w-auto bg-brand-pink text-white hover:bg-brand-rosegold hover:text-brand-chocolate font-bold text-xs uppercase px-4 py-2 rounded-xl transition flex items-center justify-center gap-1.5 cursor-pointer shadow-sm"
           >
             <CheckSquare className="h-4 w-4" />
             Print Daily Label Sheets ({orders.filter(o => o.fulfillmentDate === batchLabelDate && o.status !== 'Cancelled').length})
@@ -458,14 +458,14 @@ export default function AdminOrders({ token, triggerRefresh }: AdminOrdersProps)
                     <div className="grid grid-cols-2 gap-2">
                       <button
                         onClick={() => handleDownloadReceipt(selectedOrder.id)}
-                        className="py-2 px-3 border border-[#B76E79] hover:bg-[#B76E79]/5 text-[11px] font-bold rounded-xl text-[#B76E79] flex items-center justify-center gap-1.5 transition cursor-pointer"
+                        className="py-2 px-3 border border-brand-pink hover:bg-brand-pink/5 text-[11px] font-bold rounded-xl text-brand-pink flex items-center justify-center gap-1.5 transition cursor-pointer"
                       >
                         <FileText className="h-3.5 w-3.5" />
                         Invoice PDF
                       </button>
                       <button
                         onClick={() => handlePrintSingleLabel(selectedOrder.id)}
-                        className="py-2 px-3 border border-[#B76E79] hover:bg-[#B76E79]/5 text-[11px] font-bold rounded-xl text-[#B76E79] flex items-center justify-center gap-1.5 transition cursor-pointer"
+                        className="py-2 px-3 border border-brand-pink hover:bg-brand-pink/5 text-[11px] font-bold rounded-xl text-brand-pink flex items-center justify-center gap-1.5 transition cursor-pointer"
                       >
                         <CheckSquare className="h-3.5 w-3.5" />
                         Print Label

@@ -48,8 +48,8 @@ export default function PublicHeader({ currentView, setView, isAdminLoggedIn, on
                 setView("shop");
                 window.dispatchEvent(new Event("lainie_category_change"));
               }}
-              className={`text-xs uppercase tracking-widest font-black transition-colors duration-200 ${
-                currentView === "shop" ? "text-brand-rosegold" : "text-brand-chocolate hover:text-brand-rosegold"
+              className={`text-xs uppercase tracking-widest font-black transition-all duration-200 hover:scale-105 ${
+                currentView === "shop" ? "text-brand-pink" : "text-brand-chocolate hover:text-brand-rosegold"
               }`}
             >
               Shop All
@@ -61,14 +61,14 @@ export default function PublicHeader({ currentView, setView, isAdminLoggedIn, on
             <button
               id="nav-quote"
               onClick={() => setView("quote-builder")}
-              className="group flex flex-col items-center justify-center text-center transition-all duration-200 leading-none"
+              className="group flex flex-col items-center justify-center text-center transition-all duration-200 leading-none hover:scale-105"
             >
               <span className={`text-[11px] uppercase tracking-widest font-black transition-colors duration-200 ${
-                currentView === "quote-builder" ? "text-brand-rosegold" : "text-brand-chocolate group-hover:text-brand-rosegold"
+                currentView === "quote-builder" ? "text-brand-pink" : "text-brand-chocolate group-hover:text-brand-rosegold"
               }`}>
                 Wedding & Events
               </span>
-              <span className="text-[11px] font-semibold text-brand-rosegold underline mt-0.5 group-hover:opacity-85">
+              <span className="text-[11px] font-semibold text-brand-pink underline mt-0.5 group-hover:text-brand-rosegold transition-colors">
                 Request Quote
               </span>
             </button>
@@ -78,8 +78,8 @@ export default function PublicHeader({ currentView, setView, isAdminLoggedIn, on
             <button
               id="nav-portal"
               onClick={() => setView("quote-portal")}
-              className={`text-xs uppercase tracking-widest font-black transition-colors duration-200 ${
-                currentView === "quote-portal" ? "text-brand-rosegold" : "text-brand-chocolate hover:text-brand-rosegold"
+              className={`text-xs uppercase tracking-widest font-black transition-all duration-200 hover:scale-105 ${
+                currentView === "quote-portal" ? "text-brand-pink" : "text-brand-chocolate hover:text-brand-rosegold"
               }`}
             >
               Client Portal
@@ -91,7 +91,7 @@ export default function PublicHeader({ currentView, setView, isAdminLoggedIn, on
               <button
                 id="nav-admin"
                 onClick={() => setView("admin-dashboard")}
-                className="text-xs uppercase tracking-widest font-black text-brand-chocolate hover:text-brand-rosegold transition-colors duration-200"
+                className="text-xs uppercase tracking-widest font-black text-brand-chocolate hover:text-brand-rosegold transition-all duration-200 hover:scale-105"
               >
                 Admin
               </button>
@@ -99,7 +99,7 @@ export default function PublicHeader({ currentView, setView, isAdminLoggedIn, on
               <button
                 id="nav-admin-login"
                 onClick={() => setView("login")}
-                className="text-xs uppercase tracking-widest font-black text-brand-chocolate hover:text-brand-rosegold transition-colors duration-200"
+                className="text-xs uppercase tracking-widest font-black text-brand-chocolate hover:text-brand-rosegold transition-all duration-200 hover:scale-105"
               >
                 Admin
               </button>
@@ -113,7 +113,7 @@ export default function PublicHeader({ currentView, setView, isAdminLoggedIn, on
                 <button
                   id="btn-logout"
                   onClick={onLogout}
-                  className="flex items-center space-x-1.5 text-xs font-black uppercase tracking-widest text-brand-chocolate hover:text-[#C05663] transition-colors"
+                  className="flex items-center space-x-1.5 text-xs font-black uppercase tracking-widest text-brand-chocolate hover:text-brand-pink transition-all duration-200 hover:scale-105"
                 >
                   <LogOut className="h-4 w-4" />
                   <span>LOGOUT</span>
@@ -123,8 +123,8 @@ export default function PublicHeader({ currentView, setView, isAdminLoggedIn, on
               <button
                 id="btn-login-view"
                 onClick={() => setView("login")}
-                className={`flex items-center space-x-1.5 text-xs font-black uppercase tracking-widest text-brand-chocolate hover:text-brand-rosegold transition-all duration-200 ${
-                  currentView === "login" ? "text-brand-rosegold" : ""
+                className={`flex items-center space-x-1.5 text-xs font-black uppercase tracking-widest text-brand-chocolate hover:text-brand-rosegold transition-all duration-200 hover:scale-105 ${
+                  currentView === "login" ? "text-brand-pink" : ""
                 }`}
               >
                 <LogIn className="h-4.5 w-4.5" />
@@ -144,7 +144,7 @@ export default function PublicHeader({ currentView, setView, isAdminLoggedIn, on
             window.dispatchEvent(new Event("lainie_category_change"));
           }}
           className={`flex flex-col items-center text-[10px] uppercase font-bold py-1 ${
-            currentView === "shop" ? "text-brand-rosegold" : "text-brand-chocolate/60"
+            currentView === "shop" ? "text-brand-pink" : "text-brand-chocolate/60"
           }`}
         >
           <Cake className="h-4 w-4 mb-0.5" />
@@ -153,7 +153,7 @@ export default function PublicHeader({ currentView, setView, isAdminLoggedIn, on
         <button
           onClick={() => setView("quote-builder")}
           className={`flex flex-col items-center text-[10px] uppercase font-bold py-1 ${
-            currentView === "quote-builder" ? "text-brand-rosegold" : "text-brand-chocolate/60"
+            currentView === "quote-builder" ? "text-brand-pink" : "text-brand-chocolate/60"
           }`}
         >
           <Sparkles className="h-4 w-4 mb-0.5" />
@@ -162,7 +162,7 @@ export default function PublicHeader({ currentView, setView, isAdminLoggedIn, on
         <button
           onClick={() => setView("quote-portal")}
           className={`flex flex-col items-center text-[10px] uppercase font-bold py-1 ${
-            currentView === "quote-portal" ? "text-brand-rosegold" : "text-brand-chocolate/60"
+            currentView === "quote-portal" ? "text-brand-pink" : "text-brand-chocolate/60"
           }`}
         >
           <ClipboardCheck className="h-4 w-4 mb-0.5" />

@@ -259,8 +259,8 @@ export default function QuoteBuilder() {
                           onClick={() => setLayers(lvl)}
                           className={`py-2 px-3 border rounded-xl text-xs font-extrabold transition cursor-pointer flex items-center justify-center gap-1.5 ${
                             layers === lvl
-                              ? "bg-[#B76E79] border-[#B76E79] text-white"
-                              : "bg-white border-brand-pink/20 text-[#B76E79] hover:bg-brand-pink/5"
+                              ? "bg-brand-pink border-brand-pink text-white shadow-sm"
+                              : "bg-white border-brand-pink/20 text-brand-pink hover:bg-brand-pink/5"
                           }`}
                         >
                           <Layers className="h-3.5 w-3.5" />
@@ -295,10 +295,10 @@ export default function QuoteBuilder() {
                   <button
                     type="button"
                     onClick={() => setStep(2)}
-                    className="bg-[#B76E79] text-white hover:opacity-90 px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 cursor-pointer"
+                    className="bg-brand-pink text-white hover:bg-brand-rosegold hover:text-brand-chocolate px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 cursor-pointer transition-all duration-300 hover:scale-105 shadow-md"
                   >
                     <span>Artistry & Palette</span>
-                    <ArrowRight className="h-4 w-4" />
+                    <ArrowRight className="h-4 w-4 animate-pulse" />
                   </button>
                 </div>
               </div>
@@ -354,7 +354,7 @@ export default function QuoteBuilder() {
                         type="button"
                         onClick={() => setDecorStyle("none")}
                         className={`p-3 border rounded-xl text-center text-xs font-extrabold flex flex-col items-center justify-center gap-1.5 cursor-pointer ${
-                          decorStyle === "none" ? "bg-[#B76E79] border-[#B76E79] text-white" : "bg-white border-brand-pink/15 text-[#B76E79] hover:bg-brand-pink/5"
+                          decorStyle === "none" ? "bg-brand-pink border-brand-pink text-white" : "bg-white border-brand-pink/15 text-brand-pink hover:bg-brand-pink/5"
                         }`}
                       >
                         <span className="text-sm font-black">Minimal Piping</span>
@@ -364,7 +364,7 @@ export default function QuoteBuilder() {
                         type="button"
                         onClick={() => setDecorStyle("buttercream draw")}
                         className={`p-3 border rounded-xl text-center text-xs font-extrabold flex flex-col items-center justify-center gap-1.5 cursor-pointer ${
-                          decorStyle === "buttercream draw" ? "bg-[#B76E79] border-[#B76E79] text-white" : "bg-white border-brand-pink/15 text-[#B76E79] hover:bg-brand-pink/5"
+                          decorStyle === "buttercream draw" ? "bg-brand-pink border-brand-pink text-white" : "bg-white border-brand-pink/15 text-brand-pink hover:bg-brand-pink/5"
                         }`}
                       >
                         <span className="text-sm font-black">Drawings (+$25)</span>
@@ -374,7 +374,7 @@ export default function QuoteBuilder() {
                         type="button"
                         onClick={() => setDecorStyle("fondant toppers")}
                         className={`p-3 border rounded-xl text-center text-xs font-extrabold flex flex-col items-center justify-center gap-1.5 cursor-pointer ${
-                          decorStyle === "fondant toppers" ? "bg-[#B76E79] border-[#B76E79] text-white" : "bg-white border-brand-pink/15 text-[#B76E79] hover:bg-brand-pink/5"
+                          decorStyle === "fondant toppers" ? "bg-brand-pink border-brand-pink text-white" : "bg-white border-brand-pink/15 text-brand-pink hover:bg-brand-pink/5"
                         }`}
                       >
                         <span className="text-sm font-black">Fondant (+$45)</span>
@@ -384,7 +384,7 @@ export default function QuoteBuilder() {
                         type="button"
                         onClick={() => setDecorStyle("real flowers")}
                         className={`p-3 border rounded-xl text-center text-xs font-extrabold flex flex-col items-center justify-center gap-1.5 cursor-pointer ${
-                          decorStyle === "real flowers" ? "bg-[#B76E79] border-[#B76E79] text-white" : "bg-white border-brand-pink/15 text-[#B76E79] hover:bg-brand-pink/5"
+                          decorStyle === "real flowers" ? "bg-brand-pink border-brand-pink text-white" : "bg-white border-brand-pink/15 text-brand-pink hover:bg-brand-pink/5"
                         }`}
                       >
                         <span className="text-sm font-black">Flowers (+$35)</span>
@@ -413,7 +413,7 @@ export default function QuoteBuilder() {
                   <button
                     type="button"
                     onClick={() => setStep(1)}
-                    className="border border-[#B76E79] text-[#B76E79] bg-white hover:bg-brand-pink/5 px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 cursor-pointer"
+                    className="border border-brand-pink text-brand-pink bg-white hover:bg-brand-pink/5 px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 cursor-pointer transition-all duration-300 hover:scale-105"
                   >
                     <ArrowLeft className="h-4 w-4" />
                     <span>Back</span>
@@ -421,10 +421,10 @@ export default function QuoteBuilder() {
                   <button
                     type="button"
                     onClick={() => setStep(3)}
-                    className="bg-[#B76E79] text-white hover:opacity-90 px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 cursor-pointer"
+                    className="bg-brand-pink text-white hover:bg-brand-rosegold hover:text-brand-chocolate px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 cursor-pointer transition-all duration-300 hover:scale-105 shadow-md"
                   >
                     <span>Logistics & Check</span>
-                    <ArrowRight className="h-4 w-4" />
+                    <ArrowRight className="h-4 w-4 animate-pulse" />
                   </button>
                 </div>
               </div>
@@ -471,7 +471,7 @@ export default function QuoteBuilder() {
                           setDeliveryAddress("");
                         }}
                         className={`py-2 px-3 border rounded-xl text-xs font-extrabold transition cursor-pointer flex items-center justify-center gap-1.5 ${
-                          deliveryType === "pickup" ? "bg-[#B76E79] border-[#B76E79] text-white" : "bg-white border-brand-pink/25 text-[#B76E79] hover:bg-brand-pink/5"
+                          deliveryType === "pickup" ? "bg-brand-pink border-brand-pink text-white" : "bg-white border-brand-pink/25 text-brand-pink hover:bg-brand-pink/5"
                         }`}
                       >
                         Gift Pickup
@@ -480,7 +480,7 @@ export default function QuoteBuilder() {
                         type="button"
                         onClick={() => setDeliveryType("delivery")}
                         className={`py-2 px-3 border rounded-xl text-xs font-extrabold transition cursor-pointer flex items-center justify-center gap-1.5 ${
-                          deliveryType === "delivery" ? "bg-[#B76E79] border-[#B76E79] text-white" : "bg-white border-brand-pink/25 text-[#B76E79] hover:bg-brand-pink/5"
+                          deliveryType === "delivery" ? "bg-brand-pink border-brand-pink text-white" : "bg-white border-brand-pink/25 text-brand-pink hover:bg-brand-pink/5"
                         }`}
                       >
                         <Truck className="h-4 w-4" />
@@ -491,8 +491,8 @@ export default function QuoteBuilder() {
 
                   {/* Delivery Address Field */}
                   {deliveryType === "delivery" && (
-                    <div className="sm:col-span-2 space-y-2 bg-[#B76E79]/5 border border-[#B76E79]/15 p-4 rounded-2xl animate-in slide-in-from-top-1 duration-150">
-                      <label className="text-xs font-bold text-[#B76E79] uppercase tracking-wider block">
+                    <div className="sm:col-span-2 space-y-2 bg-brand-pink/5 border border-brand-pink/15 p-4 rounded-2xl animate-in slide-in-from-top-1 duration-150">
+                      <label className="text-xs font-bold text-brand-pink uppercase tracking-wider block">
                         Delivery Address in Royse City Surcharges
                       </label>
                       <input
@@ -501,7 +501,7 @@ export default function QuoteBuilder() {
                         placeholder="112 Bluebonnets Lane, Royse City, TX 75189"
                         value={deliveryAddress}
                         onChange={(e) => setDeliveryAddress(e.target.value)}
-                        className="w-full text-xs bg-white border border-[#B76E79]/20 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-1 focus:ring-brand-rosegold"
+                        className="w-full text-xs bg-white border border-brand-rosegold rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand-pink"
                       />
                       <p className="text-[10px] text-brand-chocolate/75 font-semibold">
                         📢 Delivery is only serviced within Royse City and adjacent 15-mile radiuses. Delivery surcharges apply.
@@ -600,7 +600,7 @@ export default function QuoteBuilder() {
                   <button
                     type="button"
                     onClick={() => setStep(2)}
-                    className="border border-[#B76E79] text-[#B76E79] bg-white hover:bg-brand-pink/5 px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 cursor-pointer"
+                    className="border border-brand-pink text-brand-pink bg-white hover:bg-brand-pink/5 px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 cursor-pointer transition-all duration-300 hover:scale-105"
                   >
                     <ArrowLeft className="h-4 w-4" />
                     <span>Back</span>
@@ -608,7 +608,7 @@ export default function QuoteBuilder() {
                   <button
                     type="submit"
                     disabled={submitting || isLeadTimeViolated()}
-                    className="bg-[#B76E79] text-white hover:opacity-95 px-6 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-40"
+                    className="bg-brand-pink text-white hover:bg-brand-rosegold hover:text-brand-chocolate px-6 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-40 transition-all duration-300 hover:scale-105"
                   >
                     {submitting ? "Booking Custom request..." : "Submit Custom Cake Request"}
                   </button>

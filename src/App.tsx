@@ -84,14 +84,14 @@ export default function App() {
   const isAdminView = view.startsWith("admin-");
 
   return (
-    <div className="min-h-screen bg-brand-pink text-brand-chocolate font-sans flex flex-col justify-between selection:bg-brand-rosegold/30">
+    <div className="min-h-screen bg-brand-gray text-brand-chocolate font-sans flex flex-col justify-between selection:bg-brand-pink/30">
       
       {/* Top Welcome Ribbon */}
       {(!settings || settings.bannerVisible !== false) && (
         <div className="bg-brand-chocolate text-brand-cream text-[10.5px] font-semibold tracking-wider text-center py-2 px-4 shadow-sm flex items-center justify-center space-x-1.5 shrink-0 z-40 animate-in fade-in slide-in-from-top duration-300">
           <Sparkles className="h-3.5 w-3.5 text-brand-pink animate-pulse" />
           <span>{settings?.announcementBanner || "Now taking custom graduation & bridal sweet requests for Royse City, Rockwall & Dallas communities!"}</span>
-          <Gift className="h-3.5 w-3.5 text-[#F9D5D3]" />
+          <Gift className="h-3.5 w-3.5 text-brand-rosegold" />
         </div>
       )}
 
@@ -441,10 +441,12 @@ export default function App() {
       </main>
 
       {/* Main Footer Block */}
-      <footer className="bg-white border-t border-brand-pink/20 py-8 px-6 text-center text-xs text-brand-chocolate/60 shrink-0 z-40">
+      <footer className="bg-brand-chocolate text-white border-t border-brand-pink/20 py-8 px-6 text-center text-xs shrink-0 z-40 relative overflow-hidden">
+        {/* Subtle Cow Print bottom accent strip */}
+        <div className="absolute bottom-0 left-0 right-0 h-1 bg-cow-print opacity-90"></div>
         <div className="max-w-2xl mx-auto space-y-3">
-          <p className="font-heading italic text-sm text-brand-chocolate">Lainie's Sweet Treats</p>
-          <p className="text-[10px] leading-relaxed">
+          <p className="font-heading italic text-base text-brand-pink tracking-wide">Lainie's Sweet Treats</p>
+          <p className="text-[10px] text-gray-300 leading-relaxed max-w-lg mx-auto">
             Delivering gorgeous, delicious mini cakes, custom cookies, cupcakes, dessert boxes & catering baskets in Royse City, Texas and surrounding Rockwall County. Made with organic butter, love, and sweet Texas charm.
           </p>
           <div className="pt-2 border-t border-brand-pink/10 text-[9px] text-gray-400">

@@ -387,7 +387,7 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
       <div 
         className="w-full relative z-20 pt-16 pb-16 md:pt-20 md:pb-20 text-center flex flex-col justify-between animate-in fade-in duration-500"
         style={{
-          backgroundImage: `linear-gradient(to bottom, rgba(62,39,35,0.55) 0%, rgba(62,39,35,0.4) 45%, rgba(62,39,35,0.5) 75%, rgba(249,213,211,0.85) 100%), url("https://firebasestorage.googleapis.com/v0/b/lainies-sweet-treats.firebasestorage.app/o/site-assets%2Fhero-background.jpg?alt=media&token=7902610f-34b3-4083-a28a-1691fb6040b1")`,
+          backgroundImage: `linear-gradient(to bottom, rgba(17,17,17,0.65) 0%, rgba(17,17,17,0.5) 45%, rgba(17,17,17,0.55) 75%, rgba(255,45,150,0.85) 100%), url("https://firebasestorage.googleapis.com/v0/b/lainies-sweet-treats.firebasestorage.app/o/site-assets%2Fhero-background.jpg?alt=media&token=7902610f-34b3-4083-a28a-1691fb6040b1")`,
           backgroundSize: "cover",
           backgroundPosition: "center",
         }}
@@ -440,9 +440,10 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
             <div className="flex justify-center">
               <button
                 onClick={onSwitchToQuote}
-                className="bg-[#B76E79] text-white text-xs uppercase tracking-widest px-8 py-3.5 rounded-full font-black hover:opacity-90 active:scale-95 transition-all duration-200 shadow-[0_4px_20px_rgba(183,110,121,0.4)] flex items-center justify-center space-x-2 cursor-pointer transform-gpu"
+                className="bg-brand-pink text-white hover:bg-brand-rosegold hover:text-brand-chocolate text-xs uppercase tracking-widest px-8 py-3.5 rounded-full font-black hover:scale-105 active:scale-95 transition-all duration-300 shadow-[0_4px_20px_rgba(255,45,150,0.3)] flex items-center justify-center space-x-2 cursor-pointer transform-gpu"
               >
-                REQUEST A CUSTOM QUOTE
+                <Sparkles className="h-4 w-4 animate-pulse text-white group-hover:text-brand-chocolate" />
+                <span>REQUEST A CUSTOM QUOTE</span>
               </button>
             </div>
           </div>
@@ -460,10 +461,10 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
                     key={cat}
                     type="button"
                     onClick={() => setActiveCategory(cat)}
-                    className={`px-3.5 sm:px-4.5 py-1.5 rounded-full text-[10px] sm:text-xs font-semibold tracking-wider uppercase transition-all duration-200 cursor-pointer border whitespace-nowrap ${
+                    className={`px-3.5 sm:px-4.5 py-1.5 rounded-full text-[10px] sm:text-xs font-semibold tracking-wider uppercase transition-all duration-300 hover:scale-105 cursor-pointer border whitespace-nowrap ${
                       isActive 
-                        ? "bg-[#B76E79] border-[#B76E79] text-white shadow-xs font-bold" 
-                        : "bg-transparent border-[rgba(255,248,240,0.35)] text-[#FFF8F0] hover:bg-[rgba(255,248,240,0.1)]"
+                        ? "bg-brand-pink border-brand-pink text-white shadow-md font-extrabold" 
+                        : "bg-transparent border-white/35 text-white hover:bg-white/10 hover:text-brand-rosegold"
                     }`}
                   >
                     {cat === "All" ? "ALL" : cat.toUpperCase()}
@@ -478,7 +479,7 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
         <div 
           className="absolute bottom-[-100px] left-0 right-0 h-[200px] pointer-events-none z-10"
           style={{
-            background: "linear-gradient(to bottom, rgba(62,39,35,0.5) 0%, rgba(74,47,43,0.48) 10%, rgba(85,55,51,0.46) 20%, rgba(97,63,59,0.44) 30%, rgba(108,72,67,0.42) 40%, rgba(120,80,75,0.4) 50%, rgba(146,106,102,0.43) 60%, rgba(172,133,129,0.46) 70%, rgba(198,160,156,0.49) 80%, rgba(223,186,184,0.52) 90%, rgba(249,213,211,0.55) 100%)"
+            background: "linear-gradient(to bottom, rgba(17,17,17,0.55) 0%, rgba(255,45,150,0.55) 100%)"
           }}
         />
       </div>
@@ -499,7 +500,7 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
         <div 
           className="absolute inset-0 pointer-events-none select-none"
           style={{
-            background: "linear-gradient(to bottom, rgba(249,213,211,0.55) 0%, rgba(255,248,240,0.6) 100%)"
+            background: "linear-gradient(to bottom, rgba(255,45,150,0.15) 0%, var(--color-brand-gray) 100%)"
           }}
         />
 
@@ -517,7 +518,7 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search sweet treats by name, ingredient, or category..."
-                  className="w-full bg-[#FFF8F0] border border-brand-pink/30 text-xs sm:text-sm text-brand-chocolate px-5 py-3.5 rounded-full pl-12 focus:outline-none focus:ring-1 focus:ring-brand-rosegold placeholder-brand-chocolate/40 transition-all font-medium shadow-md"
+                  className="w-full bg-white border border-brand-rosegold/50 text-xs sm:text-sm text-brand-chocolate px-5 py-3.5 rounded-full pl-12 focus:outline-none focus:ring-2 focus:ring-brand-pink placeholder-brand-chocolate/40 transition-all font-medium shadow-md"
                 />
               <svg className="h-4.5 w-4.5 text-brand-chocolate/40 absolute left-4.5 top-4 md:top-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
@@ -541,7 +542,7 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
 
             {/* Product Items grid */}
             {filteredProducts.length === 0 ? (
-              <div className="bg-[#FFF8F0] border border-brand-pink/20 rounded-[1.5rem] p-12 text-center space-y-4 shadow-sm">
+              <div className="bg-white border border-brand-pink/15 rounded-[1.5rem] p-12 text-center space-y-4 shadow-md">
                 <div className="text-4xl text-brand-rosegold">🧁🔍</div>
                 <h3 className="text-lg font-bold text-brand-chocolate font-heading italic">No sweet matches found!</h3>
                 <p className="text-xs text-brand-chocolate/70 max-w-sm mx-auto leading-relaxed font-normal">
@@ -573,7 +574,7 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
                       transition={{ duration: 0.35, ease: "easeOut" }}
                       key={p.id}
                       onClick={() => handleProductSelect(p)}
-                      className="bg-[#FFF8F0] border border-brand-pink/20 rounded-[1.5rem] overflow-hidden shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col group transform-gpu cursor-pointer"
+                      className="bg-white border border-brand-pink/15 rounded-[1.5rem] overflow-hidden shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col group transform-gpu cursor-pointer"
                     >
                       <div className="relative h-56 bg-brand-pink/10 overflow-hidden">
                         <img 
@@ -623,7 +624,7 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
         <div className="lg:col-span-1">
           <div 
             id="shop-cart" 
-            className="lg:sticky lg:top-32 bg-[#FFF8F0] border border-brand-pink/30 rounded-[1.5rem] p-6 shadow-md h-fit transition-all duration-300"
+            className="lg:sticky lg:top-32 bg-white border border-brand-pink/15 rounded-[1.5rem] p-6 shadow-md h-fit transition-all duration-300"
           >
             <div className="border-b border-brand-pink/20 pb-4 flex items-center space-x-2.5">
               <ShoppingBag className="h-5.5 w-5.5 text-brand-rosegold" />
@@ -747,10 +748,10 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
                           setTipType(pct);
                           setCustomTip("");
                         }}
-                        className={`py-1 rounded-full text-[10px] font-extrabold border transition cursor-pointer text-center ${
+                        className={`py-1 rounded-full text-[10px] font-extrabold border transition-all duration-300 cursor-pointer text-center hover:scale-105 ${
                           tipType === pct
-                            ? "bg-[#B76E79] border-[#B76E79] text-white"
-                            : "bg-white border-brand-pink/25 text-[#B76E79] hover:bg-brand-pink/10"
+                            ? "bg-brand-pink border-brand-pink text-white shadow-sm"
+                            : "bg-white border-brand-rosegold text-brand-pink hover:bg-brand-pink/10"
                         }`}
                       >
                         {pct}%
@@ -762,10 +763,10 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
                         setTipType("custom");
                         setCustomTip("");
                       }}
-                      className={`py-1 rounded-full text-[10px] font-extrabold border transition cursor-pointer text-center ${
+                      className={`py-1 rounded-full text-[10px] font-extrabold border transition-all duration-300 cursor-pointer text-center hover:scale-105 ${
                         tipType === "custom"
-                          ? "bg-[#B76E79] border-[#B76E79] text-white"
-                          : "bg-white border-brand-pink/25 text-[#B76E79] hover:bg-brand-pink/10"
+                          ? "bg-brand-pink border-brand-pink text-white shadow-sm"
+                          : "bg-white border-brand-rosegold text-brand-pink hover:bg-brand-pink/10"
                       }`}
                     >
                       Custom
@@ -1046,7 +1047,7 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
                 href="https://www.instagram.com/"
                 target="_blank"
                 rel="noreferrer"
-                className="relative aspect-square bg-[#FFF8F0] rounded-2xl overflow-hidden border border-brand-pink/20 block hover:-translate-y-1 hover:shadow-md transition-all duration-300 group"
+                className="relative aspect-square bg-white rounded-2xl overflow-hidden border border-brand-pink/15 block hover:-translate-y-1 hover:shadow-md transition-all duration-300 group"
               >
                 <img 
                   src={url} 
