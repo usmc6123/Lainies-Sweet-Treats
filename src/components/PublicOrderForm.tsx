@@ -464,10 +464,10 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
             <div className="flex justify-center">
               <button
                 onClick={onSwitchToQuote}
-                className="bg-brand-pink text-white hover:bg-brand-rosegold hover:text-brand-chocolate text-xs uppercase tracking-widest px-8 py-3.5 rounded-full font-black hover:scale-105 active:scale-95 transition-all duration-300 shadow-[0_4px_20px_rgba(255,45,150,0.3)] flex items-center justify-center space-x-2 cursor-pointer transform-gpu"
+                className="bg-brand-pink text-white hover:bg-brand-rosegold hover:text-brand-chocolate text-base uppercase tracking-widest px-8 py-3.5 rounded-full font-black hover:scale-105 active:scale-95 transition-all duration-300 shadow-[0_4px_20px_rgba(255,45,150,0.3)] flex items-center justify-center space-x-2 cursor-pointer transform-gpu"
               >
                 <Sparkles className="h-4 w-4 animate-pulse text-white group-hover:text-brand-chocolate" />
-                <span>REQUEST A CUSTOM QUOTE</span>
+                <span className="text-base">REQUEST A CUSTOM QUOTE</span>
               </button>
             </div>
           </div>
@@ -485,7 +485,7 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
                     key={cat}
                     type="button"
                     onClick={() => setActiveCategory(cat)}
-                    className={`px-3.5 sm:px-4.5 py-1.5 rounded-full text-[10px] sm:text-xs font-semibold tracking-wider uppercase transition-all duration-300 hover:scale-105 cursor-pointer border whitespace-nowrap ${
+                    className={`px-3.5 sm:px-4.5 py-1.5 rounded-full text-base font-semibold tracking-wider uppercase transition-all duration-300 hover:scale-105 cursor-pointer border whitespace-nowrap ${
                       isActive 
                         ? "bg-brand-pink border-brand-pink text-white shadow-md font-extrabold" 
                         : "bg-transparent border-white/35 text-white hover:bg-white/10 hover:text-brand-rosegold"
