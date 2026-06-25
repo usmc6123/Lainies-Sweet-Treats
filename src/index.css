@@ -1,9 +1,10 @@
-@import url('https://fonts.googleapis.com/css2?family=Playwrite+NG+Modern:wght@100..400&family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Chewy&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --font-heading: "Playwrite NG Modern", cursive, sans-serif;
-  --font-sans: "Inter", "Poppins", sans-serif;
+  --font-heading: "Chewy", cursive, sans-serif;
+  --font-sans: "Chewy", cursive, sans-serif;
+  --font-mono: "Chewy", cursive, sans-serif;
   
   --color-brand-pink: #FF2D96;       /* Hot Pink (Primary) */
   --color-brand-rosegold: #6EEFD8;   /* Aqua/Mint (Secondary Accent) */
@@ -13,15 +14,24 @@
   --color-brand-white: #FFFFFF;
 }
 
-/* Base resets & typography pairings */
-h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-heading);
+/* Base resets & global font override to Chewy */
+* {
+  font-family: "Chewy", cursive, sans-serif !important;
 }
 
 body {
-  font-family: var(--font-sans);
   background-color: var(--color-brand-gray);
   color: var(--color-brand-chocolate);
+  line-height: 1.6;
+  letter-spacing: 0.03em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Headings readability tweaks */
+h1, h2, h3, h4, h5, h6 {
+  line-height: 1.3;
+  letter-spacing: 0.04em;
 }
 
 /* Cow print accent pattern */

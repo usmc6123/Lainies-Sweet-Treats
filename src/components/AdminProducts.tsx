@@ -219,11 +219,27 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
       ]);
       if (pRes.ok) {
         const pList = await pRes.json();
-        const mappedProducts = pList.map((p: any) => ({
-          ...p,
-          name: (p.name === "Custom Cakes" || p.name === "Custom Cake" || p.name?.toLowerCase() === "beautiful kittens") ? "Mini Cakes" : p.name,
-          category: p.category === "Custom Cakes" ? "Mini Cakes" : p.category
-        }));
+        const mappedProducts = pList.map((p: any) => {
+          let mappedName = p.name;
+          let mappedCategory = p.category === "Custom Cakes" ? "Mini Cakes" : p.category;
+
+          const nameLower = p.name?.toLowerCase() || "";
+          if (p.name === "Custom Cakes" || p.name === "Custom Cake" || nameLower === "beautiful kittens") {
+            mappedName = "Mini Cakes";
+            mappedCategory = "Mini Cakes";
+          } else if (nameLower.includes("cure kittens") || nameLower.includes("cute kittens")) {
+            mappedName = "Cupcakes";
+            mappedCategory = "Cupcakes";
+          } else if (nameLower.includes("cookies that people like")) {
+            mappedName = "Jumbo Cookies";
+          }
+
+          return {
+            ...p,
+            name: mappedName,
+            category: mappedCategory
+          };
+        });
         setProducts(mappedProducts);
         const uniqueCategories = Array.from(new Set([
           ...defaultCategories,

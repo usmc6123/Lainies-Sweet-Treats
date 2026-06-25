@@ -131,11 +131,27 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
         ]);
         if (pRes.ok) {
           const rawProducts = await pRes.json();
-          const mapped = rawProducts.map((p: any) => ({
-            ...p,
-            name: (p.name === "Custom Cakes" || p.name === "Custom Cake" || p.name?.toLowerCase() === "beautiful kittens") ? "Mini Cakes" : p.name,
-            category: p.category === "Custom Cakes" ? "Mini Cakes" : p.category
-          }));
+          const mapped = rawProducts.map((p: any) => {
+            let mappedName = p.name;
+            let mappedCategory = p.category === "Custom Cakes" ? "Mini Cakes" : p.category;
+
+            const nameLower = p.name?.toLowerCase() || "";
+            if (p.name === "Custom Cakes" || p.name === "Custom Cake" || nameLower === "beautiful kittens") {
+              mappedName = "Mini Cakes";
+              mappedCategory = "Mini Cakes";
+            } else if (nameLower.includes("cure kittens") || nameLower.includes("cute kittens")) {
+              mappedName = "Cupcakes";
+              mappedCategory = "Cupcakes";
+            } else if (nameLower.includes("cookies that people like")) {
+              mappedName = "Jumbo Cookies";
+            }
+
+            return {
+              ...p,
+              name: mappedName,
+              category: mappedCategory
+            };
+          });
           setProducts(mapped);
         }
         if (sRes.ok) setSettings(await sRes.json());
