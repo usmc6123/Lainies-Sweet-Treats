@@ -221,6 +221,7 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
         const pList = await pRes.json();
         const mappedProducts = pList.map((p: any) => ({
           ...p,
+          name: (p.name === "Custom Cakes" || p.name === "Custom Cake" || p.name?.toLowerCase() === "beautiful kittens") ? "Mini Cakes" : p.name,
           category: p.category === "Custom Cakes" ? "Mini Cakes" : p.category
         }));
         setProducts(mappedProducts);

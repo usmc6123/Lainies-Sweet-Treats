@@ -133,6 +133,7 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
           const rawProducts = await pRes.json();
           const mapped = rawProducts.map((p: any) => ({
             ...p,
+            name: (p.name === "Custom Cakes" || p.name === "Custom Cake" || p.name?.toLowerCase() === "beautiful kittens") ? "Mini Cakes" : p.name,
             category: p.category === "Custom Cakes" ? "Mini Cakes" : p.category
           }));
           setProducts(mapped);
@@ -394,7 +395,7 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
       <div 
         className="w-full relative z-20 pt-16 pb-16 md:pt-20 md:pb-20 text-center flex flex-col justify-between animate-in fade-in duration-500"
         style={{
-          backgroundImage: `linear-gradient(to bottom, rgba(17,17,17,0.65) 0%, rgba(17,17,17,0.5) 45%, rgba(17,17,17,0.55) 75%, rgba(255,45,150,0.85) 100%), url("https://firebasestorage.googleapis.com/v0/b/lainies-sweet-treats.firebasestorage.app/o/site-assets%2Fhero-background.jpg?alt=media&token=7902610f-34b3-4083-a28a-1691fb6040b1")`,
+          backgroundImage: `linear-gradient(to bottom, rgba(17,17,17,0.65) 0%, rgba(17,17,17,0.5) 45%, rgba(17,17,17,0.55) 75%, rgba(255,45,150,0.85) 100%), url("https://images.unsplash.com/photo-1606313564200-e75d5e30476c?q=80&w=1600&auto=format&fit=crop")`,
           backgroundSize: "cover",
           backgroundPosition: "center",
         }}
