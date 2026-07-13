@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { PlusCircle, Edit2, Trash2, HelpCircle, FileText, Sparkles, DollarSign, Tag, Scale, Search } from "lucide-react";
 import { Product, Ingredient, ProductIngredientLink } from "../types";
 
+const regeneratedImage = "/src/assets/images/regenerated_image_1782495956327.jpg";
+
 interface AdminProductsProps {
   token: string;
   triggerRefresh: () => void;
@@ -224,9 +226,13 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
           let mappedCategory = p.category === "Custom Cakes" ? "Mini Cakes" : p.category;
 
           const nameLower = p.name?.toLowerCase() || "";
-          if (p.name === "Custom Cakes" || p.name === "Custom Cake" || nameLower === "beautiful kittens") {
+          let mappedPhotos = p.photos;
+          let mappedImgUrl = p.imgUrl;
+          if (p.name === "Custom Cakes" || p.name === "Custom Cake" || nameLower === "beautiful kittens" || mappedName === "Mini Cakes") {
             mappedName = "Mini Cakes";
             mappedCategory = "Mini Cakes";
+            mappedImgUrl = regeneratedImage;
+            mappedPhotos = [{ url: regeneratedImage, isPrimary: true }];
           } else if (nameLower.includes("cure kittens") || nameLower.includes("cute kittens")) {
             mappedName = "Cupcakes";
             mappedCategory = "Cupcakes";
@@ -237,7 +243,9 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
           return {
             ...p,
             name: mappedName,
-            category: mappedCategory
+            category: mappedCategory,
+            imgUrl: mappedImgUrl,
+            photos: mappedPhotos
           };
         });
         setProducts(mappedProducts);

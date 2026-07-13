@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from "motion/react";
 import { Product, OrderItem, SelectedOptions, Settings, BlockedDate } from "../types";
 import { ShoppingBag, Sparkles, Calendar, User, Phone, Mail, MapPin, Truck, AlertTriangle, CheckCircle, Trash2, ChevronRight } from "lucide-react";
 
+const regeneratedImage = "/src/assets/images/regenerated_image_1782495956327.jpg";
+
 interface PublicOrderFormProps {
   onSwitchToQuote: () => void;
 }
@@ -136,9 +138,13 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
             let mappedCategory = p.category === "Custom Cakes" ? "Mini Cakes" : p.category;
 
             const nameLower = p.name?.toLowerCase() || "";
-            if (p.name === "Custom Cakes" || p.name === "Custom Cake" || nameLower === "beautiful kittens") {
+            let mappedPhotos = p.photos;
+            let mappedImgUrl = p.imgUrl;
+            if (p.name === "Custom Cakes" || p.name === "Custom Cake" || nameLower === "beautiful kittens" || mappedName === "Mini Cakes") {
               mappedName = "Mini Cakes";
               mappedCategory = "Mini Cakes";
+              mappedImgUrl = regeneratedImage;
+              mappedPhotos = [{ url: regeneratedImage, isPrimary: true }];
             } else if (nameLower.includes("cure kittens") || nameLower.includes("cute kittens")) {
               mappedName = "Cupcakes";
               mappedCategory = "Cupcakes";
@@ -149,7 +155,9 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
             return {
               ...p,
               name: mappedName,
-              category: mappedCategory
+              category: mappedCategory,
+              imgUrl: mappedImgUrl,
+              photos: mappedPhotos
             };
           });
           setProducts(mapped);
