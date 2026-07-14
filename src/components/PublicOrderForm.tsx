@@ -612,7 +612,7 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                         />
                         <div className="absolute top-3 right-3 bg-brand-rosegold text-white text-xs font-semibold px-3 py-1 rounded-full shadow-sm">
-                          ${p.basePrice.toFixed(2)}
+                          Starting at ${p.basePrice.toFixed(2)}
                         </div>
                       </div>
 
