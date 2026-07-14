@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { PlusCircle, Edit2, Trash2, HelpCircle, FileText, Sparkles, DollarSign, Tag, Scale, Search } from "lucide-react";
 import { Product, Ingredient, ProductIngredientLink } from "../types";
-
-const regeneratedImage = "/src/assets/images/regenerated_image_1782495956327.jpg";
+import {
+  normalizeProductNameAndCategory,
+  normalizeProductPhotos,
+  getPrimaryProductImage,
+} from "../utils/productUtils";
+import { ProductImage } from "./ProductImage";
 
 interface AdminProductsProps {
   token: string;
@@ -41,16 +45,15 @@ function AdminProductCardImage({ product }: AdminProductCardImageProps) {
     aspectClass = "aspect-[4/3]";
   }
 
-  const imageUrl = product.imgUrl || "https://images.unsplash.com/photo-1578985545062-69928b1d9587";
+  const imageUrl = getPrimaryProductImage(product);
 
   return (
     <div className={`relative w-full bg-brand-pink/5 rounded-lg overflow-hidden mb-1.5 border border-brand-pink/15 transition-all duration-300 ${aspectClass}`}>
-      <img 
+      <ProductImage 
         src={imageUrl} 
         alt={product.name}
         onLoad={handleImageLoad}
         className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
-        referrerPolicy="no-referrer"
       />
       <span className="absolute top-1 left-1 text-[7px] uppercase font-extrabold bg-brand-chocolate text-brand-cream px-1 py-0.25 rounded z-10">
         {product.category}
@@ -91,16 +94,31 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
   const [photos, setPhotos] = useState<{ url: string; isPrimary: boolean }[]>([]);
   const [externalImgUrl, setExternalImgUrl] = useState("");
   const [activeUploadSlot, setActiveUploadSlot] = useState<number | null>(null);
+  const [tempUploadId, setTempUploadId] = useState<string>("");
 
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState("");
 
   const handleSlotFileChange = async (e: React.ChangeEvent<HTMLInputElement>, slotIndex: number) => {
     const file = e.target.files?.[0];
-    if (!file) return;
+    if (!file) {
+      setActiveUploadSlot(null);
+      return;
+    }
+
+    // Validate JPG, JPEG, PNG, and WebP files
+    const validTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+    const ext = file.name.split('.').pop()?.toLowerCase();
+    const validExtensions = ["jpg", "jpeg", "png", "webp"];
+    if (!validTypes.includes(file.type) && (!ext || !validExtensions.includes(ext))) {
+      setUploadError("Invalid file format. Please upload JPG, JPEG, PNG, or WebP.");
+      setActiveUploadSlot(null);
+      return;
+    }
 
     if (file.size > 5 * 1024 * 1024) {
       setUploadError("Image too large. Please select an image under 5MB.");
+      setActiveUploadSlot(null);
       return;
     }
 
@@ -120,9 +138,9 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
             },
             body: JSON.stringify({
               filename: file.name,
-              contentType: file.type,
+              contentType: file.type || `image/${ext || "jpeg"}`,
               base64: base64String,
-              productId: editingProduct ? editingProduct.id : "new-product"
+              productId: editingProduct ? editingProduct.id : (tempUploadId || "new-product")
             })
           });
 
@@ -151,16 +169,19 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
           setUploadError(err.message || "Failed to upload image.");
         } finally {
           setUploading(false);
+          setActiveUploadSlot(null);
         }
       };
       reader.onerror = () => {
         setUploadError("Failed to read local file.");
         setUploading(false);
+        setActiveUploadSlot(null);
       };
       reader.readAsDataURL(file);
     } catch (err: any) {
       setUploadError(err.message || "File reading error.");
       setUploading(false);
+      setActiveUploadSlot(null);
     }
   };
 
@@ -222,30 +243,15 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
       if (pRes.ok) {
         const pList = await pRes.json();
         const mappedProducts = pList.map((p: any) => {
-          let mappedName = p.name;
-          let mappedCategory = p.category === "Custom Cakes" ? "Mini Cakes" : p.category;
-
-          const nameLower = p.name?.toLowerCase() || "";
-          let mappedPhotos = p.photos;
-          let mappedImgUrl = p.imgUrl;
-          if (p.name === "Custom Cakes" || p.name === "Custom Cake" || nameLower === "beautiful kittens" || mappedName === "Mini Cakes") {
-            mappedName = "Mini Cakes";
-            mappedCategory = "Mini Cakes";
-            mappedImgUrl = regeneratedImage;
-            mappedPhotos = [{ url: regeneratedImage, isPrimary: true }];
-          } else if (nameLower.includes("cure kittens") || nameLower.includes("cute kittens")) {
-            mappedName = "Cupcakes";
-            mappedCategory = "Cupcakes";
-          } else if (nameLower.includes("cookies that people like")) {
-            mappedName = "Jumbo Cookies";
-          }
-
+          const { name, category } = normalizeProductNameAndCategory(p);
+          const photos = normalizeProductPhotos(p);
+          const imgUrl = photos.find(ph => ph.isPrimary)?.url || (photos.length > 0 ? photos[0].url : "");
           return {
             ...p,
-            name: mappedName,
-            category: mappedCategory,
-            imgUrl: mappedImgUrl,
-            photos: mappedPhotos
+            name,
+            category,
+            photos,
+            imgUrl
           };
         });
         setProducts(mappedProducts);
@@ -280,10 +286,7 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
     
     setIsVisible(p.isVisible !== false);
 
-    let pPhotos = p.photos || [];
-    if (pPhotos.length === 0 && p.imgUrl) {
-      pPhotos = [{ url: p.imgUrl, isPrimary: true }];
-    }
+    const pPhotos = normalizeProductPhotos(p);
     setPhotos(pPhotos);
     
     setSizes(p.options.sizes || []);
@@ -305,6 +308,7 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
     
     setIsVisible(true);
     setPhotos([]);
+    setTempUploadId(`new-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`);
     
     setSizes([]);
     setFlavors([]);
@@ -408,7 +412,7 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
     }
 
     const primaryPhoto = photos.find(ph => ph.isPrimary) || photos[0];
-    const finalImgUrl = primaryPhoto ? primaryPhoto.url : "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=500";
+    const finalImgUrl = primaryPhoto ? primaryPhoto.url : "";
 
     const payload = {
       name,
@@ -915,10 +919,15 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
 
           <button
             type="submit"
-            className="w-full bg-brand-chocolate text-brand-cream hover:bg-brand-chocolate/95 py-4 rounded-xl text-sm font-bold transition shadow-sm flex items-center justify-center space-x-2 cursor-pointer"
+            disabled={uploading}
+            className={`w-full py-4 rounded-xl text-sm font-bold transition shadow-sm flex items-center justify-center space-x-2 ${
+              uploading 
+                ? "bg-gray-300 text-gray-500 cursor-not-allowed opacity-75" 
+                : "bg-brand-chocolate text-brand-cream hover:bg-brand-chocolate/95 cursor-pointer"
+            }`}
           >
             <Sparkles className="h-5 w-5 text-brand-pink animate-pulse" />
-            <span>Publish Catalog Changes</span>
+            <span>{uploading ? "Image Uploading..." : "Publish Catalog Changes"}</span>
           </button>
         </form>
       ) : (

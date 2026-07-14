@@ -2,8 +2,13 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Product, OrderItem, SelectedOptions, Settings, BlockedDate } from "../types";
 import { ShoppingBag, Sparkles, Calendar, User, Phone, Mail, MapPin, Truck, AlertTriangle, CheckCircle, Trash2, ChevronRight } from "lucide-react";
-
-const regeneratedImage = "/src/assets/images/regenerated_image_1782495956327.jpg";
+import {
+  normalizeProductNameAndCategory,
+  normalizeProductPhotos,
+  getPrimaryProductImage,
+  DEFAULT_FALLBACK_IMAGE,
+} from "../utils/productUtils";
+import { ProductImage } from "./ProductImage";
 
 interface PublicOrderFormProps {
   onSwitchToQuote: () => void;
@@ -17,11 +22,15 @@ function ProductPhotoGallery({ product }: ProductPhotoGalleryProps) {
   const [activeIndex, setActiveIndex] = useState<number>(0);
   const [aspectType, setAspectType] = useState<"portrait" | "landscape" | "square">("square");
 
-  const productPhotos = product.photos && product.photos.length > 0
-    ? product.photos
-    : [{ url: product.imgUrl || "https://images.unsplash.com/photo-1578985545062-69928b1d9587", isPrimary: true }];
+  // Normalize product photos to ensure we have a valid array
+  const rawPhotos = normalizeProductPhotos(product);
 
-  const activePhoto = productPhotos[activeIndex] || productPhotos[0];
+  // Sort photos so that the primary image appears first in the gallery thumbnails & active photo resolution
+  const sortedPhotos = [...rawPhotos].sort((a, b) => {
+    if (a.isPrimary && !b.isPrimary) return -1;
+    if (!a.isPrimary && b.isPrimary) return 1;
+    return 0;
+  });
 
   useEffect(() => {
     setActiveIndex(0);
@@ -49,29 +58,32 @@ function ProductPhotoGallery({ product }: ProductPhotoGalleryProps) {
     aspectClass = "aspect-[4/3]";
   }
 
+  // Ensure activeIndex is valid if the photo gallery length changes
+  const safeActiveIndex = activeIndex >= sortedPhotos.length ? 0 : activeIndex;
+  const activePhoto = sortedPhotos[safeActiveIndex] || { url: DEFAULT_FALLBACK_IMAGE };
+
   return (
     <div className="space-y-2">
       <div className={`relative w-full bg-brand-pink/5 rounded-2xl overflow-hidden border border-brand-pink/15 transition-all duration-300 ${aspectClass}`}>
-        <img 
+        <ProductImage 
           src={activePhoto.url} 
-          alt={`Preview of ${product.name}`} 
+          alt={`Preview photo of ${product.name}`} 
           onLoad={handleImageLoad}
           className="w-full h-full object-cover animate-in fade-in duration-200"
-          referrerPolicy="no-referrer"
         />
       </div>
-      {productPhotos.length > 1 && (
+      {sortedPhotos.length > 1 && (
         <div className="flex gap-2 border border-brand-pink/10 rounded-xl p-1.5 overflow-x-auto bg-brand-cream/10">
-          {productPhotos.map((ph, idx) => (
+          {sortedPhotos.map((ph, idx) => (
             <button
               key={idx}
               type="button"
               onClick={() => setActiveIndex(idx)}
               className={`relative w-12 h-12 rounded-lg overflow-hidden border-2 shrink-0 transition ${
-                idx === activeIndex ? 'border-brand-rosegold shadow-sm' : 'border-transparent'
+                idx === safeActiveIndex ? 'border-brand-rosegold shadow-sm' : 'border-transparent'
               }`}
             >
-              <img src={ph.url} alt="Thumbnail preview" className="w-full h-full object-cover" />
+              <ProductImage src={ph.url} alt={`Thumbnail preview ${idx + 1} of ${product.name}`} className="w-full h-full object-cover" />
             </button>
           ))}
         </div>
@@ -134,30 +146,15 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
         if (pRes.ok) {
           const rawProducts = await pRes.json();
           const mapped = rawProducts.map((p: any) => {
-            let mappedName = p.name;
-            let mappedCategory = p.category === "Custom Cakes" ? "Mini Cakes" : p.category;
-
-            const nameLower = p.name?.toLowerCase() || "";
-            let mappedPhotos = p.photos;
-            let mappedImgUrl = p.imgUrl;
-            if (p.name === "Custom Cakes" || p.name === "Custom Cake" || nameLower === "beautiful kittens" || mappedName === "Mini Cakes") {
-              mappedName = "Mini Cakes";
-              mappedCategory = "Mini Cakes";
-              mappedImgUrl = regeneratedImage;
-              mappedPhotos = [{ url: regeneratedImage, isPrimary: true }];
-            } else if (nameLower.includes("cure kittens") || nameLower.includes("cute kittens")) {
-              mappedName = "Cupcakes";
-              mappedCategory = "Cupcakes";
-            } else if (nameLower.includes("cookies that people like")) {
-              mappedName = "Jumbo Cookies";
-            }
-
+            const { name, category } = normalizeProductNameAndCategory(p);
+            const photos = normalizeProductPhotos(p);
+            const imgUrl = photos.find(ph => ph.isPrimary)?.url || (photos.length > 0 ? photos[0].url : "");
             return {
               ...p,
-              name: mappedName,
-              category: mappedCategory,
-              imgUrl: mappedImgUrl,
-              photos: mappedPhotos
+              name,
+              category,
+              photos,
+              imgUrl
             };
           });
           setProducts(mapped);
@@ -609,15 +606,10 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
                       className="bg-white border border-brand-pink/15 rounded-[1.5rem] overflow-hidden shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col group transform-gpu cursor-pointer"
                     >
                       <div className="relative h-56 bg-brand-pink/10 overflow-hidden">
-                        <img 
-                          src={
-                            p.photos && p.photos.length > 0
-                              ? (p.photos.find(ph => ph.isPrimary)?.url || p.photos[0].url)
-                              : p.imgUrl || "https://images.unsplash.com/photo-1578985545062-69928b1d9587"
-                          } 
+                        <ProductImage 
+                          src={getPrimaryProductImage(p)} 
                           alt={p.name}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                          referrerPolicy="no-referrer"
                         />
                         <div className="absolute top-3 right-3 bg-brand-rosegold text-white text-xs font-semibold px-3 py-1 rounded-full shadow-sm">
                           ${p.basePrice.toFixed(2)}

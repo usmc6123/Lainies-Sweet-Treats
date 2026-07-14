@@ -1,6 +1,7 @@
 import { getStorage } from "firebase-admin/storage";
 import { getApps, initializeApp, cert, getApp } from "firebase-admin/app";
 import { setCorsHeaders, authenticateAdmin } from "./_lib/helper.js";
+import crypto from "crypto";
 
 export default async function handler(req: any, res: any) {
   if (setCorsHeaders(req, res)) return;
@@ -19,8 +20,9 @@ export default async function handler(req: any, res: any) {
   }
 
   try {
+    const credentials = JSON.parse(firebaseConfigEnv);
+
     if (getApps().length === 0) {
-      const credentials = JSON.parse(firebaseConfigEnv);
       if (credentials.private_key || credentials.client_email) {
         initializeApp({
           credential: cert(credentials),
@@ -42,7 +44,12 @@ export default async function handler(req: any, res: any) {
     const buffer = Buffer.from(base64Data, 'base64');
 
     const app = getApp();
-    const bucketName = "lainies-sweet-treats.firebasestorage.app";
+    
+    // Resolve bucket name dynamically: environment variable, credentials properties, or hardcoded fallback
+    const bucketName = process.env.FIREBASE_STORAGE_BUCKET ||
+                       credentials.storageBucket ||
+                       credentials.storage_bucket ||
+                       "lainies-sweet-treats.firebasestorage.app";
 
     const storage = getStorage(app);
     const bucket = storage.bucket(bucketName);
@@ -53,18 +60,29 @@ export default async function handler(req: any, res: any) {
     const filePath = `products/${folderId}/photo_${Date.now()}_${cleanFilename}`;
     const file = bucket.file(filePath);
 
+    // Generate persistent download token for Firebase Storage compatibility
+    const downloadToken = crypto.randomUUID();
+
     await file.save(buffer, {
       metadata: {
         contentType: contentType || "image/jpeg",
-        cacheControl: 'public, max-age=31536000'
+        cacheControl: 'public, max-age=31536000',
+        metadata: {
+          firebaseStorageDownloadTokens: downloadToken
+        }
       }
     });
 
-    // Make the file publicly readable
-    await file.makePublic();
+    // Make the file publicly readable but catch potential permission/CORS failures
+    try {
+      await file.makePublic();
+    } catch (makePublicErr) {
+      console.warn("makePublic failed. Proceeding with signed/token url format:", makePublicErr);
+    }
 
-    // Construct the direct public URL for Google Cloud Storage
-    const publicUrl = `https://storage.googleapis.com/${bucketName}/${filePath}`;
+    // Return the standard Firease Storage HTTP URL containing the download token
+    const encodedFilePath = encodeURIComponent(filePath);
+    const publicUrl = `https://firebasestorage.googleapis.com/v0/b/${bucketName}/o/${encodedFilePath}?alt=media&token=${downloadToken}`;
 
     return res.status(200).json({
       success: true,
