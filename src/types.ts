@@ -7,6 +7,7 @@ export interface ProductOptions {
   sizes?: OptionItem[];
   flavors?: string[];
   addOns?: OptionItem[];
+  toppings?: string[];
 }
 
 export interface ProductIngredientLink {

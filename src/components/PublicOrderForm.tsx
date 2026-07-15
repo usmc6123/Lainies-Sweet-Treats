@@ -223,14 +223,6 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
       if (sizeObj) price += sizeObj.priceAdd;
     }
 
-    const activeAddOns = activeVar ? (activeVar.options.addOns || []) : (selectedProduct.options.addOns || []);
-    if (activeAddOns) {
-      choiceAddOns.forEach(addOnName => {
-        const addOnObj = activeAddOns.find(a => a.name === addOnName);
-        if (addOnObj) price += addOnObj.priceAdd;
-      });
-    }
-
     return price;
   };
 
@@ -1136,7 +1128,9 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
         
         const activeSizes = activeVar ? (activeVar.options?.sizes || []) : (selectedProduct.options?.sizes || []);
         const activeFlavors = activeVar ? (activeVar.options?.flavors || []) : (selectedProduct.options?.flavors || []);
-        const activeAddOns = activeVar ? (activeVar.options?.addOns || []) : (selectedProduct.options?.addOns || []);
+        const activeToppings = activeVar 
+          ? (activeVar.options?.toppings || (activeVar.options?.addOns || []).map((x: any) => typeof x === "string" ? x : x.name)) 
+          : (selectedProduct.options?.toppings || (selectedProduct.options?.addOns || []).map((x: any) => typeof x === "string" ? x : x.name));
         const activeDescription = activeVar?.description || selectedProduct.description || "";
 
         return (
@@ -1191,8 +1185,8 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
                           if (!choiceFlavor && newFlavors.length > 0) {
                             setChoiceFlavor(newFlavors[0]);
                           }
-                          const newAddOns = v.options.addOns || [];
-                          setChoiceAddOns(choiceAddOns.filter(addName => newAddOns.some(add => add.name === addName)));
+                          const newToppings = v.options.toppings || (v.options.addOns || []).map((x: any) => typeof x === "string" ? x : x.name);
+                          setChoiceAddOns(choiceAddOns.filter(addName => newToppings.includes(addName)));
                         }}
                         className={`py-2.5 px-3 rounded-xl text-xs font-bold transition-all duration-200 text-center flex flex-col justify-center items-center ${
                           selectedVarId === v.id
@@ -1269,18 +1263,18 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
                 </div>
               )}
 
-              {/* AddOns checkboxes */}
-              {(!hasVariations || selectedVarId) && activeAddOns && activeAddOns.length > 0 && (
+              {/* Toppings List checkboxes */}
+              {(!hasVariations || selectedVarId) && activeToppings && activeToppings.length > 0 && (
                 <div className="mt-5">
                   <label className="text-xs font-bold text-brand-chocolate uppercase tracking-wider block mb-2">
-                    3. Extra Toppings / Add-ons:
+                    3. Selected Toppings:
                   </label>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    {activeAddOns.map(add => (
+                    {activeToppings.map(topping => (
                       <label 
-                        key={add.name}
+                        key={topping}
                         className={`flex items-center justify-between p-2.5 rounded-lg border text-xs cursor-pointer transition-all ${
-                          choiceAddOns.includes(add.name)
+                          choiceAddOns.includes(topping)
                             ? "bg-brand-pink/20 border-brand-rosegold font-semibold"
                             : "border-gray-50 hover:bg-brand-cream/30"
                         }`}
@@ -1288,21 +1282,18 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
                         <div className="flex items-center space-x-1.5">
                           <input 
                             type="checkbox"
-                            checked={choiceAddOns.includes(add.name)}
+                            checked={choiceAddOns.includes(topping)}
                             onChange={(e) => {
                               if (e.target.checked) {
-                                setChoiceAddOns([...choiceAddOns, add.name]);
+                                setChoiceAddOns([...choiceAddOns, topping]);
                               } else {
-                                setChoiceAddOns(choiceAddOns.filter(x => x !== add.name));
+                                setChoiceAddOns(choiceAddOns.filter(x => x !== topping));
                               }
                             }}
                             className="accent-brand-rosegold"
                           />
-                          <span>{add.name}</span>
+                          <span>{topping}</span>
                         </div>
-                        <span className="text-[10px] text-brand-rosegold font-bold">
-                          +${add.priceAdd}
-                        </span>
                       </label>
                     ))}
                   </div>

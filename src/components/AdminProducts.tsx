@@ -213,7 +213,7 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
   // Options (simplified list editors)
   const [sizes, setSizes] = useState<{ name: string; priceAdd: number }[]>([]);
   const [flavors, setFlavors] = useState<string[]>([]);
-  const [addOns, setAddOns] = useState<{ name: string; priceAdd: number }[]>([]);
+  const [toppings, setToppings] = useState<string[]>([]);
 
   // Product Variations state (Normal / Specialty)
   const [activeVarId, setActiveVarId] = useState<string | null>(null);
@@ -234,7 +234,7 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
           options: {
             sizes,
             flavors,
-            addOns
+            toppings
           }
         };
       }
@@ -247,7 +247,8 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
       setBasePrice(nextVar.basePrice);
       setSizes(nextVar.options.sizes || []);
       setFlavors(nextVar.options.flavors || []);
-      setAddOns(nextVar.options.addOns || []);
+      const rawToppings = nextVar.options.toppings || (nextVar.options.addOns || []).map((x: any) => typeof x === "string" ? x : x.name);
+      setToppings(rawToppings);
       setDescription(nextVar.description || "");
       setPhotos(nextVar.photos || []);
     }
@@ -263,8 +264,7 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
   const [newSizeName, setNewSizeName] = useState("");
   const [newSizePrice, setNewSizePrice] = useState(0);
   const [newFlavorName, setNewFlavorName] = useState("");
-  const [newAddOnName, setNewAddOnName] = useState("");
-  const [newAddOnPrice, setNewAddOnPrice] = useState(0);
+  const [newToppingName, setNewToppingName] = useState("");
 
   const [inputIngId, setInputIngId] = useState("");
   const [inputIngQty, setInputIngQty] = useState(0);
@@ -331,7 +331,7 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
               { name: "Five Dozen", priceAdd: 165 }
             ],
             flavors: flavors || [],
-            addOns: addOns || []
+            toppings: toppings || []
           },
           description: description || "",
           photos: photos || []
@@ -343,7 +343,7 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
           options: {
             sizes: [],
             flavors: [],
-            addOns: []
+            toppings: []
           },
           description: "",
           photos: []
@@ -387,7 +387,7 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
           options: {
             sizes: p.options.sizes || [],
             flavors: p.options.flavors || [],
-            addOns: p.options.addOns || []
+            toppings: p.options.toppings || (p.options.addOns || []).map((x: any) => typeof x === "string" ? x : x.name)
           },
           description: p.description,
           photos: pPhotos
@@ -399,7 +399,7 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
           options: {
             sizes: [],
             flavors: [],
-            addOns: []
+            toppings: []
           },
           description: "",
           photos: []
@@ -415,7 +415,7 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
       setBasePrice(norm.basePrice);
       setSizes(norm.options.sizes || []);
       setFlavors(norm.options.flavors || []);
-      setAddOns(norm.options.addOns || []);
+      setToppings(norm.options.toppings || (norm.options.addOns || []).map((x: any) => typeof x === "string" ? x : x.name));
       setDescription(norm.description || "");
       setPhotos(norm.photos || []);
     } else {
@@ -423,7 +423,7 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
       setBasePrice(p.basePrice);
       setSizes(p.options.sizes || []);
       setFlavors(p.options.flavors || []);
-      setAddOns(p.options.addOns || []);
+      setToppings(p.options.toppings || (p.options.addOns || []).map((x: any) => typeof x === "string" ? x : x.name));
       setDescription(p.description);
       setPhotos(pPhotos);
     }
@@ -446,7 +446,7 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
     
     setSizes([]);
     setFlavors([]);
-    setAddOns([]);
+    setToppings([]);
     setProdIngredients([]);
 
     setActiveVarId(null);
@@ -474,15 +474,19 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
     setFlavors(flavors.filter((_, i) => i !== idx));
   };
 
-  const handleAddAddOnOption = () => {
-    if (!newAddOnName) return;
-    setAddOns([...addOns, { name: newAddOnName, priceAdd: Number(newAddOnPrice) }]);
-    setNewAddOnName("");
-    setNewAddOnPrice(0);
+  const handleAddToppingOption = () => {
+    const trimmed = newToppingName.trim();
+    if (!trimmed) return;
+    if (toppings.includes(trimmed)) {
+      alert("This topping is already in the list!");
+      return;
+    }
+    setToppings([...toppings, trimmed]);
+    setNewToppingName("");
   };
 
-  const handleRemoveAddOnOption = (idx: number) => {
-    setAddOns(addOns.filter((_, i) => i !== idx));
+  const handleRemoveToppingOption = (idx: number) => {
+    setToppings(toppings.filter((_, i) => i !== idx));
   };
 
   const handleAddIngLink = () => {
@@ -550,7 +554,7 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
 
     let finalVariations = currentVariations;
     let finalBasePrice = Number(basePrice);
-    let finalOptions = { sizes, flavors, addOns };
+    let finalOptions = { sizes, flavors, toppings, addOns: toppings.map(t => ({ name: t, priceAdd: 0 })) };
     let finalDescription = description;
     let finalPhotos = photos;
 
@@ -563,7 +567,7 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
             basePrice: Number(basePrice),
             description,
             photos,
-            options: { sizes, flavors, addOns }
+            options: { sizes, flavors, toppings, addOns: toppings.map(t => ({ name: t, priceAdd: 0 })) }
           };
         }
         return v;
@@ -1040,38 +1044,31 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
                 </div>
               </div>
 
-              {/* AddOns select elements */}
+              {/* Toppings List section */}
               <div className="bg-brand-cream/35 p-4 rounded-2xl border border-brand-pink/15 space-y-2">
-                <span className="text-xs uppercase font-extrabold tracking-widest text-[#B76E79]">Extra Topping Add-ons</span>
+                <span className="text-xs uppercase font-extrabold tracking-widest text-[#B76E79]">Toppings List</span>
                 <div className="flex gap-2">
                   <input
                     type="text"
-                    value={newAddOnName}
-                    onChange={(e) => setNewAddOnName(e.target.value)}
-                    placeholder="e.g., Sparkler Candle"
+                    value={newToppingName}
+                    onChange={(e) => setNewToppingName(e.target.value)}
+                    placeholder="e.g., Reese's Pieces, Chocolate Drizzle"
                     className="flex-1 text-sm bg-white border border-brand-pink/15 p-2 rounded-xl focus:outline-none"
-                  />
-                  <input
-                    type="number"
-                    value={newAddOnPrice}
-                    onChange={(e) => setNewAddOnPrice(Number(e.target.value))}
-                    placeholder="+$"
-                    className="w-16 text-sm bg-white border border-brand-pink/15 p-2 rounded-xl focus:outline-none font-bold text-center"
                   />
                   <button
                     type="button"
-                    onClick={handleAddAddOnOption}
+                    onClick={handleAddToppingOption}
                     className="bg-brand-chocolate text-white text-sm font-bold px-3 py-2 rounded-xl cursor-pointer hover:opacity-90"
                   >
                     +
                   </button>
                 </div>
-                <div className="mt-2 space-y-1.5 font-semibold">
-                  {addOns.map((a, idx) => (
-                    <div key={idx} className="flex justify-between items-center text-xs bg-white p-2 rounded-lg border border-brand-pink/10">
-                      <span>{a.name} (+${a.priceAdd})</span>
-                      <button type="button" onClick={() => handleRemoveAddOnOption(idx)} className="text-red-500 font-extrabold px-1 text-sm leading-none bg-red-50 rounded p-0.5">✕</button>
-                    </div>
+                <div className="mt-2 flex flex-wrap gap-1.5 font-semibold">
+                  {toppings.map((t, idx) => (
+                    <span key={idx} className="inline-flex items-center text-xs bg-white px-2.5 py-1 rounded-lg border border-brand-pink/10">
+                      {t}
+                      <button type="button" onClick={() => handleRemoveToppingOption(idx)} className="text-red-500 font-extrabold ml-2 text-xs">✕</button>
+                    </span>
                   ))}
                 </div>
               </div>
