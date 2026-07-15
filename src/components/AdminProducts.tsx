@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { PlusCircle, Edit2, Trash2, HelpCircle, FileText, Sparkles, DollarSign, Tag, Scale, Search } from "lucide-react";
-import { Product, Ingredient, ProductIngredientLink } from "../types";
+import { Product, Ingredient, ProductIngredientLink, ProductVariation } from "../types";
 import {
   normalizeProductNameAndCategory,
   normalizeProductPhotos,
@@ -214,6 +214,47 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
   const [sizes, setSizes] = useState<{ name: string; priceAdd: number }[]>([]);
   const [flavors, setFlavors] = useState<string[]>([]);
   const [addOns, setAddOns] = useState<{ name: string; priceAdd: number }[]>([]);
+
+  // Product Variations state (Normal / Specialty)
+  const [activeVarId, setActiveVarId] = useState<string | null>(null);
+  const [currentVariations, setCurrentVariations] = useState<ProductVariation[] | undefined>(undefined);
+
+  const handleSwitchVariation = (nextVarId: string) => {
+    if (!activeVarId || !currentVariations) return;
+    if (activeVarId === nextVarId) return;
+
+    // 1. Save current form values to active variation
+    const updated = currentVariations.map(v => {
+      if (v.id === activeVarId) {
+        return {
+          ...v,
+          basePrice: Number(basePrice),
+          description,
+          photos,
+          options: {
+            sizes,
+            flavors,
+            addOns
+          }
+        };
+      }
+      return v;
+    });
+
+    // 2. Load next variation values
+    const nextVar = updated.find(v => v.id === nextVarId);
+    if (nextVar) {
+      setBasePrice(nextVar.basePrice);
+      setSizes(nextVar.options.sizes || []);
+      setFlavors(nextVar.options.flavors || []);
+      setAddOns(nextVar.options.addOns || []);
+      setDescription(nextVar.description || "");
+      setPhotos(nextVar.photos || []);
+    }
+
+    setCurrentVariations(updated);
+    setActiveVarId(nextVarId);
+  };
   
   // Ingredient Links for cost accounting
   const [prodIngredients, setProdIngredients] = useState<ProductIngredientLink[]>([]);
@@ -273,6 +314,53 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
     loadCatalogData();
   }, [token]);
 
+  useEffect(() => {
+    const isMiniCakes = category === "Mini Cakes" || name === "Mini Cakes";
+    if (isMiniCakes && !activeVarId) {
+      const productVariations: ProductVariation[] = [
+        {
+          id: "normal",
+          name: "Normal",
+          basePrice: basePrice || 40,
+          options: {
+            sizes: sizes.length > 0 ? sizes : [
+              { name: "Dozen", priceAdd: 40 },
+              { name: "Two Dozen", priceAdd: 75 },
+              { name: "Three Dozen", priceAdd: 105 },
+              { name: "Four Dozen", priceAdd: 135 },
+              { name: "Five Dozen", priceAdd: 165 }
+            ],
+            flavors: flavors || [],
+            addOns: addOns || []
+          },
+          description: description || "",
+          photos: photos || []
+        },
+        {
+          id: "specialty",
+          name: "Specialty",
+          basePrice: 0,
+          options: {
+            sizes: [],
+            flavors: [],
+            addOns: []
+          },
+          description: "",
+          photos: []
+        }
+      ];
+      setCurrentVariations(productVariations);
+      setActiveVarId("normal");
+      setBasePrice(productVariations[0].basePrice);
+      setSizes(productVariations[0].options.sizes || []);
+    } else if (!isMiniCakes && activeVarId) {
+      if (!editingProduct || (editingProduct.category !== "Mini Cakes" && editingProduct.name !== "Mini Cakes")) {
+        setActiveVarId(null);
+        setCurrentVariations(undefined);
+      }
+    }
+  }, [category, name, activeVarId]);
+
   const handleEditClick = (p: Product) => {
     setEditingProduct(p);
     setIsAdding(false);
@@ -282,17 +370,63 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
     setCategory(p.category);
     setUseCustomCategory(false);
     setCustomCategory("");
-    setBasePrice(p.basePrice);
     
     setIsVisible(p.isVisible !== false);
 
     const pPhotos = normalizeProductPhotos(p);
-    setPhotos(pPhotos);
-    
-    setSizes(p.options.sizes || []);
-    setFlavors(p.options.flavors || []);
-    setAddOns(p.options.addOns || []);
     setProdIngredients(p.ingredients || []);
+
+    // Set up variation structure
+    let productVariations: ProductVariation[] = p.variations || [];
+    if ((p.category === "Mini Cakes" || p.name === "Mini Cakes") && (!p.variations || p.variations.length === 0)) {
+      productVariations = [
+        {
+          id: "normal",
+          name: "Normal",
+          basePrice: p.basePrice,
+          options: {
+            sizes: p.options.sizes || [],
+            flavors: p.options.flavors || [],
+            addOns: p.options.addOns || []
+          },
+          description: p.description,
+          photos: pPhotos
+        },
+        {
+          id: "specialty",
+          name: "Specialty",
+          basePrice: 0,
+          options: {
+            sizes: [],
+            flavors: [],
+            addOns: []
+          },
+          description: "",
+          photos: []
+        }
+      ];
+    }
+
+    setCurrentVariations(productVariations.length > 0 ? productVariations : undefined);
+
+    if (productVariations.length > 0) {
+      setActiveVarId("normal");
+      const norm = productVariations.find(v => v.id === "normal") || productVariations[0];
+      setBasePrice(norm.basePrice);
+      setSizes(norm.options.sizes || []);
+      setFlavors(norm.options.flavors || []);
+      setAddOns(norm.options.addOns || []);
+      setDescription(norm.description || "");
+      setPhotos(norm.photos || []);
+    } else {
+      setActiveVarId(null);
+      setBasePrice(p.basePrice);
+      setSizes(p.options.sizes || []);
+      setFlavors(p.options.flavors || []);
+      setAddOns(p.options.addOns || []);
+      setDescription(p.description);
+      setPhotos(pPhotos);
+    }
   };
 
   const handleNewClick = () => {
@@ -314,6 +448,9 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
     setFlavors([]);
     setAddOns([]);
     setProdIngredients([]);
+
+    setActiveVarId(null);
+    setCurrentVariations(undefined);
   };
 
   const handleAddSizeOption = () => {
@@ -403,7 +540,7 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
 
   const handleSaveProduct = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || basePrice < 0) return;
+    if (!name) return;
 
     const finalCategory = useCustomCategory ? customCategory.trim() : category;
     if (!finalCategory) {
@@ -411,20 +548,81 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
       return;
     }
 
-    const primaryPhoto = photos.find(ph => ph.isPrimary) || photos[0];
+    let finalVariations = currentVariations;
+    let finalBasePrice = Number(basePrice);
+    let finalOptions = { sizes, flavors, addOns };
+    let finalDescription = description;
+    let finalPhotos = photos;
+
+    if (activeVarId && currentVariations) {
+      // 1. Commit current form state to active variation
+      const updated = currentVariations.map(v => {
+        if (v.id === activeVarId) {
+          return {
+            ...v,
+            basePrice: Number(basePrice),
+            description,
+            photos,
+            options: { sizes, flavors, addOns }
+          };
+        }
+        return v;
+      });
+      finalVariations = updated;
+      
+      // Keep the product level basePrice/options/description/photos equal to the "Normal" variation
+      // so it remains 100% backward-compatible and does not break list/summary views
+      const normalVar = updated.find(v => v.id === "normal") || updated[0];
+      finalBasePrice = normalVar.basePrice;
+      finalOptions = normalVar.options;
+      finalDescription = normalVar.description || description;
+      finalPhotos = normalVar.photos || photos;
+    }
+
+    // Validation:
+    if (finalBasePrice < 0 || isNaN(finalBasePrice)) {
+      alert("Price cannot be negative or invalid.");
+      return;
+    }
+
+    if (finalVariations) {
+      const ids = finalVariations.map(v => v.id);
+      const duplicate = ids.some((val, i) => ids.indexOf(val) !== i);
+      if (duplicate) {
+        alert("Duplicate variation IDs are not allowed.");
+        return;
+      }
+
+      for (const v of finalVariations) {
+        if (!v.name || v.name.trim() === "") {
+          alert("All variations must have a valid name.");
+          return;
+        }
+        if (v.basePrice < 0 || isNaN(v.basePrice)) {
+          alert(`Variation ${v.name} cannot have a negative or invalid price.`);
+          return;
+        }
+      }
+    }
+
+    const primaryPhoto = finalPhotos.find(ph => ph.isPrimary) || finalPhotos[0];
     const finalImgUrl = primaryPhoto ? primaryPhoto.url : "";
 
-    const payload = {
+    const payload: any = {
       name,
-      description,
+      description: finalDescription,
       category: finalCategory,
-      basePrice: Number(basePrice),
+      basePrice: Number(finalBasePrice),
       imgUrl: finalImgUrl,
-      photos: photos,
+      photos: finalPhotos,
       isVisible: isVisible !== false,
-      options: { sizes, flavors, addOns },
+      options: finalOptions,
       ingredients: prodIngredients
     };
+
+    if (finalVariations) {
+      payload.variations = finalVariations;
+    }
 
     try {
       let res;
@@ -733,6 +931,50 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
 
             {/* Middle Column: Options editor sizes list, flavors, accessories */}
             <div className="space-y-4">
+              {/* MINI CAKE TYPE VARIATIONS section */}
+              {(category === "Mini Cakes" || name === "Mini Cakes" || currentVariations) && (
+                <div className="bg-brand-cream/35 p-4 rounded-2xl border border-brand-pink/15 space-y-3">
+                  <span className="text-xs uppercase font-extrabold tracking-widest text-[#B76E79] block">
+                    MINI CAKE TYPE VARIATIONS
+                  </span>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => handleSwitchVariation("normal")}
+                      className={`py-3 px-4 rounded-xl text-xs sm:text-sm font-bold transition-all shadow-sm duration-200 ${
+                        activeVarId === "normal"
+                          ? "bg-brand-chocolate text-brand-cream border-2 border-brand-chocolate scale-[1.02]"
+                          : "bg-white text-brand-chocolate hover:bg-brand-pink/5 border border-brand-pink/15"
+                      }`}
+                    >
+                      Normal Variation
+                      <span className="block text-[10px] opacity-75 mt-0.5 font-medium">
+                        (Starting at ${currentVariations?.find(v => v.id === "normal")?.basePrice ?? 40})
+                      </span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleSwitchVariation("specialty")}
+                      className={`py-3 px-4 rounded-xl text-xs sm:text-sm font-bold transition-all shadow-sm duration-200 ${
+                        activeVarId === "specialty"
+                          ? "bg-brand-chocolate text-brand-cream border-2 border-brand-chocolate scale-[1.02]"
+                          : "bg-white text-brand-chocolate hover:bg-brand-pink/5 border border-brand-pink/15"
+                      }`}
+                    >
+                      Specialty Variation
+                      <span className="block text-[10px] opacity-75 mt-0.5 font-medium">
+                        (Starting at ${currentVariations?.find(v => v.id === "specialty")?.basePrice ?? 0})
+                      </span>
+                    </button>
+                  </div>
+                  <div className="bg-white/60 p-2 rounded-xl text-center border border-brand-pink/10">
+                    <p className="text-[10px] text-brand-chocolate/80 font-semibold leading-tight">
+                      Now Editing: <span className="font-extrabold text-brand-rosegold uppercase">{activeVarId === "normal" ? "Normal" : "Specialty"}</span> settings.
+                    </p>
+                  </div>
+                </div>
+              )}
+
               {/* Sizes section list */}
               <div className="bg-brand-cream/35 p-4 rounded-2xl border border-brand-pink/15 space-y-2">
                 <span className="text-xs uppercase font-extrabold tracking-widest text-[#B76E79]">Option Sizes</span>

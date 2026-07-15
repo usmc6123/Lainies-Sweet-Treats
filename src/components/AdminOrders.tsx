@@ -321,7 +321,7 @@ export default function AdminOrders({ token, triggerRefresh }: AdminOrdersProps)
                     {selectedOrder.items.map((item, idx) => (
                       <div key={idx} className="bg-brand-cream/40 p-3.5 rounded-xl border border-brand-pink/5 space-y-1.5">
                         <div className="flex justify-between font-bold text-brand-chocolate text-sm">
-                           <span>{item.quantity}x {item.name}</span>
+                           <span>{item.quantity}x {item.name}{item.variationName ? ` (${item.variationName})` : ""}</span>
                            <span>${item.totalPrice.toFixed(2)}</span>
                         </div>
                         {item.size && <p className="text-xs text-gray-500 font-medium">Scale: {item.size}</p>}

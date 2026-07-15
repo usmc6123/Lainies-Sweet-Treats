@@ -354,7 +354,7 @@ export default function AdminQuotes({ token, triggerRefresh }: AdminQuotesProps)
                         <div className="space-y-2 pt-3 border-t border-brand-pink/20 max-h-36 overflow-y-auto pr-1">
                           {proposedItems.map((item, idx) => (
                             <div key={idx} className="flex justify-between items-center text-sm text-brand-chocolate bg-white px-4 py-2.5 border border-brand-pink/10 rounded-lg">
-                              <span><strong>{item.quantity}x</strong> {item.name}</span>
+                              <span><strong>{item.quantity}x</strong> {item.name}{item.variationName ? ` (${item.variationName})` : ""}</span>
                               <div className="flex items-center space-x-3">
                                 <span className="font-extrabold text-brand-rosegold">${item.totalPrice.toFixed(2)}</span>
                                 <button

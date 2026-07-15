@@ -14,6 +14,15 @@ export interface ProductIngredientLink {
   quantity: number; // e.g., 200 grams, 2 eggs
 }
 
+export interface ProductVariation {
+  id: string;
+  name: string;
+  basePrice: number;
+  options: ProductOptions;
+  description?: string;
+  photos?: { url: string; isPrimary: boolean }[];
+}
+
 export interface Product {
   id: string;
   name: string;
@@ -25,6 +34,7 @@ export interface Product {
   imgUrl?: string; // Keep for fallback/backward compatibility
   isVisible?: boolean; // New visible/hidden toggle
   photos?: { url: string; isPrimary: boolean }[]; // Multiple photos array
+  variations?: ProductVariation[]; // Optional variations list for multi-type products (e.g. Mini Cakes)
 }
 
 export interface OrderItem {
@@ -36,6 +46,10 @@ export interface OrderItem {
   addOns?: string[];
   unitPrice: number;
   totalPrice: number;
+  variationId?: string;
+  variationName?: string;
+  variationBasePrice?: number;
+  sizePriceAdd?: number;
 }
 
 export type OrderStatus = "Pending" | "Confirmed" | "In Progress" | "Ready" | "Delivered/Picked Up" | "Cancelled";

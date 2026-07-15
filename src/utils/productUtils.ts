@@ -8,8 +8,29 @@ export function isValidProductImageUrl(value: any): boolean {
   return true;
 }
 
-export function normalizeProductPhotos(product: any): { url: string; isPrimary: boolean }[] {
+export function normalizeProductPhotos(product: any, selectedVariationId?: string): { url: string; isPrimary: boolean }[] {
   if (!product) return [];
+
+  // If a variation is selected and it has its own photos, use them
+  if (selectedVariationId && Array.isArray(product.variations)) {
+    const variation = product.variations.find((v: any) => v.id === selectedVariationId);
+    if (variation && Array.isArray(variation.photos) && variation.photos.length > 0) {
+      const validVarPhotos = variation.photos
+        .filter((photo: any) => photo && typeof photo === "object" && isValidProductImageUrl(photo.url))
+        .map((photo: any) => ({
+          url: photo.url.trim(),
+          isPrimary: !!photo.isPrimary,
+        }));
+      if (validVarPhotos.length > 0) {
+        const primaryCount = validVarPhotos.filter((p) => p.isPrimary).length;
+        if (primaryCount !== 1) {
+          validVarPhotos.forEach((p) => (p.isPrimary = false));
+          validVarPhotos[0].isPrimary = true;
+        }
+        return validVarPhotos;
+      }
+    }
+  }
 
   let validPhotos: { url: string; isPrimary: boolean }[] = [];
 
@@ -42,8 +63,8 @@ export function normalizeProductPhotos(product: any): { url: string; isPrimary: 
   return validPhotos;
 }
 
-export function getPrimaryProductImage(product: any): string {
-  const normalized = normalizeProductPhotos(product);
+export function getPrimaryProductImage(product: any, selectedVariationId?: string): string {
+  const normalized = normalizeProductPhotos(product, selectedVariationId);
   const primary = normalized.find((p) => p.isPrimary);
   if (primary) return primary.url;
   if (normalized.length > 0) return normalized[0].url;

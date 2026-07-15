@@ -262,7 +262,7 @@ export default function ClientQuotePortal() {
                           <div key={idx} className="flex gap-2 items-start text-xs text-brand-chocolate pl-2">
                             <CornerDownRight className="h-3.5 w-3.5 text-brand-rosegold mt-0.5 shrink-0" />
                             <div className="flex-1">
-                              <p className="font-semibold">{item.quantity}x {item.name}</p>
+                              <p className="font-semibold">{item.quantity}x {item.name}{item.variationName ? ` (${item.variationName})` : ""}</p>
                               {(item.size || item.flavor) && (
                                 <p className="text-[10px] text-gray-500">
                                   {item.size ? `Size: ${item.size}` : ""} {item.flavor ? `• Flavor: ${item.flavor}` : ""}

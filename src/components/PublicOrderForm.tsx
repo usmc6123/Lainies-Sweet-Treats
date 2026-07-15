@@ -16,14 +16,15 @@ interface PublicOrderFormProps {
 
 interface ProductPhotoGalleryProps {
   product: Product;
+  selectedVariationId?: string | null;
 }
 
-function ProductPhotoGallery({ product }: ProductPhotoGalleryProps) {
+function ProductPhotoGallery({ product, selectedVariationId }: ProductPhotoGalleryProps) {
   const [activeIndex, setActiveIndex] = useState<number>(0);
   const [aspectType, setAspectType] = useState<"portrait" | "landscape" | "square">("square");
 
   // Normalize product photos to ensure we have a valid array
-  const rawPhotos = normalizeProductPhotos(product);
+  const rawPhotos = normalizeProductPhotos(product, selectedVariationId || undefined);
 
   // Sort photos so that the primary image appears first in the gallery thumbnails & active photo resolution
   const sortedPhotos = [...rawPhotos].sort((a, b) => {
@@ -35,7 +36,7 @@ function ProductPhotoGallery({ product }: ProductPhotoGalleryProps) {
   useEffect(() => {
     setActiveIndex(0);
     setAspectType("square");
-  }, [product]);
+  }, [product, selectedVariationId]);
 
   const handleImageLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
     const { naturalWidth, naturalHeight } = e.currentTarget;
@@ -123,10 +124,22 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
   
   // Selection helpers for active product
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [selectedVarId, setSelectedVarId] = useState<string | null>(null);
   const [choiceSize, setChoiceSize] = useState<string>("");
   const [choiceFlavor, setChoiceFlavor] = useState<string>("");
   const [choiceAddOns, setChoiceAddOns] = useState<string[]>([]);
   const [choiceQty, setChoiceQty] = useState<number>(1);
+
+  // Reset variation and selections on product change
+  useEffect(() => {
+    if (selectedProduct) {
+      setSelectedVarId(null);
+      setChoiceSize("");
+      setChoiceFlavor("");
+      setChoiceAddOns([]);
+      setChoiceQty(1);
+    }
+  }, [selectedProduct]);
 
   // Status/Notice states
   const [loading, setLoading] = useState(true);
@@ -188,26 +201,32 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
   const [activePhotoUrlIndex, setActivePhotoUrlIndex] = useState(0);
   const handleProductSelect = (p: Product) => {
     setSelectedProduct(p);
-    setChoiceSize(p.options.sizes && p.options.sizes.length > 0 ? p.options.sizes[0].name : "");
-    setChoiceFlavor(p.options.flavors && p.options.flavors.length > 0 ? p.options.flavors[0] : "");
+    const hasVariations = p.variations && p.variations.length > 0;
+    setChoiceSize(hasVariations ? "" : (p.options.sizes && p.options.sizes.length > 0 ? p.options.sizes[0].name : ""));
+    setChoiceFlavor(hasVariations ? "" : (p.options.flavors && p.options.flavors.length > 0 ? p.options.flavors[0] : ""));
     setChoiceAddOns([]);
     setChoiceQty(1);
     setErrorMessage("");
+    setSelectedVarId(null);
   };
 
   // Live item total calculation
   const getSelectedProductPrice = () => {
     if (!selectedProduct) return 0;
-    let price = selectedProduct.basePrice;
     
-    if (choiceSize && selectedProduct.options.sizes) {
-      const sizeObj = selectedProduct.options.sizes.find(s => s.name === choiceSize);
+    const activeVar = selectedProduct.variations?.find(v => v.id === selectedVarId);
+    let price = activeVar ? activeVar.basePrice : selectedProduct.basePrice;
+
+    const activeSizes = activeVar ? (activeVar.options.sizes || []) : (selectedProduct.options.sizes || []);
+    if (choiceSize && activeSizes) {
+      const sizeObj = activeSizes.find(s => s.name === choiceSize);
       if (sizeObj) price += sizeObj.priceAdd;
     }
-    
-    if (selectedProduct.options.addOns) {
+
+    const activeAddOns = activeVar ? (activeVar.options.addOns || []) : (selectedProduct.options.addOns || []);
+    if (activeAddOns) {
       choiceAddOns.forEach(addOnName => {
-        const addOnObj = selectedProduct.options.addOns?.find(a => a.name === addOnName);
+        const addOnObj = activeAddOns.find(a => a.name === addOnName);
         if (addOnObj) price += addOnObj.priceAdd;
       });
     }
@@ -217,9 +236,22 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
 
   const handleAddToBag = () => {
     if (!selectedProduct) return;
+
+    if (selectedProduct.variations && selectedProduct.variations.length > 0 && !selectedVarId) {
+      alert("Please select a variation (Normal or Specialty) first!");
+      return;
+    }
     
+    const activeVar = selectedProduct.variations?.find(v => v.id === selectedVarId);
     const unitPrice = getSelectedProductPrice();
     const itemTotal = unitPrice * choiceQty;
+
+    let sizePriceAdd = 0;
+    const activeSizes = activeVar ? (activeVar.options.sizes || []) : (selectedProduct.options.sizes || []);
+    if (choiceSize && activeSizes) {
+      const sizeObj = activeSizes.find(s => s.name === choiceSize);
+      if (sizeObj) sizePriceAdd = sizeObj.priceAdd;
+    }
 
     const cartItem: OrderItem = {
       productId: selectedProduct.id,
@@ -229,11 +261,16 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
       flavor: choiceFlavor || undefined,
       addOns: choiceAddOns.length > 0 ? choiceAddOns : undefined,
       unitPrice,
-      totalPrice: itemTotal
+      totalPrice: itemTotal,
+      variationId: activeVar?.id,
+      variationName: activeVar?.name,
+      variationBasePrice: activeVar?.basePrice,
+      sizePriceAdd: sizePriceAdd
     };
 
     setCart([...cart, cartItem]);
     setSelectedProduct(null); // close selection visualizer
+    setSelectedVarId(null);
   };
 
   const handleRemoveFromBag = (index: number) => {
@@ -672,7 +709,7 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
                     <div className="flex-1 pr-3">
                       <div className="flex items-center justify-between gap-1">
                         <span className="font-extrabold text-brand-chocolate text-xs md:text-sm">
-                          {item.quantity}x {item.name}
+                          {item.quantity}x {item.name}{item.variationName ? ` (${item.variationName})` : ""}
                         </span>
                         <button 
                           onClick={() => handleRemoveFromBag(idx)}
@@ -1093,174 +1130,238 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
       </div>
 
       {/* CUSTOMIZABLE SELECTION MODAL PANELS (IF PRODUCT SELECTED) */}
-      {selectedProduct && (
-        <div className="fixed inset-0 bg-brand-chocolate/40 backdrop-blur-xs flex items-center justify-center z-[100] p-4">
-          <div className="bg-white rounded-3xl max-w-md w-full max-h-[90vh] overflow-y-auto border border-brand-pink/30 p-6 shadow-xl relative animate-in fade-in duration-300">
-            <button
-              onClick={() => setSelectedProduct(null)}
-              className="absolute top-4 right-4 text-brand-chocolate/60 hover:text-brand-chocolate text-xl font-bold p-1 animate-hover-pulse"
-            >
-              ✕
-            </button>
-            
-            <h3 className="text-lg font-bold text-brand-chocolate font-heading italic">
-              Configure Your Treats
-            </h3>
-            <p className="text-[11px] text-brand-rosegold font-bold uppercase tracking-wider mt-0.5">
-              {selectedProduct.name}
-            </p>
+      {selectedProduct && (() => {
+        const hasVariations = selectedProduct.variations && selectedProduct.variations.length > 0;
+        const activeVar = selectedProduct.variations?.find(v => v.id === selectedVarId);
+        
+        const activeSizes = activeVar ? (activeVar.options?.sizes || []) : (selectedProduct.options?.sizes || []);
+        const activeFlavors = activeVar ? (activeVar.options?.flavors || []) : (selectedProduct.options?.flavors || []);
+        const activeAddOns = activeVar ? (activeVar.options?.addOns || []) : (selectedProduct.options?.addOns || []);
+        const activeDescription = activeVar?.description || selectedProduct.description || "";
 
-            {selectedProduct.description && (
-              <p className="font-sans text-[12px] font-normal text-[#8D6E63] leading-normal mt-1 select-none">
-                {selectedProduct.description}
-              </p>
-            )}
-
-            {/* Visual Carousel/Gallery of All Photos */}
-            <div className="mt-3">
-              <ProductPhotoGallery product={selectedProduct} />
-            </div>
-
-            {/* Sizes Radio selections */}
-            {selectedProduct.options?.sizes && selectedProduct.options.sizes.length > 0 && (
-              <div className="mt-5">
-                <label className="text-xs font-bold text-brand-chocolate uppercase tracking-wider block mb-2">
-                  1. Highlight Size / Serving Count:
-                </label>
-                <div className="space-y-2">
-                   {selectedProduct.options.sizes.map(sz => (
-                    <label 
-                      key={sz.name}
-                      className={`flex items-center justify-between p-3 rounded-xl border text-xs cursor-pointer transition-all ${
-                        choiceSize === sz.name 
-                          ? "bg-brand-pink/20 border-brand-rosegold font-semibold" 
-                          : "border-gray-100 hover:bg-brand-cream/50"
-                      }`}
-                    >
-                      <div className="flex items-center space-x-2">
-                        <input 
-                          type="radio" 
-                          name="options-sizes"
-                          checked={choiceSize === sz.name}
-                          onChange={() => setChoiceSize(sz.name)}
-                          className="accent-brand-rosegold"
-                        />
-                        <span>{sz.name}</span>
-                      </div>
-                      <span className="text-brand-rosegold font-semibold">
-                        {sz.priceAdd > 0 ? `+$${sz.priceAdd.toFixed(2)}` : "Included"}
-                      </span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Flavors selections */}
-            {selectedProduct.options?.flavors && selectedProduct.options.flavors.length > 0 && (
-              <div className="mt-5">
-                <label className="text-xs font-bold text-brand-chocolate uppercase tracking-wider block mb-2">
-                  2. Selected Flavor Preference:
-                </label>
-                <select
-                  value={choiceFlavor}
-                  onChange={(e) => setChoiceFlavor(e.target.value)}
-                  className="w-full border border-brand-pink/20 rounded-xl px-3 py-2 text-xs bg-brand-cream/30 focus:outline-none focus:ring-1 focus:ring-brand-rosegold"
-                >
-                  {selectedProduct.options.flavors.map(f => (
-                    <option key={f} value={f}>{f}</option>
-                  ))}
-                </select>
-              </div>
-            )}
-
-            {/* AddOns checkboxes */}
-            {selectedProduct.options?.addOns && selectedProduct.options.addOns.length > 0 && (
-              <div className="mt-5">
-                <label className="text-xs font-bold text-brand-chocolate uppercase tracking-wider block mb-2">
-                  3. Extra Toppings / Add-ons:
-                </label>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {selectedProduct.options.addOns.map(add => (
-                    <label 
-                      key={add.name}
-                      className={`flex items-center justify-between p-2.5 rounded-lg border text-xs cursor-pointer transition-all ${
-                        choiceAddOns.includes(add.name)
-                          ? "bg-brand-pink/20 border-brand-rosegold font-semibold"
-                          : "border-gray-50 hover:bg-brand-cream/30"
-                      }`}
-                    >
-                      <div className="flex items-center space-x-1.5">
-                        <input 
-                          type="checkbox"
-                          checked={choiceAddOns.includes(add.name)}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setChoiceAddOns([...choiceAddOns, add.name]);
-                            } else {
-                              setChoiceAddOns(choiceAddOns.filter(x => x !== add.name));
-                            }
-                          }}
-                          className="accent-brand-rosegold"
-                        />
-                        <span>{add.name}</span>
-                      </div>
-                      <span className="text-[10px] text-brand-rosegold font-bold">
-                        +${add.priceAdd}
-                      </span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Quantity and Checkout action */}
-            <div className="mt-6 pt-4 border-t border-brand-pink/10 flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <button 
-                  type="button"
-                  onClick={() => setChoiceQty(Math.max(1, choiceQty - 1))}
-                  className="bg-brand-cream hover:bg-brand-pink px-2.5 py-1 rounded-md text-sm font-bold"
-                >
-                  -
-                </button>
-                <span className="text-sm font-bold w-6 text-center">{choiceQty}</span>
-                <button 
-                  type="button"
-                  onClick={() => setChoiceQty(choiceQty + 1)}
-                  className="bg-brand-cream hover:bg-brand-pink px-2.5 py-1 rounded-md text-sm font-bold"
-                >
-                  +
-                </button>
-              </div>
-              
-              <div className="text-right">
-                <span className="text-[10px] text-brand-chocolate/60 block uppercase font-medium">Bake Unit Price</span>
-                <span className="text-lg font-bold text-brand-rosegold">
-                  ${(getSelectedProductPrice() * choiceQty).toFixed(2)}
-                </span>
-              </div>
-            </div>
-
-            <div className="mt-5 flex gap-2">
+        return (
+          <div className="fixed inset-0 bg-brand-chocolate/40 backdrop-blur-xs flex items-center justify-center z-[100] p-4">
+            <div className="bg-white rounded-3xl max-w-md w-full max-h-[90vh] overflow-y-auto border border-brand-pink/30 p-6 shadow-xl relative animate-in fade-in duration-300">
               <button
-                type="button"
                 onClick={() => setSelectedProduct(null)}
-                className="flex-1 bg-gray-100 hover:bg-gray-200 text-brand-chocolate py-2.5 rounded-full text-xs font-semibold transition"
+                className="absolute top-4 right-4 text-brand-chocolate/60 hover:text-brand-chocolate text-xl font-bold p-1 animate-hover-pulse"
               >
-                Cancel
+                ✕
               </button>
-              <button
-                type="button"
-                onClick={handleAddToBag}
-                className="flex-1 bg-brand-rosegold hover:bg-brand-rosegold/90 text-white py-2.5 rounded-full text-xs font-semibold transition shadow-xs"
-              >
-                Add to Baking Bag
-              </button>
+              
+              <h3 className="text-lg font-bold text-brand-chocolate font-heading italic">
+                Configure Your Treats
+              </h3>
+              <p className="text-[11px] text-brand-rosegold font-bold uppercase tracking-wider mt-0.5">
+                {selectedProduct.name} {activeVar ? `(${activeVar.name})` : ""}
+              </p>
+
+              {activeDescription && (
+                <p className="font-sans text-[12px] font-normal text-[#8D6E63] leading-normal mt-1 select-none">
+                  {activeDescription}
+                </p>
+              )}
+
+              {/* Visual Carousel/Gallery of All Photos */}
+              <div className="mt-3">
+                <ProductPhotoGallery product={selectedProduct} selectedVariationId={selectedVarId} />
+              </div>
+
+              {/* CUSTOMER-FACING MINI CAKE TYPE VARIATIONS SWITCHER */}
+              {hasVariations && (
+                <div className="mt-5 p-3.5 bg-brand-cream/25 border border-brand-pink/15 rounded-2xl space-y-2">
+                  <label className="text-xs font-bold text-brand-chocolate uppercase tracking-wider block">
+                    Choose Mini Cake Type:
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {selectedProduct.variations?.map(v => (
+                      <button
+                        key={v.id}
+                        type="button"
+                        onClick={() => {
+                          setSelectedVarId(v.id);
+                          const newSizes = v.options.sizes || [];
+                          if (choiceSize && !newSizes.some(sz => sz.name === choiceSize)) {
+                            setChoiceSize("");
+                          }
+                          const newFlavors = v.options.flavors || [];
+                          if (choiceFlavor && !newFlavors.includes(choiceFlavor)) {
+                            setChoiceFlavor("");
+                          }
+                          if (!choiceFlavor && newFlavors.length > 0) {
+                            setChoiceFlavor(newFlavors[0]);
+                          }
+                          const newAddOns = v.options.addOns || [];
+                          setChoiceAddOns(choiceAddOns.filter(addName => newAddOns.some(add => add.name === addName)));
+                        }}
+                        className={`py-2.5 px-3 rounded-xl text-xs font-bold transition-all duration-200 text-center flex flex-col justify-center items-center ${
+                          selectedVarId === v.id
+                            ? "bg-brand-chocolate text-brand-cream border-2 border-brand-chocolate shadow-sm scale-[1.02]"
+                            : "bg-white text-brand-chocolate border border-brand-pink/15 hover:bg-brand-pink/5"
+                        }`}
+                      >
+                        <span>{v.name}</span>
+                        <span className="text-[9px] opacity-75 font-medium mt-0.5">
+                          Starting at ${v.basePrice.toFixed(2)}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                  {!selectedVarId && (
+                    <p className="text-[10px] text-red-500 font-semibold italic text-center animate-pulse">
+                      * Please select Normal or Specialty to see available options & pricing.
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {/* Sizes Radio selections */}
+              {(!hasVariations || selectedVarId) && activeSizes && activeSizes.length > 0 && (
+                <div className="mt-5">
+                  <label className="text-xs font-bold text-brand-chocolate uppercase tracking-wider block mb-2">
+                    1. Highlight Size / Serving Count:
+                  </label>
+                  <div className="space-y-2">
+                     {activeSizes.map(sz => (
+                      <label 
+                        key={sz.name}
+                        className={`flex items-center justify-between p-3 rounded-xl border text-xs cursor-pointer transition-all ${
+                          choiceSize === sz.name 
+                            ? "bg-brand-pink/20 border-brand-rosegold font-semibold" 
+                            : "border-gray-100 hover:bg-brand-cream/50"
+                        }`}
+                      >
+                        <div className="flex items-center space-x-2">
+                          <input 
+                            type="radio" 
+                            name="options-sizes"
+                            checked={choiceSize === sz.name}
+                            onChange={() => setChoiceSize(sz.name)}
+                            className="accent-brand-rosegold"
+                          />
+                          <span>{sz.name}</span>
+                        </div>
+                        <span className="text-brand-rosegold font-semibold">
+                          {sz.priceAdd > 0 ? `+$${sz.priceAdd.toFixed(2)}` : "Included"}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Flavors selections */}
+              {(!hasVariations || selectedVarId) && activeFlavors && activeFlavors.length > 0 && (
+                <div className="mt-5">
+                  <label className="text-xs font-bold text-brand-chocolate uppercase tracking-wider block mb-2">
+                    2. Selected Flavor Preference:
+                  </label>
+                  <select
+                    value={choiceFlavor}
+                    onChange={(e) => setChoiceFlavor(e.target.value)}
+                    className="w-full border border-brand-pink/20 rounded-xl px-3 py-2 text-xs bg-brand-cream/30 focus:outline-none focus:ring-1 focus:ring-brand-rosegold"
+                  >
+                    <option value="" disabled>-- Select Flavor --</option>
+                    {activeFlavors.map(f => (
+                      <option key={f} value={f}>{f}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {/* AddOns checkboxes */}
+              {(!hasVariations || selectedVarId) && activeAddOns && activeAddOns.length > 0 && (
+                <div className="mt-5">
+                  <label className="text-xs font-bold text-brand-chocolate uppercase tracking-wider block mb-2">
+                    3. Extra Toppings / Add-ons:
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {activeAddOns.map(add => (
+                      <label 
+                        key={add.name}
+                        className={`flex items-center justify-between p-2.5 rounded-lg border text-xs cursor-pointer transition-all ${
+                          choiceAddOns.includes(add.name)
+                            ? "bg-brand-pink/20 border-brand-rosegold font-semibold"
+                            : "border-gray-50 hover:bg-brand-cream/30"
+                        }`}
+                      >
+                        <div className="flex items-center space-x-1.5">
+                          <input 
+                            type="checkbox"
+                            checked={choiceAddOns.includes(add.name)}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setChoiceAddOns([...choiceAddOns, add.name]);
+                              } else {
+                                setChoiceAddOns(choiceAddOns.filter(x => x !== add.name));
+                              }
+                            }}
+                            className="accent-brand-rosegold"
+                          />
+                          <span>{add.name}</span>
+                        </div>
+                        <span className="text-[10px] text-brand-rosegold font-bold">
+                          +${add.priceAdd}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Quantity and Checkout action */}
+              <div className="mt-6 pt-4 border-t border-brand-pink/10 flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <button 
+                    type="button"
+                    onClick={() => setChoiceQty(Math.max(1, choiceQty - 1))}
+                    className="bg-brand-cream hover:bg-brand-pink px-2.5 py-1 rounded-md text-sm font-bold"
+                  >
+                    -
+                  </button>
+                  <span className="text-sm font-bold w-6 text-center">{choiceQty}</span>
+                  <button 
+                    type="button"
+                    onClick={() => setChoiceQty(choiceQty + 1)}
+                    className="bg-brand-cream hover:bg-brand-pink px-2.5 py-1 rounded-md text-sm font-bold"
+                  >
+                    +
+                  </button>
+                </div>
+                
+                <div className="text-right">
+                  <span className="text-[10px] text-brand-chocolate/60 block uppercase font-medium">Bake Unit Price</span>
+                  <span className="text-lg font-bold text-brand-rosegold">
+                    ${(getSelectedProductPrice() * choiceQty).toFixed(2)}
+                  </span>
+                </div>
+              </div>
+
+              <div className="mt-5 flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setSelectedProduct(null)}
+                  className="flex-1 bg-gray-100 hover:bg-gray-200 text-brand-chocolate py-2.5 rounded-full text-xs font-semibold transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  disabled={hasVariations && !selectedVarId}
+                  onClick={handleAddToBag}
+                  className={`flex-1 py-2.5 rounded-full text-xs font-semibold transition ${
+                    hasVariations && !selectedVarId
+                      ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                      : "bg-brand-rosegold hover:bg-brand-rosegold/90 text-white shadow-xs"
+                  }`}
+                >
+                  Add to Baking Bag
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
     </div>
   );
 }
