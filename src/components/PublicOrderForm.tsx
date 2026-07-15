@@ -1178,7 +1178,7 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
             {selectedProduct.options?.addOns && selectedProduct.options.addOns.length > 0 && (
               <div className="mt-5">
                 <label className="text-xs font-bold text-brand-chocolate uppercase tracking-wider block mb-2">
-                  3. Premium Add-ons / Embellishments:
+                  3. Extra Toppings / Add-ons:
                 </label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {selectedProduct.options.addOns.map(add => (

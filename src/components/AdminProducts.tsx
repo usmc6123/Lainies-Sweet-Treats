@@ -800,7 +800,7 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
 
               {/* AddOns select elements */}
               <div className="bg-brand-cream/35 p-4 rounded-2xl border border-brand-pink/15 space-y-2">
-                <span className="text-xs uppercase font-extrabold tracking-widest text-[#B76E79]">Extra Decoration Add-ons</span>
+                <span className="text-xs uppercase font-extrabold tracking-widest text-[#B76E79]">Extra Topping Add-ons</span>
                 <div className="flex gap-2">
                   <input
                     type="text"
