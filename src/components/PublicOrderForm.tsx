@@ -1133,6 +1133,10 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
           : (selectedProduct.options?.toppings || (selectedProduct.options?.addOns || []).map((x: any) => typeof x === "string" ? x : x.name));
         const activeDescription = activeVar?.description || selectedProduct.description || "";
 
+        const hasToppingsConfigured = (!hasVariations || selectedVarId) && activeToppings && activeToppings.length > 0;
+        const isToppingRequiredAndMissing = hasToppingsConfigured && (!choiceAddOns || choiceAddOns.length === 0 || !choiceAddOns[0]);
+        const isAddDisabled = (hasVariations && !selectedVarId) || isToppingRequiredAndMissing;
+
         return (
           <div className="fixed inset-0 bg-brand-chocolate/40 backdrop-blur-xs flex items-center justify-center z-[100] p-4">
             <div className="bg-white rounded-3xl max-w-md w-full max-h-[90vh] overflow-y-auto border border-brand-pink/30 p-6 shadow-xl relative animate-in fade-in duration-300">
@@ -1263,40 +1267,22 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
                 </div>
               )}
 
-              {/* Toppings List checkboxes */}
+              {/* Toppings List dropdown selector */}
               {(!hasVariations || selectedVarId) && activeToppings && activeToppings.length > 0 && (
                 <div className="mt-5">
                   <label className="text-xs font-bold text-brand-chocolate uppercase tracking-wider block mb-2">
-                    3. Selected Toppings:
+                    3. Selected Topping:
                   </label>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <select
+                    value={choiceAddOns[0] || ""}
+                    onChange={(e) => setChoiceAddOns(e.target.value ? [e.target.value] : [])}
+                    className="w-full border border-brand-pink/20 rounded-xl px-3 py-2 text-xs bg-brand-cream/30 focus:outline-none focus:ring-1 focus:ring-brand-rosegold"
+                  >
+                    <option value="" disabled>-- Select Topping --</option>
                     {activeToppings.map(topping => (
-                      <label 
-                        key={topping}
-                        className={`flex items-center justify-between p-2.5 rounded-lg border text-xs cursor-pointer transition-all ${
-                          choiceAddOns.includes(topping)
-                            ? "bg-brand-pink/20 border-brand-rosegold font-semibold"
-                            : "border-gray-50 hover:bg-brand-cream/30"
-                        }`}
-                      >
-                        <div className="flex items-center space-x-1.5">
-                          <input 
-                            type="checkbox"
-                            checked={choiceAddOns.includes(topping)}
-                            onChange={(e) => {
-                              if (e.target.checked) {
-                                setChoiceAddOns([...choiceAddOns, topping]);
-                              } else {
-                                setChoiceAddOns(choiceAddOns.filter(x => x !== topping));
-                              }
-                            }}
-                            className="accent-brand-rosegold"
-                          />
-                          <span>{topping}</span>
-                        </div>
-                      </label>
+                      <option key={topping} value={topping}>{topping}</option>
                     ))}
-                  </div>
+                  </select>
                 </div>
               )}
 
@@ -1338,10 +1324,10 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
                 </button>
                 <button
                   type="button"
-                  disabled={hasVariations && !selectedVarId}
+                  disabled={isAddDisabled}
                   onClick={handleAddToBag}
                   className={`flex-1 py-2.5 rounded-full text-xs font-semibold transition ${
-                    hasVariations && !selectedVarId
+                    isAddDisabled
                       ? "bg-gray-200 text-gray-400 cursor-not-allowed"
                       : "bg-brand-rosegold hover:bg-brand-rosegold/90 text-white shadow-xs"
                   }`}
