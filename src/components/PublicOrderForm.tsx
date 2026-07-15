@@ -127,6 +127,7 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
   const [selectedVarId, setSelectedVarId] = useState<string | null>(null);
   const [choiceSize, setChoiceSize] = useState<string>("");
   const [choiceFlavor, setChoiceFlavor] = useState<string>("");
+  const [choiceDrizzle, setChoiceDrizzle] = useState<string>("");
   const [choiceAddOns, setChoiceAddOns] = useState<string[]>([]);
   const [choiceQty, setChoiceQty] = useState<number>(1);
 
@@ -136,6 +137,7 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
       setSelectedVarId(null);
       setChoiceSize("");
       setChoiceFlavor("");
+      setChoiceDrizzle("");
       setChoiceAddOns([]);
       setChoiceQty(1);
     }
@@ -252,6 +254,7 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
       size: choiceSize || undefined,
       flavor: choiceFlavor || undefined,
       addOns: choiceAddOns.length > 0 ? choiceAddOns : undefined,
+      selectedDrizzle: choiceDrizzle || undefined,
       unitPrice,
       totalPrice: itemTotal,
       variationId: activeVar?.id,
@@ -721,6 +724,11 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
                           Flavor: {item.flavor}
                         </p>
                       )}
+                      {item.selectedDrizzle && (
+                        <p className="text-[10px] text-brand-chocolate/70 font-semibold">
+                          Drizzle: {item.selectedDrizzle}
+                        </p>
+                      )}
                       {item.addOns && item.addOns.length > 0 && (
                         <div className="flex flex-wrap gap-1 mt-1">
                           {item.addOns.map((add, i) => (
@@ -1131,11 +1139,16 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
         const activeToppings = activeVar 
           ? (activeVar.options?.toppings || (activeVar.options?.addOns || []).map((x: any) => typeof x === "string" ? x : x.name)) 
           : (selectedProduct.options?.toppings || (selectedProduct.options?.addOns || []).map((x: any) => typeof x === "string" ? x : x.name));
+        const activeDrizzles = activeVar ? (activeVar.options?.drizzles || []) : (selectedProduct.options?.drizzles || []);
         const activeDescription = activeVar?.description || selectedProduct.description || "";
 
         const hasToppingsConfigured = (!hasVariations || selectedVarId) && activeToppings && activeToppings.length > 0;
         const isToppingRequiredAndMissing = hasToppingsConfigured && (!choiceAddOns || choiceAddOns.length === 0 || !choiceAddOns[0]);
-        const isAddDisabled = (hasVariations && !selectedVarId) || isToppingRequiredAndMissing;
+        
+        const hasDrizzlesConfigured = (!hasVariations || selectedVarId) && activeDrizzles && activeDrizzles.length > 0;
+        const isDrizzleRequiredAndMissing = hasDrizzlesConfigured && !choiceDrizzle;
+
+        const isAddDisabled = (hasVariations && !selectedVarId) || isToppingRequiredAndMissing || isDrizzleRequiredAndMissing;
 
         return (
           <div className="fixed inset-0 bg-brand-chocolate/40 backdrop-blur-xs flex items-center justify-center z-[100] p-4">
@@ -1191,6 +1204,10 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
                           }
                           const newToppings = v.options.toppings || (v.options.addOns || []).map((x: any) => typeof x === "string" ? x : x.name);
                           setChoiceAddOns(choiceAddOns.filter(addName => newToppings.includes(addName)));
+                          const newDrizzles = v.options.drizzles || [];
+                          if (choiceDrizzle && !newDrizzles.includes(choiceDrizzle)) {
+                            setChoiceDrizzle("");
+                          }
                         }}
                         className={`py-2.5 px-3 rounded-xl text-xs font-bold transition-all duration-200 text-center flex flex-col justify-center items-center ${
                           selectedVarId === v.id
@@ -1262,6 +1279,25 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
                     <option value="" disabled>-- Select Flavor --</option>
                     {activeFlavors.map(f => (
                       <option key={f} value={f}>{f}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {/* Selected Drizzle selections */}
+              {(!hasVariations || selectedVarId) && activeDrizzles && activeDrizzles.length > 0 && (
+                <div className="mt-5">
+                  <label className="text-xs font-bold text-brand-chocolate uppercase tracking-wider block mb-2">
+                    SELECTED DRIZZLE:
+                  </label>
+                  <select
+                    value={choiceDrizzle}
+                    onChange={(e) => setChoiceDrizzle(e.target.value)}
+                    className="w-full border border-brand-pink/20 rounded-xl px-3 py-2 text-xs bg-brand-cream/30 focus:outline-none focus:ring-1 focus:ring-brand-rosegold"
+                  >
+                    <option value="" disabled>-- Select a drizzle --</option>
+                    {activeDrizzles.map(d => (
+                      <option key={d} value={d}>{d}</option>
                     ))}
                   </select>
                 </div>

@@ -326,6 +326,9 @@ export default function AdminOrders({ token, triggerRefresh }: AdminOrdersProps)
                         </div>
                         {item.size && <p className="text-xs text-gray-500 font-medium">Scale: {item.size}</p>}
                         {item.flavor && <p className="text-xs text-gray-500 font-medium">Icing/Flavor: {item.flavor}</p>}
+                        {item.selectedDrizzle && (
+                          <p className="text-xs text-gray-500 font-medium">Drizzle: {item.selectedDrizzle}</p>
+                        )}
                         {item.addOns && item.addOns.length > 0 && (
                           <p className="text-xs text-brand-rosegold font-bold">Toppings: {item.addOns.join(", ")}</p>
                         )}

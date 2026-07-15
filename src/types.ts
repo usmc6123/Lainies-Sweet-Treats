@@ -8,6 +8,7 @@ export interface ProductOptions {
   flavors?: string[];
   addOns?: OptionItem[];
   toppings?: string[];
+  drizzles?: string[];
 }
 
 export interface ProductIngredientLink {
@@ -45,6 +46,7 @@ export interface OrderItem {
   size?: string;
   flavor?: string;
   addOns?: string[];
+  selectedDrizzle?: string;
   unitPrice: number;
   totalPrice: number;
   variationId?: string;

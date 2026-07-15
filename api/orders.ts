@@ -46,6 +46,7 @@ function drawLabel(doc: any, order: any, startY: number) {
     const descParts = [];
     if (item.size) descParts.push(`Scale: ${item.size}`);
     if (item.flavor) descParts.push(`Icing/Flavor: ${item.flavor}`);
+    if (item.selectedDrizzle) descParts.push(`Drizzle: ${item.selectedDrizzle}`);
     if (item.addOns && item.addOns.length > 0) descParts.push(`Decor: ${item.addOns.join(', ')}`);
     
     if (descParts.length > 0) {
@@ -167,6 +168,7 @@ export default async function handler(req: any, res: any) {
           const specParts = [];
           if (item.size) specParts.push(`Scale: ${item.size}`);
           if (item.flavor) specParts.push(`Icing/Flavor: ${item.flavor}`);
+          if (item.selectedDrizzle) specParts.push(`Drizzle: ${item.selectedDrizzle}`);
           if (item.addOns && item.addOns.length > 0) specParts.push(`Decor: ${item.addOns.join(', ')}`);
           if (specParts.length > 0) {
             doc.font('Helvetica').fontSize(8.5).fillColor('#7d6259').text(specParts.join('  |  '), 60, yTable + 20, { width: 300 });

@@ -214,6 +214,7 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
   const [sizes, setSizes] = useState<{ name: string; priceAdd: number }[]>([]);
   const [flavors, setFlavors] = useState<string[]>([]);
   const [toppings, setToppings] = useState<string[]>([]);
+  const [drizzles, setDrizzles] = useState<string[]>([]);
 
   // Product Variations state (Normal / Specialty)
   const [activeVarId, setActiveVarId] = useState<string | null>(null);
@@ -234,7 +235,8 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
           options: {
             sizes,
             flavors,
-            toppings
+            toppings,
+            drizzles
           }
         };
       }
@@ -249,6 +251,8 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
       setFlavors(nextVar.options.flavors || []);
       const rawToppings = nextVar.options.toppings || (nextVar.options.addOns || []).map((x: any) => typeof x === "string" ? x : x.name);
       setToppings(rawToppings);
+      const rawDrizzles = nextVar.options.drizzles || [];
+      setDrizzles(rawDrizzles);
       setDescription(nextVar.description || "");
       setPhotos(nextVar.photos || []);
     }
@@ -265,6 +269,7 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
   const [newSizePrice, setNewSizePrice] = useState(0);
   const [newFlavorName, setNewFlavorName] = useState("");
   const [newToppingName, setNewToppingName] = useState("");
+  const [newDrizzleName, setNewDrizzleName] = useState("");
 
   const [inputIngId, setInputIngId] = useState("");
   const [inputIngQty, setInputIngQty] = useState(0);
@@ -331,7 +336,8 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
               { name: "Five Dozen", priceAdd: 165 }
             ],
             flavors: flavors || [],
-            toppings: toppings || []
+            toppings: toppings || [],
+            drizzles: drizzles || []
           },
           description: description || "",
           photos: photos || []
@@ -343,7 +349,8 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
           options: {
             sizes: [],
             flavors: [],
-            toppings: []
+            toppings: [],
+            drizzles: []
           },
           description: "",
           photos: []
@@ -387,7 +394,8 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
           options: {
             sizes: p.options.sizes || [],
             flavors: p.options.flavors || [],
-            toppings: p.options.toppings || (p.options.addOns || []).map((x: any) => typeof x === "string" ? x : x.name)
+            toppings: p.options.toppings || (p.options.addOns || []).map((x: any) => typeof x === "string" ? x : x.name),
+            drizzles: p.options.drizzles || []
           },
           description: p.description,
           photos: pPhotos
@@ -399,7 +407,8 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
           options: {
             sizes: [],
             flavors: [],
-            toppings: []
+            toppings: [],
+            drizzles: []
           },
           description: "",
           photos: []
@@ -416,6 +425,7 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
       setSizes(norm.options.sizes || []);
       setFlavors(norm.options.flavors || []);
       setToppings(norm.options.toppings || (norm.options.addOns || []).map((x: any) => typeof x === "string" ? x : x.name));
+      setDrizzles(norm.options.drizzles || []);
       setDescription(norm.description || "");
       setPhotos(norm.photos || []);
     } else {
@@ -424,6 +434,7 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
       setSizes(p.options.sizes || []);
       setFlavors(p.options.flavors || []);
       setToppings(p.options.toppings || (p.options.addOns || []).map((x: any) => typeof x === "string" ? x : x.name));
+      setDrizzles(p.options.drizzles || []);
       setDescription(p.description);
       setPhotos(pPhotos);
     }
@@ -447,6 +458,7 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
     setSizes([]);
     setFlavors([]);
     setToppings([]);
+    setDrizzles([]);
     setProdIngredients([]);
 
     setActiveVarId(null);
@@ -487,6 +499,21 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
 
   const handleRemoveToppingOption = (idx: number) => {
     setToppings(toppings.filter((_, i) => i !== idx));
+  };
+
+  const handleAddDrizzleOption = () => {
+    const trimmed = newDrizzleName.trim();
+    if (!trimmed) return;
+    if (drizzles.includes(trimmed)) {
+      alert("This drizzle is already in the list!");
+      return;
+    }
+    setDrizzles([...drizzles, trimmed]);
+    setNewDrizzleName("");
+  };
+
+  const handleRemoveDrizzleOption = (idx: number) => {
+    setDrizzles(drizzles.filter((_, i) => i !== idx));
   };
 
   const handleAddIngLink = () => {
@@ -554,7 +581,7 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
 
     let finalVariations = currentVariations;
     let finalBasePrice = Number(basePrice);
-    let finalOptions = { sizes, flavors, toppings, addOns: toppings.map(t => ({ name: t, priceAdd: 0 })) };
+    let finalOptions = { sizes, flavors, toppings, drizzles, addOns: toppings.map(t => ({ name: t, priceAdd: 0 })) };
     let finalDescription = description;
     let finalPhotos = photos;
 
@@ -567,7 +594,7 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
             basePrice: Number(basePrice),
             description,
             photos,
-            options: { sizes, flavors, toppings, addOns: toppings.map(t => ({ name: t, priceAdd: 0 })) }
+            options: { sizes, flavors, toppings, drizzles, addOns: toppings.map(t => ({ name: t, priceAdd: 0 })) }
           };
         }
         return v;
@@ -1039,6 +1066,35 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
                     <span key={idx} className="inline-flex items-center text-xs bg-white px-2.5 py-1 rounded-lg border border-brand-pink/10">
                       {f}
                       <button type="button" onClick={() => handleRemoveFlavorOption(idx)} className="text-red-500 font-extrabold ml-2 text-xs">✕</button>
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Drizzle List section */}
+              <div className="bg-brand-cream/35 p-4 rounded-2xl border border-brand-pink/15 space-y-2">
+                <span className="text-xs uppercase font-extrabold tracking-widest text-[#B76E79]">Drizzle List</span>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={newDrizzleName}
+                    onChange={(e) => setNewDrizzleName(e.target.value)}
+                    placeholder="e.g., Chocolate Drizzle, Caramel Drizzle"
+                    className="flex-1 text-sm bg-white border border-brand-pink/15 p-2 rounded-xl focus:outline-none"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleAddDrizzleOption}
+                    className="bg-brand-chocolate text-white text-sm font-bold px-3 py-2 rounded-xl cursor-pointer hover:opacity-90"
+                  >
+                    +
+                  </button>
+                </div>
+                <div className="mt-2 flex flex-wrap gap-1.5 font-semibold">
+                  {drizzles.map((d, idx) => (
+                    <span key={idx} className="inline-flex items-center text-xs bg-white px-2.5 py-1 rounded-lg border border-brand-pink/10">
+                      {d}
+                      <button type="button" onClick={() => handleRemoveDrizzleOption(idx)} className="text-red-500 font-extrabold ml-2 text-xs">✕</button>
                     </span>
                   ))}
                 </div>
