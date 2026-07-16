@@ -210,6 +210,15 @@ export interface Settings {
   emailTemplateConfirmation: string;
   announcementBanner?: string; // Customizable Announcement Banner text
   bannerVisible?: boolean; // Customizable Announcement Banner visibility
+  minimumLeadDays?: number;
+  autoEmailTemplate?: string;
+  instagramFeedUrls?: string[];
+  topBgUrl?: string;
+  topBgType?: "image" | "video";
+  topBgOpacity?: number; // 0 to 1 range (transparency / opacity)
+  bottomBgUrl?: string;
+  bottomBgType?: "image" | "video";
+  bottomBgOpacity?: number; // 0 to 1 range (transparency / opacity)
 }
 
 export type DiscountType = "percentage" | "fixed";

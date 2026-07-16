@@ -535,15 +535,37 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
   return (
     <div id="shop-view" className="w-full animate-fade-in relative">
       {/* Premium brand-integrated Hero Section with glassmorphism filtering */}
-      <div 
-        className="w-full relative z-20 pt-16 pb-16 md:pt-20 md:pb-20 text-center flex flex-col justify-between animate-in fade-in duration-500"
-        style={{
-          backgroundImage: `linear-gradient(to bottom, rgba(17,17,17,0.65) 0%, rgba(17,17,17,0.5) 45%, rgba(17,17,17,0.55) 75%, rgba(255,45,150,0.85) 100%), url("https://images.unsplash.com/photo-1606313564200-e75d5e30476c?q=80&w=1600&auto=format&fit=crop")`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
-      >
-        <div className="max-w-5xl mx-auto px-4 relative">
+      <div className="w-full relative z-20 pt-16 pb-16 md:pt-20 md:pb-20 text-center flex flex-col justify-between animate-in fade-in duration-500 overflow-hidden">
+        {/* Background Layer */}
+        <div className="absolute inset-0 z-0 pointer-events-none select-none">
+          {(settings?.topBgType || "image") === "video" ? (
+            <video
+              src={settings?.topBgUrl || "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?q=80&w=1600&auto=format&fit=crop"}
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="w-full h-full object-cover"
+              style={{ opacity: settings?.topBgOpacity !== undefined ? Number(settings.topBgOpacity) : 0.65 }}
+            />
+          ) : (
+            <div
+              className="w-full h-full bg-cover bg-center"
+              style={{
+                backgroundImage: `url("${settings?.topBgUrl || "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?q=80&w=1600&auto=format&fit=crop"}")`,
+                opacity: settings?.topBgOpacity !== undefined ? Number(settings.topBgOpacity) : 0.65
+              }}
+            />
+          )}
+        </div>
+        {/* Dark brand gradient overlay to ensure text contrast and legibility */}
+        <div 
+          className="absolute inset-0 z-10 pointer-events-none select-none" 
+          style={{
+            background: "linear-gradient(to bottom, rgba(17,17,17,0.55) 0%, rgba(17,17,17,0.3) 45%, rgba(17,17,17,0.4) 75%, rgba(255,45,150,0.65) 100%)"
+          }}
+        />
+        <div className="max-w-5xl mx-auto px-4 relative z-20">
           {/* Large desktop-only floating logo, absolutely positioned relative to the centered header container */}
           <div className="hidden lg:flex absolute lg:-left-[155px] xl:-left-[215px] lg:-top-[15px] xl:-top-[35px] lg:w-[130px] lg:h-[130px] xl:w-[220px] xl:h-[220px] flex-shrink-0 items-center justify-center transform-gpu hover:scale-105 transition-all duration-300 z-20">
             <img 
@@ -637,19 +659,39 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
 
       {/* Lower section with real-world bakery backdrop (blurred/filtered) */}
       <div id="storefront-content-section" className="w-full relative overflow-hidden z-10">
-        {/* Fixed background image with blur filter applied to offset edge leak */}
-        <div 
-          className="absolute -inset-4 pointer-events-none select-none filter blur-[3px]"
-          style={{
-            backgroundImage: `url("https://firebasestorage.googleapis.com/v0/b/lainies-sweet-treats.firebasestorage.app/o/site-assets%2Fbackground2.jpg?alt=media&token=1d962c6e-eb11-4f47-b98e-3dbc5863f473")`,
-            backgroundAttachment: "fixed",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-          }}
-        />
+        {/* Background layer */}
+        <div className="absolute -inset-4 pointer-events-none select-none filter blur-[3px] z-0">
+          {(settings?.bottomBgType || "image") === "video" ? (
+            <video
+              src={settings?.bottomBgUrl || "https://firebasestorage.googleapis.com/v0/b/lainies-sweet-treats.firebasestorage.app/o/site-assets%2Fbackground2.jpg?alt=media&token=1d962c6e-eb11-4f47-b98e-3dbc5863f473"}
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="w-full h-full object-cover"
+              style={{
+                opacity: settings?.bottomBgOpacity !== undefined ? Number(settings.bottomBgOpacity) : 0.15,
+                position: "fixed",
+                top: 0,
+                left: 0,
+                width: "100vw",
+                height: "100vh",
+              }}
+            />
+          ) : (
+            <div
+              className="w-full h-full bg-cover bg-center"
+              style={{
+                backgroundImage: `url("${settings?.bottomBgUrl || "https://firebasestorage.googleapis.com/v0/b/lainies-sweet-treats.firebasestorage.app/o/site-assets%2Fbackground2.jpg?alt=media&token=1d962c6e-eb11-4f47-b98e-3dbc5863f473"}")`,
+                backgroundAttachment: "fixed",
+                opacity: settings?.bottomBgOpacity !== undefined ? Number(settings.bottomBgOpacity) : 0.15
+              }}
+            />
+          )}
+        </div>
         {/* Soft pink to warm cream gradient overlay with lower opacity to reveal the backdrop warmth */}
         <div 
-          className="absolute inset-0 pointer-events-none select-none"
+          className="absolute inset-0 pointer-events-none select-none z-10"
           style={{
             background: "linear-gradient(to bottom, rgba(255,45,150,0.15) 0%, var(--color-brand-gray) 100%)"
           }}

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Settings, Save, CheckCircle2, Lock, Sparkles, Instagram } from "lucide-react";
+import { Settings, Save, CheckCircle2, Lock, Sparkles, Instagram, Upload, Sliders } from "lucide-react";
 import { Settings as SettingsType } from "../types";
 
 interface AdminSettingsProps {
@@ -27,6 +27,19 @@ export default function AdminSettings({ token, triggerRefresh }: AdminSettingsPr
   // FEATURE 7 States (Instagram Option B)
   const [instagramFeedUrls, setInstagramFeedUrls] = useState<string[]>([]);
   const [newInstaUrl, setNewInstaUrl] = useState("");
+
+  // Webstore Background Settings States
+  const [topBgUrl, setTopBgUrl] = useState("");
+  const [topBgType, setTopBgType] = useState<"image" | "video">("image");
+  const [topBgOpacity, setTopBgOpacity] = useState(0.65);
+  const [bottomBgUrl, setBottomBgUrl] = useState("");
+  const [bottomBgType, setBottomBgType] = useState<"image" | "video">("image");
+  const [bottomBgOpacity, setBottomBgOpacity] = useState(0.15);
+
+  // File uploading states for background setting
+  const [uploadingTop, setUploadingTop] = useState(false);
+  const [uploadingBottom, setUploadingBottom] = useState(false);
+  const [uploadError, setUploadError] = useState("");
 
   // FEATURE 4 Change Password States
   const [currentPassword, setCurrentPassword] = useState("");
@@ -57,6 +70,14 @@ export default function AdminSettings({ token, triggerRefresh }: AdminSettingsPr
 
           // Feature 7
           setInstagramFeedUrls(data.instagramFeedUrls || []);
+
+          // Webstore Backgrounds
+          setTopBgUrl(data.topBgUrl || "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?q=80&w=1600&auto=format&fit=crop");
+          setTopBgType(data.topBgType || "image");
+          setTopBgOpacity(data.topBgOpacity !== undefined ? Number(data.topBgOpacity) : 0.65);
+          setBottomBgUrl(data.bottomBgUrl || "https://firebasestorage.googleapis.com/v0/b/lainies-sweet-treats.firebasestorage.app/o/site-assets%2Fbackground2.jpg?alt=media&token=1d962c6e-eb11-4f47-b98e-3dbc5863f473");
+          setBottomBgType(data.bottomBgType || "image");
+          setBottomBgOpacity(data.bottomBgOpacity !== undefined ? Number(data.bottomBgOpacity) : 0.15);
         }
       } catch (err) {
         console.error("Failed to fetch settings keys", err);
@@ -66,6 +87,70 @@ export default function AdminSettings({ token, triggerRefresh }: AdminSettingsPr
     }
     loadSettings();
   }, []);
+
+  const handleUploadBackground = async (e: React.ChangeEvent<HTMLInputElement>, position: "top" | "bottom") => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate size (limit to 15MB for video/image)
+    if (file.size > 15 * 1024 * 1024) {
+      setUploadError("File is too large. Please select a file under 15MB.");
+      return;
+    }
+
+    setUploadError("");
+    if (position === "top") setUploadingTop(true);
+    else setUploadingBottom(true);
+
+    try {
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const base64String = reader.result as string;
+        try {
+          const res = await fetch("/api/upload", {
+            method: "POST",
+            headers: {
+              "Authorization": `Bearer ${token}`,
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              filename: file.name,
+              contentType: file.type || (file.type.includes("video") ? "video/mp4" : "image/jpeg"),
+              base64: base64String,
+              productId: "backgrounds"
+            })
+          });
+
+          if (!res.ok) {
+            const errData = await res.json();
+            throw new Error(errData.error || "Upload failed");
+          }
+
+          const data = await res.json();
+          if (data.url) {
+            if (position === "top") {
+              setTopBgUrl(data.url);
+              setTopBgType(file.type.includes("video") ? "video" : "image");
+            } else {
+              setBottomBgUrl(data.url);
+              setBottomBgType(file.type.includes("video") ? "video" : "image");
+            }
+          }
+        } catch (err: any) {
+          console.error("Upload error:", err);
+          setUploadError(err.message || "Failed to upload background file.");
+        } finally {
+          if (position === "top") setUploadingTop(false);
+          else setUploadingBottom(false);
+        }
+      };
+      reader.readAsDataURL(file);
+    } catch (err: any) {
+      setUploadError(err.message || "Failed to read local file.");
+      if (position === "top") setUploadingTop(false);
+      else setUploadingBottom(false);
+    }
+  };
 
   const handleSaveSettings = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -81,7 +166,14 @@ export default function AdminSettings({ token, triggerRefresh }: AdminSettingsPr
       // Feature 3 & 7
       announcementBanner,
       bannerVisible,
-      instagramFeedUrls
+      instagramFeedUrls,
+      // Background styling options
+      topBgUrl,
+      topBgType,
+      topBgOpacity: Number(topBgOpacity),
+      bottomBgUrl,
+      bottomBgType,
+      bottomBgOpacity: Number(bottomBgOpacity)
     };
 
     try {
@@ -333,6 +425,234 @@ export default function AdminSettings({ token, triggerRefresh }: AdminSettingsPr
                 ))}
               </div>
             )}
+          </div>
+
+          {/* Webstore Background Customizer Section */}
+          <div className="col-span-1 sm:col-span-2 border-t border-brand-pink/10 pt-6 space-y-6">
+            <div className="flex items-center space-x-2">
+              <Sliders className="h-5 w-5 text-brand-rosegold" />
+              <h3 className="font-heading text-lg font-bold text-brand-chocolate">Storefront Background Customizer</h3>
+            </div>
+            
+            <p className="text-xs text-gray-500 leading-normal font-medium">
+              Personalize your webstore's top hero banner and bottom catalog backgrounds by uploading images or looping MP4 videos. Use the transparency sliders to control contrast with the text.
+            </p>
+
+            {uploadError && (
+              <div className="p-3 bg-red-50 border border-red-150 text-red-700 text-xs font-semibold rounded-xl">
+                {uploadError}
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+              {/* Top Background Panel */}
+              <div className="border border-brand-pink/10 rounded-2xl p-4 bg-brand-cream/10 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-xs font-extrabold uppercase tracking-wider text-brand-chocolate/80">
+                    Top Background (Hero Banner)
+                  </h4>
+                </div>
+
+                {/* Preview */}
+                <div className="relative aspect-video w-full rounded-xl overflow-hidden border border-brand-pink/15 bg-black/5 flex items-center justify-center">
+                  {topBgUrl ? (
+                    topBgType === "video" ? (
+                      <video
+                        src={topBgUrl}
+                        autoPlay
+                        loop
+                        muted
+                        playsInline
+                        className="w-full h-full object-cover"
+                        style={{ opacity: topBgOpacity }}
+                      />
+                    ) : (
+                      <img
+                        src={topBgUrl}
+                        alt="Top Background Preview"
+                        className="w-full h-full object-cover"
+                        style={{ opacity: topBgOpacity }}
+                      />
+                    )
+                  ) : (
+                    <span className="text-xs text-gray-400">No background set</span>
+                  )}
+                  <div className="absolute top-2 right-2 bg-black/60 text-white text-[9px] font-bold px-2 py-0.5 rounded uppercase">
+                    {topBgType} Preview
+                  </div>
+                </div>
+
+                {/* Media Controls */}
+                <div className="space-y-3 text-xs">
+                  <div>
+                    <label className="text-[10px] uppercase font-bold text-brand-chocolate/60 block mb-1">
+                      Manual Resource URL
+                    </label>
+                    <input
+                      type="text"
+                      value={topBgUrl}
+                      onChange={(e) => setTopBgUrl(e.target.value)}
+                      className="w-full text-xs bg-white border border-brand-pink/20 rounded-lg p-2 focus:outline-none focus:ring-1 focus:ring-brand-rosegold text-brand-chocolate font-semibold"
+                      placeholder="https://images.unsplash.com/..."
+                    />
+                  </div>
+
+                  <div className="flex gap-2">
+                    <div className="flex-1">
+                      <label className="text-[10px] uppercase font-bold text-brand-chocolate/60 block mb-1">
+                        Media Type
+                      </label>
+                      <select
+                        value={topBgType}
+                        onChange={(e) => setTopBgType(e.target.value as "image" | "video")}
+                        className="w-full text-xs bg-white border border-brand-pink/20 rounded-lg p-2 focus:outline-none focus:ring-1 focus:ring-brand-rosegold font-bold text-brand-chocolate"
+                      >
+                        <option value="image">Image</option>
+                        <option value="video">Video</option>
+                      </select>
+                    </div>
+
+                    <div className="flex-1">
+                      <label className="text-[10px] uppercase font-bold text-brand-chocolate/60 block mb-1">
+                        Upload Local File
+                      </label>
+                      <label className="flex items-center justify-center gap-1.5 w-full text-xs bg-brand-pink/10 hover:bg-brand-pink/15 text-brand-rosegold border border-brand-pink/30 hover:border-brand-pink/50 rounded-lg p-2 font-bold cursor-pointer transition">
+                        <Upload className="h-3.5 w-3.5" />
+                        <span>{uploadingTop ? "Uploading..." : "Upload File"}</span>
+                        <input
+                          type="file"
+                          accept="image/*,video/*"
+                          disabled={uploadingTop}
+                          onChange={(e) => handleUploadBackground(e, "top")}
+                          className="hidden"
+                        />
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* Opacity/Transparency Slider */}
+                  <div className="space-y-1">
+                    <div className="flex justify-between text-[10px] font-bold text-brand-chocolate/60 uppercase">
+                      <span>Background Opacity (Transparency)</span>
+                      <span className="text-brand-rosegold font-black">{Math.round(topBgOpacity * 100)}%</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="0"
+                      max="1"
+                      step="0.01"
+                      value={topBgOpacity}
+                      onChange={(e) => setTopBgOpacity(Number(e.target.value))}
+                      className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-brand-rosegold"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Bottom Background Panel */}
+              <div className="border border-brand-pink/10 rounded-2xl p-4 bg-brand-cream/10 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-xs font-extrabold uppercase tracking-wider text-brand-chocolate/80">
+                    Bottom Background (Catalog Backdrop)
+                  </h4>
+                </div>
+
+                {/* Preview */}
+                <div className="relative aspect-video w-full rounded-xl overflow-hidden border border-brand-pink/15 bg-black/5 flex items-center justify-center">
+                  {bottomBgUrl ? (
+                    bottomBgType === "video" ? (
+                      <video
+                        src={bottomBgUrl}
+                        autoPlay
+                        loop
+                        muted
+                        playsInline
+                        className="w-full h-full object-cover"
+                        style={{ opacity: bottomBgOpacity }}
+                      />
+                    ) : (
+                      <img
+                        src={bottomBgUrl}
+                        alt="Bottom Background Preview"
+                        className="w-full h-full object-cover"
+                        style={{ opacity: bottomBgOpacity }}
+                      />
+                    )
+                  ) : (
+                    <span className="text-xs text-gray-400">No background set</span>
+                  )}
+                  <div className="absolute top-2 right-2 bg-black/60 text-white text-[9px] font-bold px-2 py-0.5 rounded uppercase">
+                    {bottomBgType} Preview
+                  </div>
+                </div>
+
+                {/* Media Controls */}
+                <div className="space-y-3 text-xs">
+                  <div>
+                    <label className="text-[10px] uppercase font-bold text-brand-chocolate/60 block mb-1">
+                      Manual Resource URL
+                    </label>
+                    <input
+                      type="text"
+                      value={bottomBgUrl}
+                      onChange={(e) => setBottomBgUrl(e.target.value)}
+                      className="w-full text-xs bg-white border border-brand-pink/20 rounded-lg p-2 focus:outline-none focus:ring-1 focus:ring-brand-rosegold text-brand-chocolate font-semibold"
+                      placeholder="https://images.unsplash.com/..."
+                    />
+                  </div>
+
+                  <div className="flex gap-2">
+                    <div className="flex-1">
+                      <label className="text-[10px] uppercase font-bold text-brand-chocolate/60 block mb-1">
+                        Media Type
+                      </label>
+                      <select
+                        value={bottomBgType}
+                        onChange={(e) => setBottomBgType(e.target.value as "image" | "video")}
+                        className="w-full text-xs bg-white border border-brand-pink/20 rounded-lg p-2 focus:outline-none focus:ring-1 focus:ring-brand-rosegold font-bold text-brand-chocolate"
+                      >
+                        <option value="image">Image</option>
+                        <option value="video">Video</option>
+                      </select>
+                    </div>
+
+                    <div className="flex-1">
+                      <label className="text-[10px] uppercase font-bold text-brand-chocolate/60 block mb-1">
+                        Upload Local File
+                      </label>
+                      <label className="flex items-center justify-center gap-1.5 w-full text-xs bg-brand-pink/10 hover:bg-brand-pink/15 text-brand-rosegold border border-brand-pink/30 hover:border-brand-pink/50 rounded-lg p-2 font-bold cursor-pointer transition">
+                        <Upload className="h-3.5 w-3.5" />
+                        <span>{uploadingBottom ? "Uploading..." : "Upload File"}</span>
+                        <input
+                          type="file"
+                          accept="image/*,video/*"
+                          disabled={uploadingBottom}
+                          onChange={(e) => handleUploadBackground(e, "bottom")}
+                          className="hidden"
+                        />
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* Opacity/Transparency Slider */}
+                  <div className="space-y-1">
+                    <div className="flex justify-between text-[10px] font-bold text-brand-chocolate/60 uppercase">
+                      <span>Background Opacity (Transparency)</span>
+                      <span className="text-brand-rosegold font-black">{Math.round(bottomBgOpacity * 100)}%</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="0"
+                      max="1"
+                      step="0.01"
+                      value={bottomBgOpacity}
+                      onChange={(e) => setBottomBgOpacity(Number(e.target.value))}
+                      className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-brand-rosegold"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
         </div>
