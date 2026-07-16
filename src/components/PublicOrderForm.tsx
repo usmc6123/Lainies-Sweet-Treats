@@ -460,46 +460,55 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
       customerName,
       customerEmail,
       customerPhone,
-      items: cart,
-      subtotal: cartSubtotal,
-      tipAmount: cartTipAmount,
-      tax: cartTax,
-      deliveryFee: deliveryCost,
-      total: cartTotal,
+      cart: cart.map(item => ({
+        productId: item.productId,
+        variationId: item.variationId || undefined,
+        quantity: item.quantity,
+        size: item.size || undefined,
+        selectedCakeFlavors: item.selectedCakeFlavors || undefined,
+        selectedFrostings: item.selectedFrostings || undefined,
+        selectedDrizzles: item.selectedDrizzle ? [item.selectedDrizzle] : undefined,
+        selectedToppings: item.addOns || undefined
+      })),
       fulfillmentDate,
-      type: fulfillmentType,
+      fulfillmentType,
       deliveryAddress: fulfillmentType === "delivery" ? deliveryAddress : "",
       notes: specialNotes,
-      couponCode: couponMeta ? couponMeta.code : undefined,
-      discountAmount: calculatedDiscount > 0 ? calculatedDiscount : undefined
+      promoCode: couponMeta ? couponMeta.code : undefined,
+      tipSelection: tipType,
+      customTip: tipType === "custom" ? Number(customTip) : 0
     };
 
     try {
-      const res = await fetch("/api/public/order", {
+      const res = await fetch("/api/stripe/create-checkout-session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
       });
       const data = await res.json();
       if (res.ok) {
-        setSuccessOrder(data);
-        setCart([]);
-        setCustomerName("");
-        setCustomerEmail("");
-        setCustomerPhone("");
-        setFulfillmentDate("");
-        setDeliveryAddress("");
-        setSpecialNotes("");
-        setEnteredCoupon("");
-        setCouponMeta(null);
-        setCouponError("");
-        setTipType("none");
-        setCustomTip("");
+        // Persist checkout state in sessionStorage so that we can optionally recover it
+        sessionStorage.setItem("lst_last_cart", JSON.stringify(cart));
+        sessionStorage.setItem("lst_last_checkout_fields", JSON.stringify({
+          customerName,
+          customerEmail,
+          customerPhone,
+          fulfillmentDate,
+          fulfillmentType,
+          deliveryAddress,
+          specialNotes,
+          tipType,
+          customTip,
+          couponMeta
+        }));
+        
+        // Redirect to Stripe Checkout Session
+        window.location.assign(data.checkoutUrl);
       } else {
         setErrorMessage(data.error || "Something went wrong. Please check your order criteria.");
       }
     } catch (err) {
-      setErrorMessage("Network error connecting to Lainie's Bake Shop. Please dial 214-555-CAKE!");
+      setErrorMessage("Network error connecting to Stripe. Please try again!");
     } finally {
       setSubmitting(false);
     }
@@ -1150,12 +1159,15 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
                   {submitting ? (
                     <>
                       <div className="animate-spin rounded-full h-3.5 w-3.5 border-t-2 border-b-2 border-brand-cream"></div>
-                      <span>Booking Your Baking Spot...</span>
+                      <span>Preparing Secure Checkout...</span>
                     </>
                   ) : (
-                    <span>Submit Order Request (Pending Confirmation)</span>
+                    <span>Proceed to Secure Payment — ${cartTotal.toFixed(2)}</span>
                   )}
                 </button>
+                <p className="text-center text-[10px] text-gray-500 mt-1.5 font-semibold">
+                  Secure payment powered by Stripe.
+                </p>
               </form>
             )}
 

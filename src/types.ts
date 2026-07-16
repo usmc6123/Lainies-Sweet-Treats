@@ -73,7 +73,16 @@ export interface OrderItem {
 }
 
 export type OrderStatus = "Pending" | "Confirmed" | "In Progress" | "Ready" | "Delivered/Picked Up" | "Cancelled";
-export type PaymentStatus = "Unpaid" | "Paid";
+export type PaymentStatus =
+  | "Unpaid"
+  | "Checkout Created"
+  | "Processing"
+  | "Paid"
+  | "Partially Refunded"
+  | "Refunded"
+  | "Failed"
+  | "Expired"
+  | "Disputed";
 export type FulfillmentType = "pickup" | "delivery";
 
 export interface Order {
@@ -97,6 +106,51 @@ export interface Order {
   notes?: string;
   couponCode?: string;
   discountAmount?: number;
+  tipAmount?: number;
+
+  paymentProvider?: "stripe" | "manual";
+  currency?: "usd";
+
+  subtotalCents?: number;
+  discountAmountCents?: number;
+  tipAmountCents?: number;
+  taxAmountCents?: number;
+  deliveryFeeCents?: number;
+  totalAmountCents?: number;
+  amountPaidCents?: number;
+  amountRefundedCents?: number;
+  balanceDueCents?: number;
+
+  stripeCheckoutSessionId?: string;
+  stripePaymentIntentId?: string;
+  stripeCustomerId?: string;
+  stripeChargeId?: string;
+  stripeReceiptUrl?: string;
+
+  checkoutAttemptId?: string;
+  checkoutCreatedAt?: string;
+  checkoutExpiresAt?: string;
+  paidAt?: string;
+  paymentUpdatedAt?: string;
+  refundedAt?: string;
+
+  paymentFailureMessage?: string;
+
+  customerAccountingApplied?: boolean;
+  couponUsageApplied?: boolean;
+  confirmationApplied?: boolean;
+
+  pricingSnapshot?: {
+    items: OrderItem[];
+    subtotalCents: number;
+    discountAmountCents: number;
+    tipAmountCents: number;
+    taxAmountCents: number;
+    deliveryFeeCents: number;
+    totalAmountCents: number;
+    taxRate: number;
+    couponCode?: string;
+  };
 }
 
 export type QuoteStatus = "Pending Review" | "Sent" | "Accepted" | "Declined";

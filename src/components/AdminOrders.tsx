@@ -103,6 +103,72 @@ export default function AdminOrders({ token, triggerRefresh }: AdminOrdersProps)
     }
   };
 
+  const [syncing, setSyncing] = useState<string | null>(null);
+  const [refunding, setRefunding] = useState<string | null>(null);
+
+  const handleSyncStripeStatus = async (orderId: string) => {
+    setSyncing(orderId);
+    try {
+      const res = await fetch("/api/stripe/sync-order", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ orderId })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const updated = data.order;
+        if (selectedOrder && selectedOrder.id === orderId) {
+          setSelectedOrder(updated);
+        }
+        setOrders(orders.map(o => o.id === orderId ? updated : o));
+        alert(`Synced! Payment status is now: ${updated.paymentStatus}`);
+        triggerRefresh();
+      } else {
+        const err = await res.json();
+        alert(`Stripe Sync Error: ${err.error || "failed"}`);
+      }
+    } catch {
+      alert("Failed to sync status.");
+    } finally {
+      setSyncing(null);
+    }
+  };
+
+  const handleStripeRefund = async (orderId: string) => {
+    if (!confirm("Are you sure you want to refund this order in Stripe? This cannot be undone.")) return;
+    setRefunding(orderId);
+    try {
+      const res = await fetch("/api/stripe/refund", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ orderId })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const updated = data.order;
+        if (selectedOrder && selectedOrder.id === orderId) {
+          setSelectedOrder(updated);
+        }
+        setOrders(orders.map(o => o.id === orderId ? updated : o));
+        alert("Refunded successfully in Stripe!");
+        triggerRefresh();
+      } else {
+        const err = await res.json();
+        alert(`Refund Error: ${err.error || "failed"}`);
+      }
+    } catch {
+      alert("Failed to trigger refund.");
+    } finally {
+      setRefunding(null);
+    }
+  };
+
   const handleDeleteOrder = async (orderId: string) => {
     if (!confirm("Are you sure you want to permanently delete this order record? This cannot be undone.")) return;
     try {
@@ -459,6 +525,38 @@ export default function AdminOrders({ token, triggerRefresh }: AdminOrdersProps)
                       >
                         Paid
                       </button>
+                    </div>
+                  </div>
+
+                  {/* Stripe Sync & Refund Actions */}
+                  <div className="bg-gray-50/50 p-3 rounded-xl border border-dashed border-gray-200 flex flex-col gap-2">
+                    <p className="font-bold uppercase tracking-wider text-[9px] text-gray-400">Stripe Integration Status</p>
+                    <div className="flex justify-between items-center text-xs">
+                      <span className="text-gray-500">Stripe Status:</span>
+                      <span className="font-bold uppercase text-brand-chocolate">{selectedOrder.paymentStatus}</span>
+                    </div>
+                    {selectedOrder.paymentFailureMessage && (
+                      <p className="text-[10px] text-red-600 font-semibold bg-red-50 p-1.5 rounded">
+                        ⚠️ {selectedOrder.paymentFailureMessage}
+                      </p>
+                    )}
+                    <div className="grid grid-cols-2 gap-2 mt-1">
+                      <button
+                        onClick={() => handleSyncStripeStatus(selectedOrder.id)}
+                        disabled={syncing === selectedOrder.id}
+                        className="py-1.5 px-3 bg-white border border-gray-200 hover:bg-gray-100 text-[10.5px] font-bold rounded-lg text-brand-chocolate transition flex items-center justify-center gap-1 cursor-pointer disabled:opacity-50"
+                      >
+                        {syncing === selectedOrder.id ? "Syncing..." : "Sync Stripe"}
+                      </button>
+                      {selectedOrder.paymentStatus === "Paid" && (
+                        <button
+                          onClick={() => handleStripeRefund(selectedOrder.id)}
+                          disabled={refunding === selectedOrder.id}
+                          className="py-1.5 px-3 bg-red-50 hover:bg-red-100 text-[10.5px] font-bold rounded-lg text-red-700 transition flex items-center justify-center gap-1 cursor-pointer disabled:opacity-50"
+                        >
+                          {refunding === selectedOrder.id ? "Refunding..." : "Stripe Refund"}
+                        </button>
+                      )}
                     </div>
                   </div>
 

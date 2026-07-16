@@ -13,6 +13,7 @@ import AdminIngredients from "./components/AdminIngredients";
 import AdminCustomers from "./components/AdminCustomers";
 import AdminSettings from "./components/AdminSettings";
 import AdminCoupons from "./components/AdminCoupons";
+import { PaymentStatusPage } from "./components/PaymentStatusPage";
 
 import { 
   Sparkles, ShieldCheck, LogOut, LayoutDashboard, 
@@ -25,6 +26,39 @@ export default function App() {
   const [adminEmail, setAdminEmail] = useState<string | null>(null);
   const [triggerRefreshCount, setTriggerRefreshCount] = useState(0);
   const [settings, setSettings] = useState<any>(null);
+
+  const [paymentStatus, setPaymentStatus] = useState<"success" | "cancelled" | null>(null);
+  const [paymentSessionId, setPaymentSessionId] = useState<string>("");
+  const [paymentOrderId, setPaymentOrderId] = useState<string>("");
+
+  // Check for Stripe redirect params on initialization
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const payment = params.get("payment");
+    if (payment === "success") {
+      setPaymentStatus("success");
+      setPaymentSessionId(params.get("session_id") || "");
+      setView("payment-outcome");
+    } else if (payment === "cancelled") {
+      setPaymentStatus("cancelled");
+      setPaymentOrderId(params.get("orderId") || "");
+      setView("payment-outcome");
+    }
+  }, []);
+
+  const handleReturnToStore = () => {
+    const url = new URL(window.location.href);
+    url.searchParams.delete("payment");
+    url.searchParams.delete("session_id");
+    url.searchParams.delete("orderId");
+    window.history.replaceState({}, "", url.pathname);
+
+    setPaymentStatus(null);
+    setPaymentSessionId("");
+    setPaymentOrderId("");
+    setView("shop");
+  };
+
 
   // Load customizable settings
   useEffect(() => {
@@ -405,6 +439,15 @@ export default function App() {
           {view === "shop" && (
             <PublicOrderForm onSwitchToQuote={() => navigateTo("quote-request")} />
           )}
+          {view === "payment-outcome" && paymentStatus && (
+            <PaymentStatusPage
+              status={paymentStatus}
+              sessionId={paymentSessionId}
+              orderId={paymentOrderId}
+              onReturnToStore={handleReturnToStore}
+            />
+          )}
+
           {view === "quote-request" && <QuoteBuilder />}
           {view === "client-portal" && <ClientQuotePortal />}
           {view === "admin-login" && <AdminLogin onLoginSuccess={handleLoginSuccess} />}

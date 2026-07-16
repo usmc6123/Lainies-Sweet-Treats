@@ -14,10 +14,21 @@ import customersHandler from "./api/customers.js";
 import analyticsHandler from "./api/analytics.js";
 import productsHandler from "./api/products.js";
 import uploadHandler from "./api/upload.js";
+import stripeHandler from "./api/stripe.js";
+import webhookHandler from "./api/stripe-webhook.js";
 
 async function startServer() {
   const app = express();
-  app.use(express.json());
+  
+  // Exempt stripe webhook from express.json parser to allow raw body signature verification
+  app.use((req, res, next) => {
+    if (req.path === "/api/stripe/webhook") {
+      next();
+    } else {
+      express.json()(req, res, next);
+    }
+  });
+
 
   // Set up a small adapter to pass the request/response to our Vercel handlers
   const adapt = (handler: any) => async (req: any, res: any) => {
@@ -68,6 +79,16 @@ async function startServer() {
   app.all("/api/products", adapt(productsHandler));
   app.all("/api/products/:id", adapt(productsHandler));
   app.all("/api/upload", adapt(uploadHandler));
+
+  // Stripe payments endpoints
+  app.all("/api/stripe/create-checkout-session", adapt(stripeHandler));
+  app.all("/api/stripe/checkout-status", adapt(stripeHandler));
+  app.all("/api/stripe/retry-payment", adapt(stripeHandler));
+  app.all("/api/stripe/refund", adapt(stripeHandler));
+  app.all("/api/stripe/test-connection", adapt(stripeHandler));
+  app.all("/api/stripe/sync-order", adapt(stripeHandler));
+  app.all("/api/stripe/webhook", adapt(webhookHandler));
+
 
   // Vite middleware for development UI
   const vite = await createViteServer({
