@@ -5,10 +5,10 @@ export interface OptionItem {
 
 export interface ProductOptions {
   sizes?: OptionItem[];
-  flavors?: string[];
+  flavors?: (string | OptionItem)[];
   addOns?: OptionItem[];
-  toppings?: string[];
-  drizzles?: string[];
+  toppings?: (string | OptionItem)[];
+  drizzles?: (string | OptionItem)[];
 }
 
 export interface ProductIngredientLink {
@@ -23,6 +23,9 @@ export interface ProductVariation {
   options: ProductOptions;
   description?: string;
   photos?: { url: string; isPrimary: boolean }[];
+  flavorSelectionLimit?: number;
+  drizzleSelectionLimit?: number;
+  toppingSelectionLimit?: number;
 }
 
 export interface Product {
@@ -37,6 +40,9 @@ export interface Product {
   isVisible?: boolean; // New visible/hidden toggle
   photos?: { url: string; isPrimary: boolean }[]; // Multiple photos array
   variations?: ProductVariation[]; // Optional variations list for multi-type products (e.g. Mini Cakes)
+  flavorSelectionLimit?: number;
+  drizzleSelectionLimit?: number;
+  toppingSelectionLimit?: number;
 }
 
 export interface OrderItem {
@@ -53,6 +59,9 @@ export interface OrderItem {
   variationName?: string;
   variationBasePrice?: number;
   sizePriceAdd?: number;
+  selectedFlavors?: string[];
+  selectedDrizzles?: string[];
+  selectedToppings?: string[];
 }
 
 export type OrderStatus = "Pending" | "Confirmed" | "In Progress" | "Ready" | "Delivered/Picked Up" | "Cancelled";

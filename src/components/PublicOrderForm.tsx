@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Product, OrderItem, SelectedOptions, Settings, BlockedDate } from "../types";
+import { Product, OrderItem, SelectedOptions, Settings, BlockedDate, OptionItem } from "../types";
 import { ShoppingBag, Sparkles, Calendar, User, Phone, Mail, MapPin, Truck, AlertTriangle, CheckCircle, Trash2, ChevronRight } from "lucide-react";
 import {
   normalizeProductNameAndCategory,
@@ -9,6 +9,19 @@ import {
   DEFAULT_FALLBACK_IMAGE,
 } from "../utils/productUtils";
 import { ProductImage } from "./ProductImage";
+
+const resolveToOptions = (rawList: (string | OptionItem)[] | undefined): OptionItem[] => {
+  if (!rawList) return [];
+  return rawList.map(item => {
+    if (typeof item === "string") {
+      return { name: item, priceAdd: 0 };
+    }
+    return {
+      name: item.name || "",
+      priceAdd: Number(item.priceAdd) || 0
+    };
+  });
+};
 
 interface PublicOrderFormProps {
   onSwitchToQuote: () => void;
@@ -205,7 +218,13 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
     setSelectedProduct(p);
     const hasVariations = p.variations && p.variations.length > 0;
     setChoiceSize(hasVariations ? "" : (p.options.sizes && p.options.sizes.length > 0 ? p.options.sizes[0].name : ""));
-    setChoiceFlavor(hasVariations ? "" : (p.options.flavors && p.options.flavors.length > 0 ? p.options.flavors[0] : ""));
+    
+    let defaultFlavor = "";
+    if (p.options.flavors && p.options.flavors.length > 0) {
+      const f = p.options.flavors[0];
+      defaultFlavor = typeof f === "string" ? f : f.name;
+    }
+    setChoiceFlavor(hasVariations ? "" : defaultFlavor);
     setChoiceAddOns([]);
     setChoiceQty(1);
     setErrorMessage("");
@@ -219,10 +238,38 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
     const activeVar = selectedProduct.variations?.find(v => v.id === selectedVarId);
     let price = activeVar ? activeVar.basePrice : selectedProduct.basePrice;
 
+    // Size price addition
     const activeSizes = activeVar ? (activeVar.options.sizes || []) : (selectedProduct.options.sizes || []);
     if (choiceSize && activeSizes) {
       const sizeObj = activeSizes.find(s => s.name === choiceSize);
       if (sizeObj) price += sizeObj.priceAdd;
+    }
+
+    // Flavor price addition
+    const rawFlavors = activeVar ? activeVar.options?.flavors : selectedProduct.options?.flavors;
+    const resolvedFlavors = resolveToOptions(rawFlavors);
+    if (choiceFlavor && resolvedFlavors) {
+      const flavorObj = resolvedFlavors.find(f => f.name === choiceFlavor);
+      if (flavorObj) price += flavorObj.priceAdd;
+    }
+
+    // Drizzle price addition
+    const rawDrizzles = activeVar ? activeVar.options?.drizzles : selectedProduct.options?.drizzles;
+    const resolvedDrizzles = resolveToOptions(rawDrizzles);
+    if (choiceDrizzle && resolvedDrizzles) {
+      const drizzleObj = resolvedDrizzles.find(d => d.name === choiceDrizzle);
+      if (drizzleObj) price += drizzleObj.priceAdd;
+    }
+
+    // Topping price addition
+    const rawToppings = activeVar 
+      ? (activeVar.options?.toppings || activeVar.options?.addOns) 
+      : (selectedProduct.options?.toppings || selectedProduct.options?.addOns);
+    const resolvedToppings = resolveToOptions(rawToppings);
+    const selectedToppingName = choiceAddOns[0];
+    if (selectedToppingName && resolvedToppings) {
+      const toppingObj = resolvedToppings.find(t => t.name === selectedToppingName);
+      if (toppingObj) price += toppingObj.priceAdd;
     }
 
     return price;
@@ -1135,17 +1182,24 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
         const activeVar = selectedProduct.variations?.find(v => v.id === selectedVarId);
         
         const activeSizes = activeVar ? (activeVar.options?.sizes || []) : (selectedProduct.options?.sizes || []);
-        const activeFlavors = activeVar ? (activeVar.options?.flavors || []) : (selectedProduct.options?.flavors || []);
-        const activeToppings = activeVar 
-          ? (activeVar.options?.toppings || (activeVar.options?.addOns || []).map((x: any) => typeof x === "string" ? x : x.name)) 
-          : (selectedProduct.options?.toppings || (selectedProduct.options?.addOns || []).map((x: any) => typeof x === "string" ? x : x.name));
-        const activeDrizzles = activeVar ? (activeVar.options?.drizzles || []) : (selectedProduct.options?.drizzles || []);
+        
+        const rawFlavors = activeVar ? activeVar.options?.flavors : selectedProduct.options?.flavors;
+        const resolvedFlavors = resolveToOptions(rawFlavors);
+
+        const rawToppings = activeVar 
+          ? (activeVar.options?.toppings || activeVar.options?.addOns) 
+          : (selectedProduct.options?.toppings || selectedProduct.options?.addOns);
+        const resolvedToppings = resolveToOptions(rawToppings);
+
+        const rawDrizzles = activeVar ? activeVar.options?.drizzles : selectedProduct.options?.drizzles;
+        const resolvedDrizzles = resolveToOptions(rawDrizzles);
+
         const activeDescription = activeVar?.description || selectedProduct.description || "";
 
-        const hasToppingsConfigured = (!hasVariations || selectedVarId) && activeToppings && activeToppings.length > 0;
+        const hasToppingsConfigured = (!hasVariations || selectedVarId) && resolvedToppings && resolvedToppings.length > 0;
         const isToppingRequiredAndMissing = hasToppingsConfigured && (!choiceAddOns || choiceAddOns.length === 0 || !choiceAddOns[0]);
         
-        const hasDrizzlesConfigured = (!hasVariations || selectedVarId) && activeDrizzles && activeDrizzles.length > 0;
+        const hasDrizzlesConfigured = (!hasVariations || selectedVarId) && resolvedDrizzles && resolvedDrizzles.length > 0;
         const isDrizzleRequiredAndMissing = hasDrizzlesConfigured && !choiceDrizzle;
 
         const isAddDisabled = (hasVariations && !selectedVarId) || isToppingRequiredAndMissing || isDrizzleRequiredAndMissing;
@@ -1195,16 +1249,16 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
                           if (choiceSize && !newSizes.some(sz => sz.name === choiceSize)) {
                             setChoiceSize("");
                           }
-                          const newFlavors = v.options.flavors || [];
+                          const newFlavors = resolveToOptions(v.options.flavors).map(f => f.name);
                           if (choiceFlavor && !newFlavors.includes(choiceFlavor)) {
                             setChoiceFlavor("");
                           }
                           if (!choiceFlavor && newFlavors.length > 0) {
                             setChoiceFlavor(newFlavors[0]);
                           }
-                          const newToppings = v.options.toppings || (v.options.addOns || []).map((x: any) => typeof x === "string" ? x : x.name);
+                          const newToppings = resolveToOptions(v.options.toppings || v.options.addOns).map(t => t.name);
                           setChoiceAddOns(choiceAddOns.filter(addName => newToppings.includes(addName)));
-                          const newDrizzles = v.options.drizzles || [];
+                          const newDrizzles = resolveToOptions(v.options.drizzles).map(d => d.name);
                           if (choiceDrizzle && !newDrizzles.includes(choiceDrizzle)) {
                             setChoiceDrizzle("");
                           }
@@ -1266,7 +1320,7 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
               )}
 
               {/* Flavors selections */}
-              {(!hasVariations || selectedVarId) && activeFlavors && activeFlavors.length > 0 && (
+              {(!hasVariations || selectedVarId) && resolvedFlavors && resolvedFlavors.length > 0 && (
                 <div className="mt-5">
                   <label className="text-xs font-bold text-brand-chocolate uppercase tracking-wider block mb-2">
                     2. Selected Flavor Preference:
@@ -1277,15 +1331,17 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
                     className="w-full border border-brand-pink/20 rounded-xl px-3 py-2 text-xs bg-brand-cream/30 focus:outline-none focus:ring-1 focus:ring-brand-rosegold"
                   >
                     <option value="" disabled>-- Select Flavor --</option>
-                    {activeFlavors.map(f => (
-                      <option key={f} value={f}>{f}</option>
+                    {resolvedFlavors.map(f => (
+                      <option key={f.name} value={f.name}>
+                        {f.name} {f.priceAdd > 0 ? `(+$${f.priceAdd.toFixed(2)})` : ""}
+                      </option>
                     ))}
                   </select>
                 </div>
               )}
 
               {/* Selected Drizzle selections */}
-              {(!hasVariations || selectedVarId) && activeDrizzles && activeDrizzles.length > 0 && (
+              {(!hasVariations || selectedVarId) && resolvedDrizzles && resolvedDrizzles.length > 0 && (
                 <div className="mt-5">
                   <label className="text-xs font-bold text-brand-chocolate uppercase tracking-wider block mb-2">
                     SELECTED DRIZZLE:
@@ -1296,18 +1352,20 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
                     className="w-full border border-brand-pink/20 rounded-xl px-3 py-2 text-xs bg-brand-cream/30 focus:outline-none focus:ring-1 focus:ring-brand-rosegold"
                   >
                     <option value="" disabled>-- Select a drizzle --</option>
-                    {activeDrizzles.map(d => (
-                      <option key={d} value={d}>{d}</option>
+                    {resolvedDrizzles.map(d => (
+                      <option key={d.name} value={d.name}>
+                        {d.name} {d.priceAdd > 0 ? `(+$${d.priceAdd.toFixed(2)})` : ""}
+                      </option>
                     ))}
                   </select>
                 </div>
               )}
 
               {/* Toppings List dropdown selector */}
-              {(!hasVariations || selectedVarId) && activeToppings && activeToppings.length > 0 && (
+              {(!hasVariations || selectedVarId) && resolvedToppings && resolvedToppings.length > 0 && (
                 <div className="mt-5">
                   <label className="text-xs font-bold text-brand-chocolate uppercase tracking-wider block mb-2">
-                    3. Selected Topping:
+                    Selected Topping:
                   </label>
                   <select
                     value={choiceAddOns[0] || ""}
@@ -1315,8 +1373,10 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
                     className="w-full border border-brand-pink/20 rounded-xl px-3 py-2 text-xs bg-brand-cream/30 focus:outline-none focus:ring-1 focus:ring-brand-rosegold"
                   >
                     <option value="" disabled>-- Select Topping --</option>
-                    {activeToppings.map(topping => (
-                      <option key={topping} value={topping}>{topping}</option>
+                    {resolvedToppings.map(t => (
+                      <option key={t.name} value={t.name}>
+                        {t.name} {t.priceAdd > 0 ? `(+$${t.priceAdd.toFixed(2)})` : ""}
+                      </option>
                     ))}
                   </select>
                 </div>
