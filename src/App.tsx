@@ -13,11 +13,12 @@ import AdminIngredients from "./components/AdminIngredients";
 import AdminCustomers from "./components/AdminCustomers";
 import AdminSettings from "./components/AdminSettings";
 import AdminCoupons from "./components/AdminCoupons";
+import AdminPayments from "./components/AdminPayments";
 import { PaymentStatusPage } from "./components/PaymentStatusPage";
 
 import { 
   Sparkles, ShieldCheck, LogOut, LayoutDashboard, 
-  ClipboardList, Heart, Calendar, Scale, Users, Settings, Tag, Gift
+  ClipboardList, Heart, Calendar, Scale, Users, Settings, Tag, Gift, CreditCard
 } from "lucide-react";
 
 export default function App() {
@@ -234,6 +235,18 @@ export default function App() {
               </button>
 
               <button
+                onClick={() => navigateTo("admin-payments")}
+                className={`w-full flex items-center px-4 py-3 rounded-xl transition duration-200 text-left ${
+                  view === "admin-payments"
+                    ? "bg-brand-pink/10 text-brand-pink font-semibold border-l-4 border-brand-rosegold"
+                    : "text-white/60 hover:text-white hover:bg-white/5"
+                }`}
+              >
+                <CreditCard className="h-4 w-4 mr-3 opacity-80" />
+                <span className="text-xs">Payments Center</span>
+              </button>
+
+              <button
                 onClick={() => navigateTo("admin-quotes")}
                 className={`w-full flex items-center px-4 py-3 rounded-xl transition duration-200 text-left ${
                   view === "admin-quotes"
@@ -363,6 +376,16 @@ export default function App() {
                 Orders
               </button>
               <button
+                onClick={() => navigateTo("admin-payments")}
+                className={`px-3 py-1.5 text-[11px] font-bold rounded-lg transition ${
+                  view === "admin-payments" 
+                    ? "bg-brand-chocolate text-brand-cream" 
+                    : "text-brand-chocolate/75 hover:bg-brand-pink/20"
+                }`}
+              >
+                Payments
+              </button>
+              <button
                 onClick={() => navigateTo("admin-quotes")}
                 className={`px-3 py-1.5 text-[11px] font-bold rounded-lg transition ${
                   view === "admin-quotes" 
@@ -470,6 +493,7 @@ export default function App() {
             <div>
               {view === "admin-dashboard" && <AdminDashboard token={token} setView={navigateTo} triggerRefresh={triggerRefreshCount} />}
               {view === "admin-orders" && <AdminOrders token={token} triggerRefresh={incrementRefresh} />}
+              {view === "admin-payments" && <AdminPayments token={token} triggerRefresh={incrementRefresh} />}
               {view === "admin-quotes" && <AdminQuotes token={token} triggerRefresh={incrementRefresh} />}
               {view === "admin-products" && <AdminProducts token={token} triggerRefresh={incrementRefresh} />}
               {view === "admin-calendar" && <AdminCalendar token={token} triggerRefresh={incrementRefresh} setView={navigateTo} />}
