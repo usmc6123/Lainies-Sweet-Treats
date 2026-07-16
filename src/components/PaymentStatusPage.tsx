@@ -83,7 +83,7 @@ export function PaymentStatusPage({ status, sessionId, orderId, onReturnToStore 
         setError(data.error || "Fulfillment capacity or coupon is no longer valid. Please start a new order!");
       }
     } catch (err) {
-      setError("Network failure retrying payment. Please dial 214-555-CAKE!");
+      setError("Network failure retrying payment. Please contact Lainie’s Sweet Treats for assistance.");
     } finally {
       setRetrying(false);
     }

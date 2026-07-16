@@ -1,6 +1,6 @@
-import { dbService } from "../src/server/db.js";
+import { dbService, getDb } from "../src/server/db.js";
 import { getStripe } from "./_lib/stripe.js";
-import { confirmSuccessfulOrderPayment } from "./stripe.js";
+import { verifyAndConfirmStripePayment, reconcileStripeRefund } from "./stripe.js";
 import { Order } from "../src/types.js";
 
 // Disable automatic Vercel body parsing to access raw request bytes
@@ -48,152 +48,204 @@ export default async function handler(req: any, res: any) {
 
     console.log(`[Webhook Received] Event ID: ${event.id}, Type: ${event.type}`);
 
-    // Idempotency: Process each Stripe Event ID exactly once
-    const existingEvent = await dbService.get("stripeWebhookEvents", event.id);
-    if (existingEvent) {
-      console.log(`[Webhook Idempotency] Event ${event.id} was already processed.`);
-      return res.status(200).json({ received: true, duplicated: true });
+    // Atomic transaction at the beginning to claim the event ID
+    const db = getDb();
+    const eventRef = db.collection("stripeWebhookEvents").doc(event.id);
+
+    const claimResult = await db.runTransaction(async (transaction: any) => {
+      const eventSnap = await transaction.get(eventRef);
+      if (eventSnap.exists) {
+        const data = eventSnap.data();
+        if (data.processingStatus === "failed") {
+          // Allow retrying failed events by resetting status to processing
+          transaction.update(eventRef, {
+            processingStatus: "processing",
+            processedAt: null,
+            error: null
+          });
+          return { status: "processing", allowedToRetry: true };
+        }
+        return { status: data.processingStatus, exists: true };
+      }
+      
+      transaction.set(eventRef, {
+        id: event.id,
+        eventId: event.id,
+        type: event.type,
+        processingStatus: "processing",
+        createdAt: new Date().toISOString(),
+        processedAt: null
+      });
+      return { status: "processing", exists: false };
+    });
+
+    if (claimResult.exists) {
+      if (claimResult.status === "processed" || claimResult.status === "processing") {
+        console.log(`[Webhook Idempotency Gate] Event ${event.id} is already in status: ${claimResult.status}. Skipping duplication.`);
+        return res.status(200).json({ received: true, status: claimResult.status, skipped: true });
+      }
     }
 
     let orderId = "";
-    let orderNumber = "";
-
     const dataObject = event.data.object;
 
-    // Handle events
-    switch (event.type) {
-      case "checkout.session.completed":
-      case "checkout.session.async_payment_succeeded": {
-        const session = dataObject;
-        orderId = session.client_reference_id;
-        orderNumber = session.metadata?.orderNumber || "";
+    try {
+      // Process the webhook events safely
+      switch (event.type) {
+        case "checkout.session.completed":
+        case "checkout.session.async_payment_succeeded": {
+          const session = dataObject;
+          orderId = session.client_reference_id;
 
-        if (orderId) {
-          const order: Order | null = await dbService.get("orders", orderId);
-          if (order) {
-            // Verify payment currency and exact total amount
-            const stripeCurrency = session.currency?.toLowerCase();
-            const orderCurrency = (order.currency || "usd").toLowerCase();
-            
-            if (stripeCurrency !== orderCurrency || session.amount_total !== order.totalAmountCents) {
-              console.error(`[Payment Mismatch] Order: ${order.orderNumber}. Expected ${order.totalAmountCents} ${orderCurrency}, but received ${session.amount_total} ${stripeCurrency}`);
-              await dbService.update("orders", orderId, {
-                paymentStatus: "Failed",
-                paymentFailureMessage: `Discrepancy: Paid $${(session.amount_total / 100).toFixed(2)} but expected $${(order.totalAmountCents / 100).toFixed(2)}. Requires attention.`
-              });
-            } else if (session.payment_status === "paid") {
-              await confirmSuccessfulOrderPayment(orderId, session.id, session.payment_intent as string);
+          if (orderId) {
+            console.log(`[Webhook Action] Checking checkout session for order ${orderId}`);
+            const verifyRes = await verifyAndConfirmStripePayment(orderId, session.id, session.payment_intent as string);
+            if (!verifyRes.success) {
+              throw new Error(`Payment verification failed: ${verifyRes.error}`);
             }
           }
+          break;
         }
-        break;
-      }
 
-      case "checkout.session.expired":
-      case "checkout.session.async_payment_failed": {
-        const session = dataObject;
-        orderId = session.client_reference_id;
-        if (orderId) {
-          const order: Order | null = await dbService.get("orders", orderId);
-          if (order && order.paymentStatus !== "Paid") {
+        case "checkout.session.expired":
+        case "checkout.session.async_payment_failed": {
+          const session = dataObject;
+          orderId = session.client_reference_id;
+          if (orderId) {
+            const order: Order | null = await dbService.get("orders", orderId);
+            if (order && order.paymentStatus !== "Paid") {
+              await dbService.update("orders", orderId, {
+                paymentStatus: event.type === "checkout.session.expired" ? "Expired" : "Failed",
+                paymentFailureMessage: `Stripe Checkout Session expired or payment failed.`
+              });
+            }
+          }
+          break;
+        }
+
+        case "payment_intent.succeeded": {
+          const paymentIntent = dataObject;
+          orderId = paymentIntent.metadata?.orderId;
+          if (orderId) {
+            console.log(`[Webhook Action] Checking payment intent success for order ${orderId}`);
+            const verifyRes = await verifyAndConfirmStripePayment(orderId, undefined, paymentIntent.id);
+            if (!verifyRes.success) {
+              throw new Error(`Payment Intent verification failed: ${verifyRes.error}`);
+            }
+          }
+          break;
+        }
+
+        case "payment_intent.payment_failed": {
+          const paymentIntent = dataObject;
+          orderId = paymentIntent.metadata?.orderId;
+          if (orderId) {
             await dbService.update("orders", orderId, {
-              paymentStatus: event.type === "checkout.session.expired" ? "Expired" : "Failed",
-              paymentFailureMessage: `Stripe Checkout Session was expired or payment failed.`
+              paymentStatus: "Failed",
+              paymentFailureMessage: paymentIntent.last_payment_error?.message || "Payment intent failed."
             });
           }
+          break;
         }
-        break;
-      }
 
-      case "payment_intent.succeeded": {
-        const paymentIntent = dataObject;
-        orderId = paymentIntent.metadata?.orderId;
-        if (orderId) {
-          const order: Order | null = await dbService.get("orders", orderId);
-          if (order && order.paymentStatus !== "Paid") {
-            await confirmSuccessfulOrderPayment(orderId, order.stripeCheckoutSessionId || "", paymentIntent.id);
-          }
-        }
-        break;
-      }
-
-      case "payment_intent.payment_failed": {
-        const paymentIntent = dataObject;
-        orderId = paymentIntent.metadata?.orderId;
-        if (orderId) {
-          await dbService.update("orders", orderId, {
-            paymentStatus: "Failed",
-            paymentFailureMessage: paymentIntent.last_payment_error?.message || "Payment intent failed."
-          });
-        }
-        break;
-      }
-
-      case "payment_intent.processing": {
-        const paymentIntent = dataObject;
-        orderId = paymentIntent.metadata?.orderId;
-        if (orderId) {
-          await dbService.update("orders", orderId, {
-            paymentStatus: "Processing"
-          });
-        }
-        break;
-      }
-
-      case "charge.refunded": {
-        const charge = dataObject;
-        orderId = charge.metadata?.orderId;
-        if (orderId) {
-          const order: Order | null = await dbService.get("orders", orderId);
-          if (order) {
-            const refundAmountCents = charge.amount_refunded;
-            const nextRefundedCents = refundAmountCents;
-            const nextBalanceCents = Math.max(0, (order.amountPaidCents || 0) - nextRefundedCents);
-            const nextStatus = nextRefundedCents >= (order.amountPaidCents || 0) ? "Refunded" : "Partially Refunded";
-
+        case "payment_intent.processing": {
+          const paymentIntent = dataObject;
+          orderId = paymentIntent.metadata?.orderId;
+          if (orderId) {
             await dbService.update("orders", orderId, {
-              amountRefundedCents: nextRefundedCents,
-              balanceDueCents: nextBalanceCents,
-              paymentStatus: nextStatus,
-              refundedAt: new Date().toISOString(),
-              paymentUpdatedAt: new Date().toISOString()
+              paymentStatus: "Processing"
             });
           }
+          break;
         }
-        break;
+
+        case "refund.created":
+        case "refund.updated": {
+          const refund = dataObject;
+          if (refund.payment_intent) {
+            const orderQuery = await db.collection("orders").where("stripePaymentIntentId", "==", refund.payment_intent).get();
+            if (!orderQuery.empty) {
+              orderId = orderQuery.docs[0].id;
+              await reconcileStripeRefund(orderId, refund.id, refund.status, refund.amount);
+            }
+          }
+          break;
+        }
+
+        case "refund.failed": {
+          const refund = dataObject;
+          if (refund.payment_intent) {
+            const orderQuery = await db.collection("orders").where("stripePaymentIntentId", "==", refund.payment_intent).get();
+            if (!orderQuery.empty) {
+              orderId = orderQuery.docs[0].id;
+              await reconcileStripeRefund(orderId, refund.id, "failed", refund.amount);
+            }
+          }
+          break;
+        }
+
+        case "charge.refunded": {
+          const charge = dataObject;
+          orderId = charge.metadata?.orderId;
+          if (!orderId && charge.payment_intent) {
+            const orderQuery = await db.collection("orders").where("stripePaymentIntentId", "==", charge.payment_intent).get();
+            if (!orderQuery.empty) {
+              orderId = orderQuery.docs[0].id;
+            }
+          }
+          if (orderId) {
+            if (charge.refunds && charge.refunds.data) {
+              for (const ref of charge.refunds.data) {
+                await reconcileStripeRefund(orderId, ref.id, ref.status, ref.amount);
+              }
+            } else {
+              await reconcileStripeRefund(orderId, "fallback-charge-refund", "succeeded", charge.amount_refunded);
+            }
+          }
+          break;
+        }
+
+        case "charge.dispute.created":
+        case "charge.dispute.updated":
+        case "charge.dispute.closed": {
+          const dispute = dataObject;
+          orderId = dispute.metadata?.orderId;
+          if (orderId) {
+            await dbService.update("orders", orderId, {
+              paymentStatus: "Disputed"
+            });
+          }
+          break;
+        }
+
+        default:
+          console.log(`[Webhook Unhandled Type] ${event.type}`);
       }
 
-      case "charge.dispute.created":
-      case "charge.dispute.updated":
-      case "charge.dispute.closed": {
-        const dispute = dataObject;
-        orderId = dispute.metadata?.orderId;
-        if (orderId) {
-          await dbService.update("orders", orderId, {
-            paymentStatus: "Disputed"
-          });
-        }
-        break;
-      }
+      // Transition the webhook event record to fully processed
+      await dbService.update("stripeWebhookEvents", event.id, {
+        processingStatus: "processed",
+        orderId: orderId || "",
+        processedAt: new Date().toISOString()
+      });
 
-      default:
-        console.log(`[Webhook Unhandled Type] ${event.type}`);
+      return res.status(200).json({ received: true });
+
+    } catch (processError: any) {
+      console.error(`[Webhook Process Error] Event ${event.id}:`, processError);
+      
+      // Update event record to failed, allowing Stripe's retry attempts to retry cleanly
+      await dbService.update("stripeWebhookEvents", event.id, {
+        processingStatus: "failed",
+        error: processError.message || "Unknown processing error",
+        processedAt: new Date().toISOString()
+      });
+
+      return res.status(500).json({ error: "Webhook processing failed. Requesting retry." });
     }
 
-    // Save event record in Firestore for full idempotency/auditing
-    await dbService.insert("stripeWebhookEvents", {
-      id: event.id,
-      eventId: event.id,
-      type: event.type,
-      orderId: orderId || "",
-      processingStatus: "Processed",
-      createdAt: new Date().toISOString(),
-      processedAt: new Date().toISOString()
-    });
-
-    return res.status(200).json({ received: true });
   } catch (error: any) {
-    console.error("[Webhook Processing Error]:", error);
-    return res.status(500).json({ error: error.message || "Webhook processing crashed" });
+    console.error("[Webhook Handling Fatal Error]:", error);
+    return res.status(500).json({ error: error.message || "Webhook handling crashed" });
   }
 }

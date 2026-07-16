@@ -109,7 +109,7 @@ export interface Order {
   tipAmount?: number;
 
   paymentProvider?: "stripe" | "manual";
-  currency?: "usd";
+  currency?: string;
 
   subtotalCents?: number;
   discountAmountCents?: number;
@@ -136,9 +136,13 @@ export interface Order {
 
   paymentFailureMessage?: string;
 
+  paymentConfirmationApplied?: boolean;
   customerAccountingApplied?: boolean;
   couponUsageApplied?: boolean;
   confirmationApplied?: boolean;
+
+  refunds?: any[];
+  auditHistory?: any[];
 
   pricingSnapshot?: {
     items: OrderItem[];

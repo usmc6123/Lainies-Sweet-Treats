@@ -28,7 +28,12 @@
     { "source": "/api/products", "destination": "/api/products.ts" },
     { "source": "/api/products/:id", "destination": "/api/products.ts" },
     { "source": "/api/upload", "destination": "/api/upload.ts" },
-    { "source": "/api/stripe/webhook", "destination": "/api/stripe-webhook.ts" },
-    { "source": "/api/stripe/:action", "destination": "/api/stripe.ts" }
+    { "source": "/api/stripe/create-checkout-session", "destination": "/api/stripe.ts" },
+    { "source": "/api/stripe/checkout-status", "destination": "/api/stripe.ts" },
+    { "source": "/api/stripe/retry-payment", "destination": "/api/stripe.ts" },
+    { "source": "/api/stripe/refund", "destination": "/api/stripe.ts" },
+    { "source": "/api/stripe/test-connection", "destination": "/api/stripe.ts" },
+    { "source": "/api/stripe/sync-order", "destination": "/api/stripe.ts" },
+    { "source": "/api/stripe/webhook", "destination": "/api/stripe-webhook.ts" }
   ]
 }
