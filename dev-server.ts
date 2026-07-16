@@ -3,17 +3,8 @@ import { createServer as createViteServer } from "vite";
 
 // Local imports of serverless handlers
 import authHandler from "./api/auth.js";
-import settingsHandler from "./api/settings.js";
-import blockedDatesHandler from "./api/blocked-dates.js";
+import adminHandler from "./api/admin.js";
 import publicHandler from "./api/public.js";
-import ingredientsHandler from "./api/ingredients.js";
-import expensesHandler from "./api/expenses.js";
-import ordersHandler from "./api/orders.js";
-import quotesHandler from "./api/quotes.js";
-import customersHandler from "./api/customers.js";
-import analyticsHandler from "./api/analytics.js";
-import productsHandler from "./api/products.js";
-import uploadHandler from "./api/upload.js";
 import stripeHandler from "./api/stripe.js";
 import webhookHandler from "./api/stripe-webhook.js";
 
@@ -46,39 +37,40 @@ async function startServer() {
   app.all("/api/auth/change-password", adapt(authHandler));
   app.all("/api/user/login", adapt(authHandler));
   
-  app.all("/api/settings", adapt(settingsHandler));
-  app.all("/api/coupons", adapt(settingsHandler));
-  app.all("/api/coupons/:id", adapt(settingsHandler));
+  app.all("/api/settings", adapt(adminHandler));
+  app.all("/api/coupons", adapt(adminHandler));
+  app.all("/api/coupons/:id", adapt(adminHandler));
+  app.all("/api/coupons/:id/toggle", adapt(adminHandler));
 
-  app.all("/api/blocked-dates", adapt(blockedDatesHandler));
-  app.all("/api/blocked-dates/:id", adapt(blockedDatesHandler));
+  app.all("/api/blocked-dates", adapt(adminHandler));
+  app.all("/api/blocked-dates/:id", adapt(adminHandler));
 
   app.all("/api/public/menu", adapt(publicHandler));
   app.all("/api/public/order", adapt(publicHandler));
   app.all("/api/public/validate-coupon", adapt(publicHandler));
 
-  app.all("/api/ingredients", adapt(ingredientsHandler));
-  app.all("/api/ingredients/:id", adapt(ingredientsHandler));
+  app.all("/api/ingredients", adapt(adminHandler));
+  app.all("/api/ingredients/:id", adapt(adminHandler));
 
-  app.all("/api/expenses", adapt(expensesHandler));
-  app.all("/api/expenses/:id", adapt(expensesHandler));
+  app.all("/api/expenses", adapt(adminHandler));
+  app.all("/api/expenses/:id", adapt(adminHandler));
 
-  app.all("/api/orders", adapt(ordersHandler));
-  app.all("/api/orders/:id", adapt(ordersHandler));
-  app.all("/api/orders/:id/status", adapt(ordersHandler));
+  app.all("/api/orders", adapt(adminHandler));
+  app.all("/api/orders/:id", adapt(adminHandler));
+  app.all("/api/orders/:id/status", adapt(adminHandler));
 
-  app.all("/api/quotes", adapt(quotesHandler));
-  app.all("/api/quotes/:id", adapt(quotesHandler));
-  app.all("/api/quotes/:id/respond", adapt(quotesHandler));
+  app.all("/api/quotes", adapt(adminHandler));
+  app.all("/api/quotes/:id", adapt(adminHandler));
+  app.all("/api/quotes/:id/respond", adapt(adminHandler));
 
-  app.all("/api/customers", adapt(customersHandler));
-  app.all("/api/customers/:id", adapt(customersHandler));
+  app.all("/api/customers", adapt(adminHandler));
+  app.all("/api/customers/:id", adapt(adminHandler));
 
-  app.all("/api/analytics", adapt(analyticsHandler));
+  app.all("/api/analytics", adapt(adminHandler));
 
-  app.all("/api/products", adapt(productsHandler));
-  app.all("/api/products/:id", adapt(productsHandler));
-  app.all("/api/upload", adapt(uploadHandler));
+  app.all("/api/products", adapt(adminHandler));
+  app.all("/api/products/:id", adapt(adminHandler));
+  app.all("/api/upload", adapt(adminHandler));
 
   // Stripe payments endpoints
   app.all("/api/stripe/create-checkout-session", adapt(stripeHandler));
