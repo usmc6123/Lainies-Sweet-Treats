@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { PlusCircle, Edit2, Trash2, HelpCircle, FileText, Sparkles, DollarSign, Tag, Scale, Search } from "lucide-react";
+import { PlusCircle, Edit2, Trash2, HelpCircle, FileText, Sparkles, DollarSign, Tag, Scale, Search, GripVertical, Check, X } from "lucide-react";
 import { Product, Ingredient, ProductIngredientLink, ProductVariation } from "../types";
 import {
   normalizeProductNameAndCategory,
@@ -271,6 +271,24 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
   const [newToppingName, setNewToppingName] = useState("");
   const [newDrizzleName, setNewDrizzleName] = useState("");
 
+  // States for inline editing options
+  const [editingSizeIdx, setEditingSizeIdx] = useState<number | null>(null);
+  const [editingSizeName, setEditingSizeName] = useState("");
+  const [editingSizePrice, setEditingSizePrice] = useState<number>(0);
+
+  const [editingFlavorIdx, setEditingFlavorIdx] = useState<number | null>(null);
+  const [editingFlavorName, setEditingFlavorName] = useState("");
+
+  const [editingDrizzleIdx, setEditingDrizzleIdx] = useState<number | null>(null);
+  const [editingDrizzleName, setEditingDrizzleName] = useState("");
+
+  const [editingToppingIdx, setEditingToppingIdx] = useState<number | null>(null);
+  const [editingToppingName, setEditingToppingName] = useState("");
+
+  // Drag and drop states
+  const [draggedIdx, setDraggedIdx] = useState<number | null>(null);
+  const [draggedType, setDraggedType] = useState<"sizes" | "flavors" | "drizzles" | "toppings" | null>(null);
+
   const [inputIngId, setInputIngId] = useState("");
   const [inputIngQty, setInputIngQty] = useState(0);
 
@@ -514,6 +532,105 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
 
   const handleRemoveDrizzleOption = (idx: number) => {
     setDrizzles(drizzles.filter((_, i) => i !== idx));
+  };
+
+  // Inline edit handlers
+  const handleStartEditSize = (index: number, currentName: string, currentPrice: number) => {
+    setEditingSizeIdx(index);
+    setEditingSizeName(currentName);
+    setEditingSizePrice(currentPrice);
+  };
+
+  const handleSaveEditSize = (index: number) => {
+    const trimmed = editingSizeName.trim();
+    if (!trimmed) return;
+    const updated = [...sizes];
+    updated[index] = { name: trimmed, priceAdd: Number(editingSizePrice) };
+    setSizes(updated);
+    setEditingSizeIdx(null);
+  };
+
+  const handleStartEditFlavor = (index: number, currentName: string) => {
+    setEditingFlavorIdx(index);
+    setEditingFlavorName(currentName);
+  };
+
+  const handleSaveEditFlavor = (index: number) => {
+    const trimmed = editingFlavorName.trim();
+    if (!trimmed) return;
+    const updated = [...flavors];
+    updated[index] = trimmed;
+    setFlavors(updated);
+    setEditingFlavorIdx(null);
+  };
+
+  const handleStartEditDrizzle = (index: number, currentName: string) => {
+    setEditingDrizzleIdx(index);
+    setEditingDrizzleName(currentName);
+  };
+
+  const handleSaveEditDrizzle = (index: number) => {
+    const trimmed = editingDrizzleName.trim();
+    if (!trimmed) return;
+    const updated = [...drizzles];
+    updated[index] = trimmed;
+    setDrizzles(updated);
+    setEditingDrizzleIdx(null);
+  };
+
+  const handleStartEditTopping = (index: number, currentName: string) => {
+    setEditingToppingIdx(index);
+    setEditingToppingName(currentName);
+  };
+
+  const handleSaveEditTopping = (index: number) => {
+    const trimmed = editingToppingName.trim();
+    if (!trimmed) return;
+    const updated = [...toppings];
+    updated[index] = trimmed;
+    setToppings(updated);
+    setEditingToppingIdx(null);
+  };
+
+  // Drag and drop event handlers
+  const handleDragStart = (e: React.DragEvent, index: number, type: "sizes" | "flavors" | "drizzles" | "toppings") => {
+    setDraggedIdx(index);
+    setDraggedType(type);
+    e.dataTransfer.effectAllowed = "move";
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
+
+  const handleDrop = (e: React.DragEvent, targetIndex: number, type: "sizes" | "flavors" | "drizzles" | "toppings") => {
+    e.preventDefault();
+    if (draggedIdx === null || draggedType !== type || draggedIdx === targetIndex) return;
+
+    if (type === "sizes") {
+      const updated = [...sizes];
+      const [moved] = updated.splice(draggedIdx, 1);
+      updated.splice(targetIndex, 0, moved);
+      setSizes(updated);
+    } else if (type === "flavors") {
+      const updated = [...flavors];
+      const [moved] = updated.splice(draggedIdx, 1);
+      updated.splice(targetIndex, 0, moved);
+      setFlavors(updated);
+    } else if (type === "drizzles") {
+      const updated = [...drizzles];
+      const [moved] = updated.splice(draggedIdx, 1);
+      updated.splice(targetIndex, 0, moved);
+      setDrizzles(updated);
+    } else if (type === "toppings") {
+      const updated = [...toppings];
+      const [moved] = updated.splice(draggedIdx, 1);
+      updated.splice(targetIndex, 0, moved);
+      setToppings(updated);
+    }
+
+    setDraggedIdx(null);
+    setDraggedType(null);
   };
 
   const handleAddIngLink = () => {
@@ -774,91 +891,107 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Left Column: Basic elements info */}
-            <div className="space-y-4">
-              <div>
-                <label className="text-xs uppercase font-extrabold tracking-wider text-gray-500 block">Treat Name</label>
-                <input
-                  type="text"
-                  required
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Vanilla Confetti Cupcakes"
-                  className="w-full text-sm bg-brand-cream/10 border border-brand-pink/15 rounded-xl p-3 mt-1.5 focus:outline-none focus:ring-1 focus:ring-brand-rosegold text-brand-chocolate font-medium"
-                />
-              </div>
-
-              <div>
-                <label className="text-xs uppercase font-extrabold tracking-wider text-gray-500 block">Category</label>
-                <div className="space-y-2 mt-1.5">
-                  <select
-                    value={useCustomCategory ? "custom_other" : category}
-                    onChange={(e) => {
-                      if (e.target.value === "custom_other") {
-                        setUseCustomCategory(true);
-                      } else {
-                        setUseCustomCategory(false);
-                        setCategory(e.target.value);
-                      }
-                    }}
-                    className="w-full text-sm bg-brand-cream/10 border border-brand-pink/15 rounded-xl p-3 text-brand-chocolate font-medium focus:outline-none focus:ring-1 focus:ring-brand-rosegold"
-                  >
-                    {dynamicCategories.map(cat => (
-                      <option key={cat} value={cat}>{cat}</option>
-                    ))}
-                    <option value="custom_other">+ Enter Custom Category...</option>
-                  </select>
-                  {useCustomCategory && (
-                    <input
-                      type="text"
-                      required
-                      value={customCategory}
-                      onChange={(e) => setCustomCategory(e.target.value)}
-                      placeholder="e.g. Dessert Trays, Macarons, Pies"
-                      className="w-full text-sm bg-brand-cream/10 border border-brand-pink/15 rounded-xl p-3 focus:outline-none focus:ring-1 focus:ring-brand-rosegold text-brand-chocolate font-medium animate-in slide-in-from-top duration-200"
-                    />
-                  )}
+            <div className="space-y-6">
+              {/* PRODUCT INFORMATION */}
+              <div className="bg-brand-cream/15 p-5 rounded-[2rem] border-2 border-brand-pink/20 space-y-4">
+                <div className="border-b border-brand-pink/10 pb-2.5">
+                  <h4 className="text-sm font-extrabold text-[#B76E79] uppercase tracking-wider">PRODUCT INFORMATION</h4>
+                  <p className="text-[10px] text-gray-500 font-semibold leading-tight">Configure the basic details of this bakery item.</p>
                 </div>
-              </div>
 
-              <div>
-                <label className="text-xs uppercase font-extrabold tracking-wider text-gray-500 block">Base Selling Price ($)</label>
-                <input
-                  type="number"
-                  required
-                  min="0.1"
-                  step="0.01"
-                  value={basePrice}
-                  onChange={(e) => setBasePrice(Number(e.target.value))}
-                  className="w-full text-sm bg-brand-cream/10 border border-brand-pink/15 rounded-xl p-3 mt-1.5 text-brand-chocolate font-bold focus:outline-none focus:ring-1 focus:ring-brand-rosegold"
-                />
-              </div>
-
-              {/* Feature 1 — Catalog Visibility Toggle switch */}
-              <div>
-                <div className="flex items-center justify-between p-3.5 bg-brand-cream/35 border border-brand-pink/15 rounded-2xl">
-                  <div>
-                    <span className="text-xs uppercase font-extrabold tracking-wider text-brand-chocolate block">Visibility Status</span>
-                    <span className="text-[10px] text-gray-500 font-semibold block leading-tight mt-0.5">Show this treat on the public storefront menu?</span>
+                <div>
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold text-brand-chocolate uppercase tracking-wider block">Product Name</label>
+                    <span className="text-[8px] bg-brand-chocolate text-white px-1.5 py-0.5 rounded uppercase font-black tracking-widest">Storefront View</span>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => setIsVisible(!isVisible)}
-                    className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${isVisible ? 'bg-brand-rosegold' : 'bg-gray-200'}`}
-                  >
-                    <span
-                      className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${isVisible ? 'translate-x-5' : 'translate-x-0'}`}
+                  <p className="text-[10px] text-gray-500 font-semibold mb-1">The name customers will see on your storefront.</p>
+                  <input
+                    type="text"
+                    required
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Vanilla Confetti Cupcakes"
+                    className="w-full text-sm bg-white border border-brand-pink/20 rounded-xl p-3 focus:outline-none focus:ring-1 focus:ring-brand-rosegold text-brand-chocolate font-medium"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-brand-chocolate uppercase tracking-wider block">Category</label>
+                  <p className="text-[10px] text-gray-500 font-semibold mb-1">Choose which category this product belongs to.</p>
+                  <div className="space-y-2">
+                    <select
+                      value={useCustomCategory ? "custom_other" : category}
+                      onChange={(e) => {
+                        if (e.target.value === "custom_other") {
+                          setUseCustomCategory(true);
+                        } else {
+                          setUseCustomCategory(false);
+                          setCategory(e.target.value);
+                        }
+                      }}
+                      className="w-full text-sm bg-white border border-brand-pink/20 rounded-xl p-3 text-brand-chocolate font-medium focus:outline-none focus:ring-1 focus:ring-brand-rosegold"
+                    >
+                      {dynamicCategories.map(cat => (
+                        <option key={cat} value={cat}>{cat}</option>
+                      ))}
+                      <option value="custom_other">+ Enter Custom Category...</option>
+                    </select>
+                    {useCustomCategory && (
+                      <input
+                        type="text"
+                        required
+                        value={customCategory}
+                        onChange={(e) => setCustomCategory(e.target.value)}
+                        placeholder="e.g. Dessert Trays, Macarons, Pies"
+                        className="w-full text-sm bg-white border border-brand-pink/20 rounded-xl p-3 focus:outline-none focus:ring-1 focus:ring-brand-rosegold text-brand-chocolate font-medium animate-in slide-in-from-top duration-200"
+                      />
+                    )}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-brand-chocolate uppercase tracking-wider block">Base Selling Price</label>
+                  <p className="text-[10px] text-gray-500 font-semibold mb-1">Starting price before size or customization selections.</p>
+                  <div className="relative">
+                    <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-gray-400 font-bold">$</span>
+                    <input
+                      type="number"
+                      required
+                      min="0.1"
+                      step="0.01"
+                      value={basePrice}
+                      onChange={(e) => setBasePrice(Number(e.target.value))}
+                      className="w-full text-sm bg-white border border-brand-pink/20 rounded-xl p-3 pl-8 text-brand-chocolate font-bold focus:outline-none focus:ring-1 focus:ring-brand-rosegold"
                     />
-                  </button>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-brand-chocolate uppercase tracking-wider block">Visibility</label>
+                  <p className="text-[10px] text-gray-500 font-semibold mb-2.5">Hide or display this product on your website.</p>
+                  <div className="flex items-center justify-between p-3.5 bg-white border border-brand-pink/15 rounded-xl">
+                    <span className="text-[11px] text-brand-chocolate font-semibold">{isVisible ? "Visible on website" : "Hidden from website"}</span>
+                    <button
+                      type="button"
+                      onClick={() => setIsVisible(!isVisible)}
+                      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${isVisible ? 'bg-brand-rosegold' : 'bg-gray-200'}`}
+                    >
+                      <span
+                        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${isVisible ? 'translate-x-5' : 'translate-x-0'}`}
+                      />
+                    </button>
+                  </div>
                 </div>
               </div>
 
-              {/* Feature 2 — Photo Gallery up to 4 slots */}
-              <div className="space-y-3">
-                <div className="flex justify-between items-center">
-                  <label className="text-xs uppercase font-extrabold tracking-wider text-gray-500 block">Treat Photo Gallery ({photos.length}/4)</label>
-                  {photos.length < 4 && (
-                    <span className="text-[10px] text-brand-chocolate bg-brand-pink/15 px-2 py-0.5 rounded-md font-bold">Slots Available</span>
-                  )}
+              {/* PRODUCT PHOTO GALLERY */}
+              <div className="bg-brand-cream/15 p-5 rounded-[2rem] border-2 border-brand-pink/20 space-y-4">
+                <div className="border-b border-brand-pink/10 pb-2.5">
+                  <div className="flex justify-between items-center">
+                    <h4 className="text-sm font-extrabold text-[#B76E79] uppercase tracking-wider">PRODUCT PHOTO GALLERY</h4>
+                    <span className="text-[9px] bg-[#B76E79]/10 text-[#B76E79] px-2 py-0.5 rounded-full font-bold">{photos.length}/4 Slots</span>
+                  </div>
+                  <p className="text-[10px] text-gray-500 font-semibold leading-tight mt-0.5">Upload up to 4 images. The starred image becomes the primary storefront image.</p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
@@ -866,7 +999,7 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
                     const photo = photos[index];
                     if (photo) {
                       return (
-                        <div key={index} className="relative group w-full h-24 bg-gray-50 rounded-xl overflow-hidden border border-brand-pink/10 flex flex-col justify-end">
+                        <div key={index} className="relative group w-full h-24 bg-gray-50 rounded-xl overflow-hidden border border-brand-pink/15 flex flex-col justify-end shadow-xs">
                           <img 
                             src={photo.url} 
                             alt={`Product gallery slot ${index + 1}`} 
@@ -898,7 +1031,7 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
                     } else {
                       const isUploadingCurrent = uploading && activeUploadSlot === index;
                       return (
-                        <div key={index} className="relative border border-dashed border-brand-pink/30 hover:border-[#B76E79] rounded-xl h-24 flex flex-col items-center justify-center bg-brand-cream/10 hover:bg-brand-cream/20 transition overflow-hidden">
+                        <div key={index} className="relative border border-dashed border-brand-pink/30 hover:border-[#B76E79] rounded-xl h-24 flex flex-col items-center justify-center bg-white hover:bg-brand-cream/10 transition overflow-hidden shadow-xs cursor-pointer">
                           <input
                             type="file"
                             accept="image/*"
@@ -909,7 +1042,7 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
                             disabled={uploading}
                             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                           />
-                          <PlusCircle className="h-4 w-4 text-brand-rosegold mb-1" />
+                          <PlusCircle className="h-4 w-4 text-[#B76E79] mb-1" />
                           <span className="text-[10px] font-extrabold text-brand-chocolate text-center px-1">
                             {isUploadingCurrent ? "Uploading..." : "Add Photo"}
                           </span>
@@ -924,61 +1057,63 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
                 )}
 
                 {/* Manual Add external URL */}
-                <div>
-                  <label className="text-[10px] uppercase font-bold tracking-wider text-gray-400 block mb-1">Add Image via external Link</label>
+                <div className="space-y-1">
+                  <label className="text-[9px] uppercase font-bold tracking-wider text-gray-400 block">Add Image via external Link</label>
                   <div className="flex gap-1.5">
                     <input
                       type="text"
                       value={externalImgUrl}
                       onChange={(e) => setExternalImgUrl(e.target.value)}
                       placeholder="https://images.unsplash.com/..."
-                      className="flex-1 text-xs bg-brand-cream/10 border border-brand-pink/15 rounded-xl p-2 text-brand-chocolate focus:ring-1 focus:ring-brand-rosegold focus:outline-none font-medium"
+                      className="flex-1 text-xs bg-white border border-brand-pink/20 rounded-xl p-2 text-brand-chocolate focus:ring-1 focus:ring-brand-rosegold focus:outline-none font-medium"
                     />
                     <button
                       type="button"
                       onClick={handleAddExternalUrl}
-                      className="bg-brand-chocolate text-brand-cream hover:opacity-90 px-3 py-2 rounded-xl text-xs font-bold transition cursor-pointer"
+                      className="bg-brand-chocolate text-brand-cream hover:opacity-90 px-3.5 py-2 rounded-xl text-xs font-bold transition cursor-pointer"
                     >
                       Add URL
                     </button>
                   </div>
-                  <p className="text-[9px] text-brand-chocolate/40 mt-1.5 font-semibold italic leading-snug">
-                    * Paste or upload up to 4 images to showcase this bakery item. First or starred photo becomes primary.
-                  </p>
                 </div>
               </div>
 
-              <div>
-                <label className="text-xs uppercase font-extrabold tracking-wider text-gray-500 block">Catalog Description</label>
+              {/* PRODUCT DESCRIPTION */}
+              <div className="bg-brand-cream/15 p-5 rounded-[2rem] border-2 border-brand-pink/20 space-y-4">
+                <div className="border-b border-brand-pink/10 pb-2.5">
+                  <h4 className="text-sm font-extrabold text-[#B76E79] uppercase tracking-wider">PRODUCT DESCRIPTION</h4>
+                  <p className="text-[10px] text-gray-500 font-semibold leading-tight">This description is displayed on your storefront product page.</p>
+                </div>
                 <textarea
                   rows={3}
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="Perfect fluffy sponge cake finished with homemade cream frosting layer sprinkles."
-                  className="w-full text-sm bg-brand-cream/10 border border-brand-pink/15 rounded-xl p-3 mt-1.5 text-brand-chocolate font-medium focus:outline-none focus:ring-1 focus:ring-brand-rosegold"
+                  className="w-full text-sm bg-white border border-brand-pink/20 rounded-xl p-3 text-brand-chocolate font-medium focus:outline-none focus:ring-1 focus:ring-brand-rosegold"
                 />
               </div>
             </div>
 
             {/* Middle Column: Options editor sizes list, flavors, accessories */}
-            <div className="space-y-4">
-              {/* MINI CAKE TYPE VARIATIONS section */}
+            <div className="space-y-6">
+              {/* PRODUCT VARIATIONS section */}
               {(category === "Mini Cakes" || name === "Mini Cakes" || currentVariations) && (
-                <div className="bg-brand-cream/35 p-4 rounded-2xl border border-brand-pink/15 space-y-3">
-                  <span className="text-xs uppercase font-extrabold tracking-widest text-[#B76E79] block">
-                    MINI CAKE TYPE VARIATIONS
-                  </span>
-                  <div className="grid grid-cols-2 gap-2">
+                <div className="bg-brand-cream/15 p-5 rounded-[2rem] border-2 border-brand-pink/20 space-y-4">
+                  <div className="border-b border-brand-pink/10 pb-2.5">
+                    <h4 className="text-sm font-extrabold text-[#B76E79] uppercase tracking-wider">PRODUCT VARIATIONS</h4>
+                    <p className="text-[10px] text-gray-500 font-semibold leading-tight">Create different versions of this product that have their own pricing and customization options.</p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2.5">
                     <button
                       type="button"
                       onClick={() => handleSwitchVariation("normal")}
-                      className={`py-3 px-4 rounded-xl text-xs sm:text-sm font-bold transition-all shadow-sm duration-200 ${
+                      className={`py-3 px-4 rounded-xl text-xs sm:text-sm font-bold transition-all shadow-xs duration-200 cursor-pointer ${
                         activeVarId === "normal"
                           ? "bg-brand-chocolate text-brand-cream border-2 border-brand-chocolate scale-[1.02]"
                           : "bg-white text-brand-chocolate hover:bg-brand-pink/5 border border-brand-pink/15"
                       }`}
                     >
-                      Normal Variation
+                      Normal
                       <span className="block text-[10px] opacity-75 mt-0.5 font-medium">
                         (Starting at ${currentVariations?.find(v => v.id === "normal")?.basePrice ?? 40})
                       </span>
@@ -986,146 +1121,480 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
                     <button
                       type="button"
                       onClick={() => handleSwitchVariation("specialty")}
-                      className={`py-3 px-4 rounded-xl text-xs sm:text-sm font-bold transition-all shadow-sm duration-200 ${
+                      className={`py-3 px-4 rounded-xl text-xs sm:text-sm font-bold transition-all shadow-xs duration-200 cursor-pointer ${
                         activeVarId === "specialty"
                           ? "bg-brand-chocolate text-brand-cream border-2 border-brand-chocolate scale-[1.02]"
                           : "bg-white text-brand-chocolate hover:bg-brand-pink/5 border border-brand-pink/15"
                       }`}
                     >
-                      Specialty Variation
+                      Specialty
                       <span className="block text-[10px] opacity-75 mt-0.5 font-medium">
                         (Starting at ${currentVariations?.find(v => v.id === "specialty")?.basePrice ?? 0})
                       </span>
                     </button>
                   </div>
-                  <div className="bg-white/60 p-2 rounded-xl text-center border border-brand-pink/10">
-                    <p className="text-[10px] text-brand-chocolate/80 font-semibold leading-tight">
-                      Now Editing: <span className="font-extrabold text-brand-rosegold uppercase">{activeVarId === "normal" ? "Normal" : "Specialty"}</span> settings.
+                  <div className="bg-brand-pink/5 p-2.5 rounded-xl text-center border border-brand-pink/15">
+                    <p className="text-[10px] text-brand-chocolate font-bold leading-tight uppercase tracking-wider">
+                      Now Editing: <span className="text-[#B76E79] font-black">{activeVarId === "normal" ? "Normal Settings" : "Specialty Settings"}</span>
                     </p>
                   </div>
                 </div>
               )}
 
-              {/* Sizes section list */}
-              <div className="bg-brand-cream/35 p-4 rounded-2xl border border-brand-pink/15 space-y-2">
-                <span className="text-xs uppercase font-extrabold tracking-widest text-[#B76E79]">Option Sizes</span>
-                <div className="flex gap-2">
+              {/* SIZE OPTIONS */}
+              <div className="bg-brand-cream/15 p-5 rounded-[2rem] border-2 border-brand-pink/20 space-y-4">
+                <div className="border-b border-brand-pink/10 pb-2.5">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-sm font-extrabold text-[#B76E79] uppercase tracking-wider">SIZE OPTIONS</h4>
+                    <span className="text-[8px] bg-brand-chocolate text-white px-1.5 py-0.5 rounded uppercase font-black tracking-widest">Storefront Choice</span>
+                  </div>
+                  <p className="text-[10px] text-gray-500 font-semibold leading-tight">Create the size choices customers can purchase.</p>
+                </div>
+
+                <div className="flex gap-2 bg-white p-2.5 rounded-xl border border-brand-pink/15 shadow-xs">
                   <input
                     type="text"
                     value={newSizeName}
                     onChange={(e) => setNewSizeName(e.target.value)}
-                    placeholder="e.g., Small, Dozen"
-                    className="flex-1 text-sm bg-white border border-brand-pink/15 p-2 rounded-xl focus:outline-none"
+                    placeholder="e.g., Half Dozen"
+                    className="flex-1 text-sm bg-brand-cream/5 border border-brand-pink/10 p-2 rounded-xl focus:outline-none focus:ring-1 focus:ring-[#B76E79]"
                   />
-                  <input
-                    type="number"
-                    value={newSizePrice}
-                    onChange={(e) => setNewSizePrice(Number(e.target.value))}
-                    placeholder="+$"
-                    className="w-16 text-sm bg-white border border-brand-pink/15 p-2 rounded-xl focus:outline-none font-bold text-center"
-                  />
+                  <div className="relative w-20">
+                    <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-gray-400 font-bold">$</span>
+                    <input
+                      type="number"
+                      value={newSizePrice || ""}
+                      onChange={(e) => setNewSizePrice(Number(e.target.value))}
+                      placeholder="Price"
+                      className="w-full text-sm bg-brand-cream/5 border border-brand-pink/10 p-2 pl-5 rounded-xl focus:outline-none focus:ring-1 focus:ring-[#B76E79] font-bold text-center"
+                    />
+                  </div>
                   <button
                     type="button"
                     onClick={handleAddSizeOption}
-                    className="bg-brand-chocolate text-white text-sm font-bold px-3 py-2 rounded-xl cursor-pointer hover:opacity-90"
+                    className="bg-brand-chocolate text-white text-xs font-bold px-3 py-2 rounded-xl cursor-pointer hover:opacity-90 transition shadow-sm"
+                    title="Add Size"
                   >
-                    +
+                    Add
                   </button>
                 </div>
-                <div className="mt-2 space-y-1.5 font-semibold">
-                  {sizes.map((s, idx) => (
-                    <div key={idx} className="flex justify-between items-center text-xs bg-white p-2 rounded-lg border border-brand-pink/10">
-                      <span>{s.name} (+${s.priceAdd})</span>
-                      <button type="button" onClick={() => handleRemoveSizeOption(idx)} className="text-red-500 font-extrabold px-1 text-sm leading-none bg-red-50 rounded p-0.5">✕</button>
-                    </div>
-                  ))}
+
+                {/* Draggable and Editable Sizes List */}
+                <div className="space-y-1.5 max-h-64 overflow-y-auto pr-1">
+                  {sizes.length === 0 ? (
+                    <p className="text-[10px] text-gray-400 italic text-center py-2">No size options added yet.</p>
+                  ) : (
+                    sizes.map((s, idx) => {
+                      const isEditing = editingSizeIdx === idx;
+                      const isDragging = draggedIdx === idx && draggedType === "sizes";
+                      return (
+                        <div
+                          key={idx}
+                          draggable={!isEditing}
+                          onDragStart={(e) => handleDragStart(e, idx, "sizes")}
+                          onDragOver={handleDragOver}
+                          onDrop={(e) => handleDrop(e, idx, "sizes")}
+                          onDragEnd={() => { setDraggedIdx(null); setDraggedType(null); }}
+                          className={`flex items-center gap-2 bg-white p-2.5 rounded-xl border border-brand-pink/10 transition-all ${
+                            isDragging ? "opacity-30 border-dashed border-[#B76E79]" : "hover:border-[#B76E79]/50"
+                          }`}
+                        >
+                          {!isEditing && (
+                            <div className="cursor-grab text-gray-300 hover:text-gray-500 transition px-1">
+                              <GripVertical className="h-4.5 w-4.5" />
+                            </div>
+                          )}
+
+                          {isEditing ? (
+                            <div className="flex-1 flex gap-1.5 items-center">
+                              <input
+                                type="text"
+                                value={editingSizeName}
+                                onChange={(e) => setEditingSizeName(e.target.value)}
+                                className="flex-1 text-xs bg-brand-cream/5 border border-brand-pink/20 p-1.5 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#B76E79]"
+                              />
+                              <div className="relative w-16">
+                                <span className="absolute left-1.5 top-1/2 -translate-y-1/2 text-[10px] text-gray-400 font-bold">$</span>
+                                <input
+                                  type="number"
+                                  value={editingSizePrice}
+                                  onChange={(e) => setEditingSizePrice(Number(e.target.value))}
+                                  className="w-full text-xs bg-brand-cream/5 border border-brand-pink/20 p-1.5 pl-4 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#B76E79] text-center font-bold"
+                                />
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => handleSaveEditSize(idx)}
+                                className="bg-emerald-500 hover:bg-emerald-600 text-white p-1.5 rounded-lg cursor-pointer animate-pulse"
+                                title="Save changes"
+                              >
+                                <Check className="h-3.5 w-3.5" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setEditingSizeIdx(null)}
+                                className="bg-gray-100 hover:bg-gray-200 text-gray-500 p-1.5 rounded-lg cursor-pointer"
+                                title="Cancel"
+                              >
+                                <X className="h-3.5 w-3.5" />
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="flex-1 flex justify-between items-center text-xs">
+                              <span className="font-bold text-brand-chocolate">{s.name}</span>
+                              <div className="flex items-center gap-3">
+                                <span className="text-brand-rosegold font-bold bg-brand-pink/5 px-2.5 py-0.5 rounded-md">
+                                  +${s.priceAdd.toFixed(2)}
+                                </span>
+                                <div className="flex items-center gap-1.5">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleStartEditSize(idx, s.name, s.priceAdd)}
+                                    className="text-[#B76E79] hover:text-[#B76E79]/80 p-1 hover:bg-[#B76E79]/5 rounded transition cursor-pointer"
+                                    title="Edit size name/price"
+                                  >
+                                    <Edit2 className="h-3.5 w-3.5" />
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleRemoveSizeOption(idx)}
+                                    className="text-red-500 hover:text-red-700 p-1 hover:bg-red-50 rounded transition cursor-pointer"
+                                    title="Delete size option"
+                                  >
+                                    <Trash2 className="h-3.5 w-3.5" />
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })
+                  )}
                 </div>
               </div>
 
-              {/* Flavors input lists */}
-              <div className="bg-brand-cream/35 p-4 rounded-2xl border border-brand-pink/15 space-y-2">
-                <span className="text-xs uppercase font-extrabold tracking-widest text-[#B76E79]">Flavors List</span>
-                <div className="flex gap-2">
+              {/* AVAILABLE FLAVORS */}
+              <div className="bg-brand-cream/15 p-5 rounded-[2rem] border-2 border-brand-pink/20 space-y-4">
+                <div className="border-b border-brand-pink/10 pb-2.5">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-sm font-extrabold text-[#B76E79] uppercase tracking-wider">AVAILABLE FLAVORS</h4>
+                    <span className="text-[8px] bg-brand-chocolate text-white px-1.5 py-0.5 rounded uppercase font-black tracking-widest">Storefront Choice</span>
+                  </div>
+                  <p className="text-[10px] text-gray-500 font-semibold leading-tight">These are the buttercream or cake flavors customers can choose from.</p>
+                </div>
+
+                <div className="flex gap-2 bg-white p-2.5 rounded-xl border border-brand-pink/15 shadow-xs">
                   <input
                     type="text"
                     value={newFlavorName}
                     onChange={(e) => setNewFlavorName(e.target.value)}
                     placeholder="e.g., Red Velvet Sponge"
-                    className="flex-1 text-sm bg-white border border-brand-pink/15 p-2 rounded-xl focus:outline-none"
+                    className="flex-1 text-sm bg-brand-cream/5 border border-brand-pink/10 p-2 rounded-xl focus:outline-none focus:ring-1 focus:ring-[#B76E79]"
                   />
                   <button
                     type="button"
                     onClick={handleAddFlavorOption}
-                    className="bg-brand-chocolate text-white text-sm font-bold px-3 py-2 rounded-xl cursor-pointer hover:opacity-90"
+                    className="bg-brand-chocolate text-white text-xs font-bold px-3 py-2 rounded-xl cursor-pointer hover:opacity-90 transition shadow-sm"
                   >
-                    +
+                    Add
                   </button>
                 </div>
-                <div className="mt-2 flex flex-wrap gap-1.5 font-semibold">
-                  {flavors.map((f, idx) => (
-                    <span key={idx} className="inline-flex items-center text-xs bg-white px-2.5 py-1 rounded-lg border border-brand-pink/10">
-                      {f}
-                      <button type="button" onClick={() => handleRemoveFlavorOption(idx)} className="text-red-500 font-extrabold ml-2 text-xs">✕</button>
-                    </span>
-                  ))}
+
+                {/* Draggable and Editable Flavors List */}
+                <div className="space-y-1.5 max-h-64 overflow-y-auto pr-1">
+                  {flavors.length === 0 ? (
+                    <p className="text-[10px] text-gray-400 italic text-center py-2">No flavor options added yet.</p>
+                  ) : (
+                    flavors.map((f, idx) => {
+                      const isEditing = editingFlavorIdx === idx;
+                      const isDragging = draggedIdx === idx && draggedType === "flavors";
+                      return (
+                        <div
+                          key={idx}
+                          draggable={!isEditing}
+                          onDragStart={(e) => handleDragStart(e, idx, "flavors")}
+                          onDragOver={handleDragOver}
+                          onDrop={(e) => handleDrop(e, idx, "flavors")}
+                          onDragEnd={() => { setDraggedIdx(null); setDraggedType(null); }}
+                          className={`flex items-center gap-2 bg-white p-2.5 rounded-xl border border-brand-pink/10 transition-all ${
+                            isDragging ? "opacity-30 border-dashed border-[#B76E79]" : "hover:border-[#B76E79]/50"
+                          }`}
+                        >
+                          {!isEditing && (
+                            <div className="cursor-grab text-gray-300 hover:text-gray-500 transition px-1">
+                              <GripVertical className="h-4.5 w-4.5" />
+                            </div>
+                          )}
+
+                          {isEditing ? (
+                            <div className="flex-1 flex gap-1.5 items-center">
+                              <input
+                                type="text"
+                                value={editingFlavorName}
+                                onChange={(e) => setEditingFlavorName(e.target.value)}
+                                className="flex-1 text-xs bg-brand-cream/5 border border-brand-pink/20 p-1.5 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#B76E79]"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => handleSaveEditFlavor(idx)}
+                                className="bg-emerald-500 hover:bg-emerald-600 text-white p-1.5 rounded-lg cursor-pointer"
+                                title="Save changes"
+                              >
+                                <Check className="h-3.5 w-3.5" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setEditingFlavorIdx(null)}
+                                className="bg-gray-100 hover:bg-gray-200 text-gray-500 p-1.5 rounded-lg cursor-pointer"
+                                title="Cancel"
+                              >
+                                <X className="h-3.5 w-3.5" />
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="flex-1 flex justify-between items-center text-xs">
+                              <span className="font-bold text-brand-chocolate">{f}</span>
+                              <div className="flex items-center gap-1.5">
+                                <button
+                                  type="button"
+                                  onClick={() => handleStartEditFlavor(idx, f)}
+                                  className="text-[#B76E79] hover:text-[#B76E79]/80 p-1 hover:bg-[#B76E79]/5 rounded transition cursor-pointer"
+                                  title="Edit flavor name"
+                                >
+                                  <Edit2 className="h-3.5 w-3.5" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveFlavorOption(idx)}
+                                  className="text-red-500 hover:text-red-700 p-1 hover:bg-red-50 rounded transition cursor-pointer"
+                                  title="Delete flavor option"
+                                >
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })
+                  )}
                 </div>
               </div>
 
-              {/* Drizzle List section */}
-              <div className="bg-brand-cream/35 p-4 rounded-2xl border border-brand-pink/15 space-y-2">
-                <span className="text-xs uppercase font-extrabold tracking-widest text-[#B76E79]">Drizzle List</span>
-                <div className="flex gap-2">
+              {/* AVAILABLE DRIZZLES */}
+              <div className="bg-brand-cream/15 p-5 rounded-[2rem] border-2 border-brand-pink/20 space-y-4">
+                <div className="border-b border-brand-pink/10 pb-2.5">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-sm font-extrabold text-[#B76E79] uppercase tracking-wider">AVAILABLE DRIZZLES</h4>
+                    <span className="text-[8px] bg-brand-chocolate text-white px-1.5 py-0.5 rounded uppercase font-black tracking-widest">Storefront Choice</span>
+                  </div>
+                  <p className="text-[10px] text-gray-500 font-semibold leading-tight">Select the drizzle options customers can choose from.</p>
+                </div>
+
+                <div className="flex gap-2 bg-white p-2.5 rounded-xl border border-brand-pink/15 shadow-xs">
                   <input
                     type="text"
                     value={newDrizzleName}
                     onChange={(e) => setNewDrizzleName(e.target.value)}
-                    placeholder="e.g., Chocolate Drizzle, Caramel Drizzle"
-                    className="flex-1 text-sm bg-white border border-brand-pink/15 p-2 rounded-xl focus:outline-none"
+                    placeholder="e.g., Chocolate Drizzle"
+                    className="flex-1 text-sm bg-brand-cream/5 border border-brand-pink/10 p-2 rounded-xl focus:outline-none focus:ring-1 focus:ring-[#B76E79]"
                   />
                   <button
                     type="button"
                     onClick={handleAddDrizzleOption}
-                    className="bg-brand-chocolate text-white text-sm font-bold px-3 py-2 rounded-xl cursor-pointer hover:opacity-90"
+                    className="bg-brand-chocolate text-white text-xs font-bold px-3 py-2 rounded-xl cursor-pointer hover:opacity-90 transition shadow-sm"
                   >
-                    +
+                    Add
                   </button>
                 </div>
-                <div className="mt-2 flex flex-wrap gap-1.5 font-semibold">
-                  {drizzles.map((d, idx) => (
-                    <span key={idx} className="inline-flex items-center text-xs bg-white px-2.5 py-1 rounded-lg border border-brand-pink/10">
-                      {d}
-                      <button type="button" onClick={() => handleRemoveDrizzleOption(idx)} className="text-red-500 font-extrabold ml-2 text-xs">✕</button>
-                    </span>
-                  ))}
+
+                {/* Draggable and Editable Drizzles List */}
+                <div className="space-y-1.5 max-h-64 overflow-y-auto pr-1">
+                  {drizzles.length === 0 ? (
+                    <p className="text-[10px] text-gray-400 italic text-center py-2">No drizzle options added yet.</p>
+                  ) : (
+                    drizzles.map((d, idx) => {
+                      const isEditing = editingDrizzleIdx === idx;
+                      const isDragging = draggedIdx === idx && draggedType === "drizzles";
+                      return (
+                        <div
+                          key={idx}
+                          draggable={!isEditing}
+                          onDragStart={(e) => handleDragStart(e, idx, "drizzles")}
+                          onDragOver={handleDragOver}
+                          onDrop={(e) => handleDrop(e, idx, "drizzles")}
+                          onDragEnd={() => { setDraggedIdx(null); setDraggedType(null); }}
+                          className={`flex items-center gap-2 bg-white p-2.5 rounded-xl border border-brand-pink/10 transition-all ${
+                            isDragging ? "opacity-30 border-dashed border-[#B76E79]" : "hover:border-[#B76E79]/50"
+                          }`}
+                        >
+                          {!isEditing && (
+                            <div className="cursor-grab text-gray-300 hover:text-gray-500 transition px-1">
+                              <GripVertical className="h-4.5 w-4.5" />
+                            </div>
+                          )}
+
+                          {isEditing ? (
+                            <div className="flex-1 flex gap-1.5 items-center">
+                              <input
+                                type="text"
+                                value={editingDrizzleName}
+                                onChange={(e) => setEditingDrizzleName(e.target.value)}
+                                className="flex-1 text-xs bg-brand-cream/5 border border-brand-pink/20 p-1.5 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#B76E79]"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => handleSaveEditDrizzle(idx)}
+                                className="bg-emerald-500 hover:bg-emerald-600 text-white p-1.5 rounded-lg cursor-pointer"
+                                title="Save changes"
+                              >
+                                <Check className="h-3.5 w-3.5" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setEditingDrizzleIdx(null)}
+                                className="bg-gray-100 hover:bg-gray-200 text-gray-500 p-1.5 rounded-lg cursor-pointer"
+                                title="Cancel"
+                              >
+                                <X className="h-3.5 w-3.5" />
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="flex-1 flex justify-between items-center text-xs">
+                              <span className="font-bold text-brand-chocolate">{d}</span>
+                              <div className="flex items-center gap-1.5">
+                                <button
+                                  type="button"
+                                  onClick={() => handleStartEditDrizzle(idx, d)}
+                                  className="text-[#B76E79] hover:text-[#B76E79]/80 p-1 hover:bg-[#B76E79]/5 rounded transition cursor-pointer"
+                                  title="Edit drizzle name"
+                                >
+                                  <Edit2 className="h-3.5 w-3.5" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveDrizzleOption(idx)}
+                                  className="text-red-500 hover:text-red-700 p-1 hover:bg-red-50 rounded transition cursor-pointer"
+                                  title="Delete drizzle option"
+                                >
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })
+                  )}
                 </div>
               </div>
 
-              {/* Toppings List section */}
-              <div className="bg-brand-cream/35 p-4 rounded-2xl border border-brand-pink/15 space-y-2">
-                <span className="text-xs uppercase font-extrabold tracking-widest text-[#B76E79]">Toppings List</span>
-                <div className="flex gap-2">
+              {/* AVAILABLE TOPPINGS */}
+              <div className="bg-brand-cream/15 p-5 rounded-[2rem] border-2 border-brand-pink/20 space-y-4">
+                <div className="border-b border-brand-pink/10 pb-2.5">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-sm font-extrabold text-[#B76E79] uppercase tracking-wider">AVAILABLE TOPPINGS</h4>
+                    <span className="text-[8px] bg-brand-chocolate text-white px-1.5 py-0.5 rounded uppercase font-black tracking-widest">Storefront Choice</span>
+                  </div>
+                  <p className="text-[10px] text-gray-500 font-semibold leading-tight">Choose the toppings customers can select.</p>
+                </div>
+
+                <div className="flex gap-2 bg-white p-2.5 rounded-xl border border-[#B76E79]/20 shadow-xs">
                   <input
                     type="text"
                     value={newToppingName}
                     onChange={(e) => setNewToppingName(e.target.value)}
-                    placeholder="e.g., Reese's Pieces, Chocolate Drizzle"
-                    className="flex-1 text-sm bg-white border border-brand-pink/15 p-2 rounded-xl focus:outline-none"
+                    placeholder="e.g., Reese's Pieces"
+                    className="flex-1 text-sm bg-brand-cream/5 border border-brand-pink/10 p-2 rounded-xl focus:outline-none focus:ring-1 focus:ring-[#B76E79]"
                   />
                   <button
                     type="button"
                     onClick={handleAddToppingOption}
-                    className="bg-brand-chocolate text-white text-sm font-bold px-3 py-2 rounded-xl cursor-pointer hover:opacity-90"
+                    className="bg-brand-chocolate text-white text-xs font-bold px-3 py-2 rounded-xl cursor-pointer hover:opacity-90 transition shadow-sm"
                   >
-                    +
+                    Add
                   </button>
                 </div>
-                <div className="mt-2 flex flex-wrap gap-1.5 font-semibold">
-                  {toppings.map((t, idx) => (
-                    <span key={idx} className="inline-flex items-center text-xs bg-white px-2.5 py-1 rounded-lg border border-brand-pink/10">
-                      {t}
-                      <button type="button" onClick={() => handleRemoveToppingOption(idx)} className="text-red-500 font-extrabold ml-2 text-xs">✕</button>
-                    </span>
-                  ))}
+
+                {/* Draggable and Editable Toppings List */}
+                <div className="space-y-1.5 max-h-64 overflow-y-auto pr-1">
+                  {toppings.length === 0 ? (
+                    <p className="text-[10px] text-gray-400 italic text-center py-2">No topping options added yet.</p>
+                  ) : (
+                    toppings.map((t, idx) => {
+                      const isEditing = editingToppingIdx === idx;
+                      const isDragging = draggedIdx === idx && draggedType === "toppings";
+                      return (
+                        <div
+                          key={idx}
+                          draggable={!isEditing}
+                          onDragStart={(e) => handleDragStart(e, idx, "toppings")}
+                          onDragOver={handleDragOver}
+                          onDrop={(e) => handleDrop(e, idx, "toppings")}
+                          onDragEnd={() => { setDraggedIdx(null); setDraggedType(null); }}
+                          className={`flex items-center gap-2 bg-white p-2.5 rounded-xl border border-brand-pink/10 transition-all ${
+                            isDragging ? "opacity-30 border-dashed border-[#B76E79]" : "hover:border-[#B76E79]/50"
+                          }`}
+                        >
+                          {!isEditing && (
+                            <div className="cursor-grab text-gray-300 hover:text-gray-500 transition px-1">
+                              <GripVertical className="h-4.5 w-4.5" />
+                            </div>
+                          )}
+
+                          {isEditing ? (
+                            <div className="flex-1 flex gap-1.5 items-center">
+                              <input
+                                type="text"
+                                value={editingToppingName}
+                                onChange={(e) => setEditingToppingName(e.target.value)}
+                                className="flex-1 text-xs bg-brand-cream/5 border border-brand-pink/20 p-1.5 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#B76E79]"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => handleSaveEditTopping(idx)}
+                                className="bg-emerald-500 hover:bg-emerald-600 text-white p-1.5 rounded-lg cursor-pointer"
+                                title="Save changes"
+                              >
+                                <Check className="h-3.5 w-3.5" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setEditingToppingIdx(null)}
+                                className="bg-gray-100 hover:bg-gray-200 text-gray-500 p-1.5 rounded-lg cursor-pointer"
+                                title="Cancel"
+                              >
+                                <X className="h-3.5 w-3.5" />
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="flex-1 flex justify-between items-center text-xs">
+                              <span className="font-bold text-brand-chocolate">{t}</span>
+                              <div className="flex items-center gap-1.5">
+                                <button
+                                  type="button"
+                                  onClick={() => handleStartEditTopping(idx, t)}
+                                  className="text-[#B76E79] hover:text-[#B76E79]/80 p-1 hover:bg-[#B76E79]/5 rounded transition cursor-pointer"
+                                  title="Edit topping name"
+                                >
+                                  <Edit2 className="h-3.5 w-3.5" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveToppingOption(idx)}
+                                  className="text-red-500 hover:text-red-700 p-1 hover:bg-red-50 rounded transition cursor-pointer"
+                                  title="Delete topping option"
+                                >
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })
+                  )}
                 </div>
               </div>
             </div>
