@@ -212,20 +212,28 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
   
   // Options (simplified list editors)
   const [sizes, setSizes] = useState<{ name: string; priceAdd: number }[]>([]);
-  const [flavors, setFlavors] = useState<{ name: string; priceAdd: number }[]>([]);
+  const [cakeFlavors, setCakeFlavors] = useState<{ name: string; priceAdd: number }[]>([]);
+  const [frostings, setFrostings] = useState<{ name: string; priceAdd: number }[]>([]);
   const [toppings, setToppings] = useState<{ name: string; priceAdd: number }[]>([]);
   const [drizzles, setDrizzles] = useState<{ name: string; priceAdd: number }[]>([]);
 
-  const [flavorSelectionLimit, setFlavorSelectionLimit] = useState<number>(1);
+  const [cakeFlavorSelectionLimit, setCakeFlavorSelectionLimit] = useState<number>(1);
+  const [frostingSelectionLimit, setFrostingSelectionLimit] = useState<number>(1);
   const [drizzleSelectionLimit, setDrizzleSelectionLimit] = useState<number>(1);
   const [toppingSelectionLimit, setToppingSelectionLimit] = useState<number>(1);
 
   // Automatically adjust limits when options lists change
   useEffect(() => {
-    if (flavorSelectionLimit > flavors.length) {
-      setFlavorSelectionLimit(flavors.length);
+    if (cakeFlavorSelectionLimit > cakeFlavors.length) {
+      setCakeFlavorSelectionLimit(cakeFlavors.length);
     }
-  }, [flavors, flavorSelectionLimit]);
+  }, [cakeFlavors, cakeFlavorSelectionLimit]);
+
+  useEffect(() => {
+    if (frostingSelectionLimit > frostings.length) {
+      setFrostingSelectionLimit(frostings.length);
+    }
+  }, [frostings, frostingSelectionLimit]);
 
   useEffect(() => {
     if (drizzleSelectionLimit > drizzles.length) {
@@ -267,11 +275,15 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
           photos,
           options: {
             sizes,
-            flavors,
+            cakeFlavors,
+            flavors: frostings,
+            frostings,
             toppings,
             drizzles
           },
-          flavorSelectionLimit,
+          cakeFlavorSelectionLimit,
+          flavorSelectionLimit: frostingSelectionLimit,
+          frostingSelectionLimit,
           drizzleSelectionLimit,
           toppingSelectionLimit
         };
@@ -284,12 +296,14 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
     if (nextVar) {
       setBasePrice(nextVar.basePrice);
       setSizes(nextVar.options.sizes || []);
-      setFlavors(normalizeOptions(nextVar.options.flavors));
+      setCakeFlavors(normalizeOptions(nextVar.options.cakeFlavors));
+      setFrostings(normalizeOptions(nextVar.options.frostings || nextVar.options.flavors));
       setToppings(normalizeOptions(nextVar.options.toppings || nextVar.options.addOns));
       setDrizzles(normalizeOptions(nextVar.options.drizzles));
       setDescription(nextVar.description || "");
       setPhotos(nextVar.photos || []);
-      setFlavorSelectionLimit(nextVar.flavorSelectionLimit ?? 1);
+      setCakeFlavorSelectionLimit(nextVar.cakeFlavorSelectionLimit ?? 1);
+      setFrostingSelectionLimit(nextVar.frostingSelectionLimit ?? nextVar.flavorSelectionLimit ?? 1);
       setDrizzleSelectionLimit(nextVar.drizzleSelectionLimit ?? 1);
       setToppingSelectionLimit(nextVar.toppingSelectionLimit ?? 1);
     }
@@ -304,8 +318,10 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
   // Helpers for array editors
   const [newSizeName, setNewSizeName] = useState("");
   const [newSizePrice, setNewSizePrice] = useState(0);
-  const [newFlavorName, setNewFlavorName] = useState("");
-  const [newFlavorPrice, setNewFlavorPrice] = useState(0);
+  const [newCakeFlavorName, setNewCakeFlavorName] = useState("");
+  const [newCakeFlavorPrice, setNewCakeFlavorPrice] = useState(0);
+  const [newFrostingName, setNewFrostingName] = useState("");
+  const [newFrostingPrice, setNewFrostingPrice] = useState(0);
   const [newToppingName, setNewToppingName] = useState("");
   const [newToppingPrice, setNewToppingPrice] = useState(0);
   const [newDrizzleName, setNewDrizzleName] = useState("");
@@ -316,9 +332,13 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
   const [editingSizeName, setEditingSizeName] = useState("");
   const [editingSizePrice, setEditingSizePrice] = useState<number>(0);
 
-  const [editingFlavorIdx, setEditingFlavorIdx] = useState<number | null>(null);
-  const [editingFlavorName, setEditingFlavorName] = useState("");
-  const [editingFlavorPrice, setEditingFlavorPrice] = useState<number>(0);
+  const [editingCakeFlavorIdx, setEditingCakeFlavorIdx] = useState<number | null>(null);
+  const [editingCakeFlavorName, setEditingCakeFlavorName] = useState("");
+  const [editingCakeFlavorPrice, setEditingCakeFlavorPrice] = useState<number>(0);
+
+  const [editingFrostingIdx, setEditingFrostingIdx] = useState<number | null>(null);
+  const [editingFrostingName, setEditingFrostingName] = useState("");
+  const [editingFrostingPrice, setEditingFrostingPrice] = useState<number>(0);
 
   const [editingDrizzleIdx, setEditingDrizzleIdx] = useState<number | null>(null);
   const [editingDrizzleName, setEditingDrizzleName] = useState("");
@@ -330,7 +350,7 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
 
   // Drag and drop states
   const [draggedIdx, setDraggedIdx] = useState<number | null>(null);
-  const [draggedType, setDraggedType] = useState<"sizes" | "flavors" | "drizzles" | "toppings" | null>(null);
+  const [draggedType, setDraggedType] = useState<"sizes" | "cakeFlavors" | "frostings" | "flavors" | "drizzles" | "toppings" | null>(null);
 
   const [inputIngId, setInputIngId] = useState("");
   const [inputIngQty, setInputIngQty] = useState(0);
@@ -396,7 +416,9 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
               { name: "Four Dozen", priceAdd: 135 },
               { name: "Five Dozen", priceAdd: 165 }
             ],
-            flavors: flavors || [],
+            cakeFlavors: cakeFlavors || [],
+            flavors: frostings || [],
+            frostings: frostings || [],
             toppings: toppings || [],
             drizzles: drizzles || []
           },
@@ -409,7 +431,9 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
           basePrice: 0,
           options: {
             sizes: [],
+            cakeFlavors: [],
             flavors: [],
+            frostings: [],
             toppings: [],
             drizzles: []
           },
@@ -454,7 +478,9 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
           basePrice: p.basePrice,
           options: {
             sizes: p.options.sizes || [],
+            cakeFlavors: p.options.cakeFlavors || [],
             flavors: p.options.flavors || [],
+            frostings: p.options.frostings || p.options.flavors || [],
             toppings: p.options.toppings || p.options.addOns || [],
             drizzles: p.options.drizzles || []
           },
@@ -467,7 +493,9 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
           basePrice: 0,
           options: {
             sizes: [],
+            cakeFlavors: [],
             flavors: [],
+            frostings: [],
             toppings: [],
             drizzles: []
           },
@@ -484,24 +512,28 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
       const norm = productVariations.find(v => v.id === "normal") || productVariations[0];
       setBasePrice(norm.basePrice);
       setSizes(norm.options.sizes || []);
-      setFlavors(normalizeOptions(norm.options.flavors));
+      setCakeFlavors(normalizeOptions(norm.options.cakeFlavors));
+      setFrostings(normalizeOptions(norm.options.frostings || norm.options.flavors));
       setToppings(normalizeOptions(norm.options.toppings || norm.options.addOns));
       setDrizzles(normalizeOptions(norm.options.drizzles));
       setDescription(norm.description || "");
       setPhotos(norm.photos || []);
-      setFlavorSelectionLimit(norm.flavorSelectionLimit ?? 1);
+      setCakeFlavorSelectionLimit(norm.cakeFlavorSelectionLimit ?? 1);
+      setFrostingSelectionLimit(norm.frostingSelectionLimit ?? norm.flavorSelectionLimit ?? 1);
       setDrizzleSelectionLimit(norm.drizzleSelectionLimit ?? 1);
       setToppingSelectionLimit(norm.toppingSelectionLimit ?? 1);
     } else {
       setActiveVarId(null);
       setBasePrice(p.basePrice);
       setSizes(p.options.sizes || []);
-      setFlavors(normalizeOptions(p.options.flavors));
+      setCakeFlavors(normalizeOptions(p.options.cakeFlavors));
+      setFrostings(normalizeOptions(p.options.frostings || p.options.flavors));
       setToppings(normalizeOptions(p.options.toppings || p.options.addOns));
       setDrizzles(normalizeOptions(p.options.drizzles));
       setDescription(p.description);
       setPhotos(pPhotos);
-      setFlavorSelectionLimit(p.flavorSelectionLimit ?? 1);
+      setCakeFlavorSelectionLimit(p.cakeFlavorSelectionLimit ?? 1);
+      setFrostingSelectionLimit(p.frostingSelectionLimit ?? p.flavorSelectionLimit ?? 1);
       setDrizzleSelectionLimit(p.drizzleSelectionLimit ?? 1);
       setToppingSelectionLimit(p.toppingSelectionLimit ?? 1);
     }
@@ -523,11 +555,13 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
     setTempUploadId(`new-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`);
     
     setSizes([]);
-    setFlavors([]);
+    setCakeFlavors([]);
+    setFrostings([]);
     setToppings([]);
     setDrizzles([]);
     setProdIngredients([]);
-    setFlavorSelectionLimit(1);
+    setCakeFlavorSelectionLimit(1);
+    setFrostingSelectionLimit(1);
     setDrizzleSelectionLimit(1);
     setToppingSelectionLimit(1);
 
@@ -546,15 +580,26 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
     setSizes(sizes.filter((_, i) => i !== idx));
   };
 
-  const handleAddFlavorOption = () => {
-    if (!newFlavorName) return;
-    setFlavors([...flavors, { name: newFlavorName, priceAdd: Number(newFlavorPrice) }]);
-    setNewFlavorName("");
-    setNewFlavorPrice(0);
+  const handleAddCakeFlavorOption = () => {
+    if (!newCakeFlavorName) return;
+    setCakeFlavors([...cakeFlavors, { name: newCakeFlavorName, priceAdd: Number(newCakeFlavorPrice) }]);
+    setNewCakeFlavorName("");
+    setNewCakeFlavorPrice(0);
   };
 
-  const handleRemoveFlavorOption = (idx: number) => {
-    setFlavors(flavors.filter((_, i) => i !== idx));
+  const handleRemoveCakeFlavorOption = (idx: number) => {
+    setCakeFlavors(cakeFlavors.filter((_, i) => i !== idx));
+  };
+
+  const handleAddFrostingOption = () => {
+    if (!newFrostingName) return;
+    setFrostings([...frostings, { name: newFrostingName, priceAdd: Number(newFrostingPrice) }]);
+    setNewFrostingName("");
+    setNewFrostingPrice(0);
+  };
+
+  const handleRemoveFrostingOption = (idx: number) => {
+    setFrostings(frostings.filter((_, i) => i !== idx));
   };
 
   const handleAddToppingOption = () => {
@@ -605,19 +650,34 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
     setEditingSizeIdx(null);
   };
 
-  const handleStartEditFlavor = (index: number, currentName: string, currentPrice: number) => {
-    setEditingFlavorIdx(index);
-    setEditingFlavorName(currentName);
-    setEditingFlavorPrice(currentPrice);
+  const handleStartEditCakeFlavor = (index: number, currentName: string, currentPrice: number) => {
+    setEditingCakeFlavorIdx(index);
+    setEditingCakeFlavorName(currentName);
+    setEditingCakeFlavorPrice(currentPrice);
   };
 
-  const handleSaveEditFlavor = (index: number) => {
-    const trimmed = editingFlavorName.trim();
+  const handleSaveEditCakeFlavor = (index: number) => {
+    const trimmed = editingCakeFlavorName.trim();
     if (!trimmed) return;
-    const updated = [...flavors];
-    updated[index] = { name: trimmed, priceAdd: Number(editingFlavorPrice) };
-    setFlavors(updated);
-    setEditingFlavorIdx(null);
+    const updated = [...cakeFlavors];
+    updated[index] = { name: trimmed, priceAdd: Number(editingCakeFlavorPrice) };
+    setCakeFlavors(updated);
+    setEditingCakeFlavorIdx(null);
+  };
+
+  const handleStartEditFrosting = (index: number, currentName: string, currentPrice: number) => {
+    setEditingFrostingIdx(index);
+    setEditingFrostingName(currentName);
+    setEditingFrostingPrice(currentPrice);
+  };
+
+  const handleSaveEditFrosting = (index: number) => {
+    const trimmed = editingFrostingName.trim();
+    if (!trimmed) return;
+    const updated = [...frostings];
+    updated[index] = { name: trimmed, priceAdd: Number(editingFrostingPrice) };
+    setFrostings(updated);
+    setEditingFrostingIdx(null);
   };
 
   const handleStartEditDrizzle = (index: number, currentName: string, currentPrice: number) => {
@@ -651,7 +711,7 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
   };
 
   // Drag and drop event handlers
-  const handleDragStart = (e: React.DragEvent, index: number, type: "sizes" | "flavors" | "drizzles" | "toppings") => {
+  const handleDragStart = (e: React.DragEvent, index: number, type: "sizes" | "cakeFlavors" | "frostings" | "flavors" | "drizzles" | "toppings") => {
     setDraggedIdx(index);
     setDraggedType(type);
     e.dataTransfer.effectAllowed = "move";
@@ -661,7 +721,7 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
     e.preventDefault();
   };
 
-  const handleDrop = (e: React.DragEvent, targetIndex: number, type: "sizes" | "flavors" | "drizzles" | "toppings") => {
+  const handleDrop = (e: React.DragEvent, targetIndex: number, type: "sizes" | "cakeFlavors" | "frostings" | "flavors" | "drizzles" | "toppings") => {
     e.preventDefault();
     if (draggedIdx === null || draggedType !== type || draggedIdx === targetIndex) return;
 
@@ -670,11 +730,16 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
       const [moved] = updated.splice(draggedIdx, 1);
       updated.splice(targetIndex, 0, moved);
       setSizes(updated);
-    } else if (type === "flavors") {
-      const updated = [...flavors];
+    } else if (type === "cakeFlavors") {
+      const updated = [...cakeFlavors];
       const [moved] = updated.splice(draggedIdx, 1);
       updated.splice(targetIndex, 0, moved);
-      setFlavors(updated);
+      setCakeFlavors(updated);
+    } else if (type === "frostings" || type === "flavors") {
+      const updated = [...frostings];
+      const [moved] = updated.splice(draggedIdx, 1);
+      updated.splice(targetIndex, 0, moved);
+      setFrostings(updated);
     } else if (type === "drizzles") {
       const updated = [...drizzles];
       const [moved] = updated.splice(draggedIdx, 1);
@@ -756,7 +821,15 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
 
     let finalVariations = currentVariations;
     let finalBasePrice = Number(basePrice);
-    let finalOptions = { sizes, flavors, toppings, drizzles, addOns: toppings };
+    let finalOptions = {
+      sizes,
+      cakeFlavors,
+      flavors: frostings,
+      frostings,
+      toppings,
+      drizzles,
+      addOns: toppings
+    };
     let finalDescription = description;
     let finalPhotos = photos;
 
@@ -769,8 +842,18 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
             basePrice: Number(basePrice),
             description,
             photos,
-            options: { sizes, flavors, toppings, drizzles, addOns: toppings },
-            flavorSelectionLimit,
+            options: {
+              sizes,
+              cakeFlavors,
+              flavors: frostings,
+              frostings,
+              toppings,
+              drizzles,
+              addOns: toppings
+            },
+            cakeFlavorSelectionLimit,
+            flavorSelectionLimit: frostingSelectionLimit,
+            frostingSelectionLimit,
             drizzleSelectionLimit,
             toppingSelectionLimit
           };
@@ -827,9 +910,15 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
       isVisible: isVisible !== false,
       options: finalOptions,
       ingredients: prodIngredients,
+      cakeFlavorSelectionLimit: (activeVarId && finalVariations)
+        ? (finalVariations.find(v => v.id === "normal")?.cakeFlavorSelectionLimit ?? 1)
+        : cakeFlavorSelectionLimit,
       flavorSelectionLimit: (activeVarId && finalVariations)
-        ? (finalVariations.find(v => v.id === "normal")?.flavorSelectionLimit ?? 1)
-        : flavorSelectionLimit,
+        ? (finalVariations.find(v => v.id === "normal")?.frostingSelectionLimit ?? 1)
+        : frostingSelectionLimit,
+      frostingSelectionLimit: (activeVarId && finalVariations)
+        ? (finalVariations.find(v => v.id === "normal")?.frostingSelectionLimit ?? 1)
+        : frostingSelectionLimit,
       drizzleSelectionLimit: (activeVarId && finalVariations)
         ? (finalVariations.find(v => v.id === "normal")?.drizzleSelectionLimit ?? 1)
         : drizzleSelectionLimit,
@@ -1350,55 +1439,55 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
                 </details>
               </div>
 
-              {/* AVAILABLE FLAVORS */}
+              {/* AVAILABLE CAKE FLAVORS */}
               <div className="bg-brand-cream/15 p-5 rounded-[2rem] border-2 border-brand-pink/20 space-y-4">
                 <div className="border-b border-brand-pink/10 pb-2.5">
                   <div className="flex items-center justify-between">
-                    <h4 className="text-sm font-extrabold text-[#B76E79] uppercase tracking-wider">AVAILABLE FLAVORS</h4>
+                    <h4 className="text-sm font-extrabold text-[#B76E79] uppercase tracking-wider">AVAILABLE CAKE FLAVORS</h4>
                     <span className="text-[8px] bg-brand-chocolate text-white px-1.5 py-0.5 rounded uppercase font-black tracking-widest">Storefront Choice</span>
                   </div>
-                  <p className="text-[10px] text-gray-500 font-semibold leading-tight">These are the buttercream or cake flavors customers can choose from.</p>
+                  <p className="text-[10px] text-gray-500 font-semibold leading-tight">These are the cake flavor options customers can choose from.</p>
                 </div>
 
-                {/* Flavor Selection Limit Control */}
+                {/* Cake Flavor Selection Limit Control */}
                 <div className="bg-white p-3.5 rounded-2xl border border-brand-pink/25 space-y-2.5 shadow-xs">
                   <div className="flex items-center justify-between">
                     <div>
                       <span className="text-xs font-extrabold text-[#B76E79] uppercase tracking-wider block">
-                        Flavor Selection Limit
+                        Cake Flavor Selection Limit
                       </span>
                       <span className="text-[10px] text-gray-500 font-semibold">
-                        “How many flavors may the customer select?”
+                        “How many cake flavors may the customer select?”
                       </span>
                     </div>
                     <div className="flex items-center space-x-1.5">
                       <button
                         type="button"
-                        onClick={() => setFlavorSelectionLimit(prev => Math.max(0, prev - 1))}
+                        onClick={() => setCakeFlavorSelectionLimit(prev => Math.max(0, prev - 1))}
                         className="w-7 h-7 bg-brand-pink/10 hover:bg-brand-pink/20 text-[#B76E79] rounded-lg flex items-center justify-center font-bold text-sm cursor-pointer border border-brand-pink/20 transition-all"
-                        disabled={flavorSelectionLimit <= 0}
+                        disabled={cakeFlavorSelectionLimit <= 0}
                       >
                         -
                       </button>
                       <input
                         type="number"
                         min={0}
-                        max={flavors.length}
+                        max={cakeFlavors.length}
                         step={1}
-                        value={flavorSelectionLimit}
+                        value={cakeFlavorSelectionLimit}
                         onChange={(e) => {
                           const val = Math.floor(Number(e.target.value));
                           if (!isNaN(val)) {
-                            setFlavorSelectionLimit(Math.max(0, Math.min(flavors.length, val)));
+                            setCakeFlavorSelectionLimit(Math.max(0, Math.min(cakeFlavors.length, val)));
                           }
                         }}
                         className="w-12 h-7 bg-brand-cream/5 border border-brand-pink/20 rounded-lg text-center text-xs font-bold text-brand-chocolate focus:outline-none focus:ring-1 focus:ring-brand-rosegold"
                       />
                       <button
                         type="button"
-                        onClick={() => setFlavorSelectionLimit(prev => Math.min(flavors.length, prev + 1))}
+                        onClick={() => setCakeFlavorSelectionLimit(prev => Math.min(cakeFlavors.length, prev + 1))}
                         className="w-7 h-7 bg-brand-pink/10 hover:bg-brand-pink/20 text-[#B76E79] rounded-lg flex items-center justify-center font-bold text-sm cursor-pointer border border-brand-pink/20 transition-all"
-                        disabled={flavorSelectionLimit >= flavors.length}
+                        disabled={cakeFlavorSelectionLimit >= cakeFlavors.length}
                       >
                         +
                       </button>
@@ -1406,13 +1495,13 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
                   </div>
                   <div className="text-[10px] text-brand-chocolate/80 font-bold bg-brand-pink/5 px-2.5 py-1 rounded-md border border-brand-pink/10">
                     <span className="block text-[#B76E79]">
-                      Flavor Selection Limit: {flavorSelectionLimit}
+                      Cake Flavor Selection Limit: {cakeFlavorSelectionLimit}
                     </span>
                     <span className="block text-gray-600 font-semibold mt-0.5 leading-tight">
-                      {flavorSelectionLimit === 0 ? "Customer cannot select any options." : `Customer may select up to ${flavorSelectionLimit} flavor${flavorSelectionLimit > 1 ? "s" : ""}.`}
+                      {cakeFlavorSelectionLimit === 0 ? "Customer cannot select any options." : `Customer may select up to ${cakeFlavorSelectionLimit} cake flavor${cakeFlavorSelectionLimit > 1 ? "s" : ""}.`}
                     </span>
                     <span className="block text-gray-500 font-medium mt-0.5">
-                      Customers may select up to {flavorSelectionLimit} of the {flavors.length} available flavors.
+                      Customers may select up to {cakeFlavorSelectionLimit} of the {cakeFlavors.length} available cake flavors.
                     </span>
                   </div>
                 </div>
@@ -1420,24 +1509,24 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
                 <div className="flex gap-2 bg-white p-2.5 rounded-xl border border-brand-pink/15 shadow-xs">
                   <input
                     type="text"
-                    value={newFlavorName}
-                    onChange={(e) => setNewFlavorName(e.target.value)}
-                    placeholder="e.g., Red Velvet Sponge"
+                    value={newCakeFlavorName}
+                    onChange={(e) => setNewCakeFlavorName(e.target.value)}
+                    placeholder="e.g., Chocolate Sponge"
                     className="flex-1 text-sm bg-brand-cream/5 border border-brand-pink/10 p-2 rounded-xl focus:outline-none focus:ring-1 focus:ring-[#B76E79]"
                   />
                   <div className="relative w-20">
                     <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-gray-400 font-bold">$</span>
                     <input
                       type="number"
-                      value={newFlavorPrice || ""}
-                      onChange={(e) => setNewFlavorPrice(Number(e.target.value))}
+                      value={newCakeFlavorPrice || ""}
+                      onChange={(e) => setNewCakeFlavorPrice(Number(e.target.value))}
                       placeholder="Price"
                       className="w-full text-sm bg-brand-cream/5 border border-brand-pink/10 p-2 pl-5 rounded-xl focus:outline-none focus:ring-1 focus:ring-[#B76E79] font-bold text-center"
                     />
                   </div>
                   <button
                     type="button"
-                    onClick={handleAddFlavorOption}
+                    onClick={handleAddCakeFlavorOption}
                     className="bg-brand-chocolate text-white text-xs font-bold px-3 py-2 rounded-xl cursor-pointer hover:opacity-90 transition shadow-sm"
                   >
                     Add
@@ -1445,25 +1534,25 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
                 </div>
 
                 {/* Collapsible Added Items List */}
-                <details className="group border border-brand-pink/10 rounded-xl bg-white overflow-hidden mt-2" open={flavors.length > 0}>
+                <details className="group border border-brand-pink/10 rounded-xl bg-white overflow-hidden mt-2" open={cakeFlavors.length > 0}>
                   <summary className="flex items-center justify-between p-2.5 cursor-pointer select-none bg-brand-pink/5 hover:bg-brand-pink/10 font-bold text-xs text-brand-chocolate">
-                    <span>Added Flavors ({flavors.length})</span>
+                    <span>Added Cake Flavors ({cakeFlavors.length})</span>
                     <span className="text-[10px] transition-transform group-open:rotate-180">▼</span>
                   </summary>
                   <div className="p-3 space-y-1.5 max-h-64 overflow-y-auto border-t border-brand-pink/10">
-                    {flavors.length === 0 ? (
-                      <p className="text-[10px] text-gray-400 italic text-center py-2">No flavor options added yet.</p>
+                    {cakeFlavors.length === 0 ? (
+                      <p className="text-[10px] text-gray-400 italic text-center py-2">No cake flavor options added yet.</p>
                     ) : (
-                      flavors.map((f, idx) => {
-                        const isEditing = editingFlavorIdx === idx;
-                        const isDragging = draggedIdx === idx && draggedType === "flavors";
+                      cakeFlavors.map((f, idx) => {
+                        const isEditing = editingCakeFlavorIdx === idx;
+                        const isDragging = draggedIdx === idx && draggedType === "cakeFlavors";
                         return (
                           <div
                             key={idx}
                             draggable={!isEditing}
-                            onDragStart={(e) => handleDragStart(e, idx, "flavors")}
+                            onDragStart={(e) => handleDragStart(e, idx, "cakeFlavors")}
                             onDragOver={handleDragOver}
-                            onDrop={(e) => handleDrop(e, idx, "flavors")}
+                            onDrop={(e) => handleDrop(e, idx, "cakeFlavors")}
                             onDragEnd={() => { setDraggedIdx(null); setDraggedType(null); }}
                             className={`flex items-center gap-2 bg-white p-2.5 rounded-xl border border-brand-pink/10 transition-all ${
                               isDragging ? "opacity-30 border-dashed border-[#B76E79]" : "hover:border-[#B76E79]/50"
@@ -1479,22 +1568,22 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
                               <div className="flex-1 flex gap-1.5 items-center">
                                 <input
                                   type="text"
-                                  value={editingFlavorName}
-                                  onChange={(e) => setEditingFlavorName(e.target.value)}
+                                  value={editingCakeFlavorName}
+                                  onChange={(e) => setEditingCakeFlavorName(e.target.value)}
                                   className="flex-1 text-xs bg-brand-cream/5 border border-brand-pink/20 p-1.5 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#B76E79]"
                                 />
                                 <div className="relative w-16">
                                   <span className="absolute left-1.5 top-1/2 -translate-y-1/2 text-[10px] text-gray-400 font-bold">$</span>
                                   <input
                                     type="number"
-                                    value={editingFlavorPrice}
-                                    onChange={(e) => setEditingFlavorPrice(Number(e.target.value))}
+                                    value={editingCakeFlavorPrice}
+                                    onChange={(e) => setEditingCakeFlavorPrice(Number(e.target.value))}
                                     className="w-full text-xs bg-brand-cream/5 border border-brand-pink/20 p-1.5 pl-4 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#B76E79] text-center font-bold"
                                   />
                                 </div>
                                 <button
                                   type="button"
-                                  onClick={() => handleSaveEditFlavor(idx)}
+                                  onClick={() => handleSaveEditCakeFlavor(idx)}
                                   className="bg-emerald-500 hover:bg-emerald-600 text-white p-1.5 rounded-lg cursor-pointer"
                                   title="Save changes"
                                 >
@@ -1502,7 +1591,7 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
                                 </button>
                                 <button
                                   type="button"
-                                  onClick={() => setEditingFlavorIdx(null)}
+                                  onClick={() => setEditingCakeFlavorIdx(null)}
                                   className="bg-gray-100 hover:bg-gray-200 text-gray-500 p-1.5 rounded-lg cursor-pointer"
                                   title="Cancel"
                                 >
@@ -1519,17 +1608,212 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
                                   <div className="flex items-center gap-1.5">
                                     <button
                                       type="button"
-                                      onClick={() => handleStartEditFlavor(idx, f.name, f.priceAdd)}
+                                      onClick={() => handleStartEditCakeFlavor(idx, f.name, f.priceAdd)}
                                       className="text-[#B76E79] hover:text-[#B76E79]/80 p-1 hover:bg-[#B76E79]/5 rounded transition cursor-pointer"
-                                      title="Edit flavor name/price"
+                                      title="Edit cake flavor name/price"
                                     >
                                       <Edit2 className="h-3.5 w-3.5" />
                                     </button>
                                     <button
                                       type="button"
-                                      onClick={() => handleRemoveFlavorOption(idx)}
+                                      onClick={() => handleRemoveCakeFlavorOption(idx)}
                                       className="text-red-500 hover:text-red-700 p-1 hover:bg-red-50 rounded transition cursor-pointer"
-                                      title="Delete flavor option"
+                                      title="Delete cake flavor option"
+                                    >
+                                      <Trash2 className="h-3.5 w-3.5" />
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
+                </details>
+              </div>
+
+              {/* AVAILABLE FROSTINGS */}
+              <div className="bg-brand-cream/15 p-5 rounded-[2rem] border-2 border-brand-pink/20 space-y-4">
+                <div className="border-b border-brand-pink/10 pb-2.5">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-sm font-extrabold text-[#B76E79] uppercase tracking-wider">AVAILABLE FROSTINGS</h4>
+                    <span className="text-[8px] bg-brand-chocolate text-white px-1.5 py-0.5 rounded uppercase font-black tracking-widest">Storefront Choice</span>
+                  </div>
+                  <p className="text-[10px] text-gray-500 font-semibold leading-tight">These are the frosting flavors customers can choose from.</p>
+                </div>
+
+                {/* Frosting Selection Limit Control */}
+                <div className="bg-white p-3.5 rounded-2xl border border-brand-pink/25 space-y-2.5 shadow-xs">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="text-xs font-extrabold text-[#B76E79] uppercase tracking-wider block">
+                        Frosting Selection Limit
+                      </span>
+                      <span className="text-[10px] text-gray-500 font-semibold">
+                        “How many frostings may the customer select?”
+                      </span>
+                    </div>
+                    <div className="flex items-center space-x-1.5">
+                      <button
+                        type="button"
+                        onClick={() => setFrostingSelectionLimit(prev => Math.max(0, prev - 1))}
+                        className="w-7 h-7 bg-brand-pink/10 hover:bg-brand-pink/20 text-[#B76E79] rounded-lg flex items-center justify-center font-bold text-sm cursor-pointer border border-brand-pink/20 transition-all"
+                        disabled={frostingSelectionLimit <= 0}
+                      >
+                        -
+                      </button>
+                      <input
+                        type="number"
+                        min={0}
+                        max={frostings.length}
+                        step={1}
+                        value={frostingSelectionLimit}
+                        onChange={(e) => {
+                          const val = Math.floor(Number(e.target.value));
+                          if (!isNaN(val)) {
+                            setFrostingSelectionLimit(Math.max(0, Math.min(frostings.length, val)));
+                          }
+                        }}
+                        className="w-12 h-7 bg-brand-cream/5 border border-brand-pink/20 rounded-lg text-center text-xs font-bold text-brand-chocolate focus:outline-none focus:ring-1 focus:ring-brand-rosegold"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setFrostingSelectionLimit(prev => Math.min(frostings.length, prev + 1))}
+                        className="w-7 h-7 bg-brand-pink/10 hover:bg-brand-pink/20 text-[#B76E79] rounded-lg flex items-center justify-center font-bold text-sm cursor-pointer border border-brand-pink/20 transition-all"
+                        disabled={frostingSelectionLimit >= frostings.length}
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+                  <div className="text-[10px] text-brand-chocolate/80 font-bold bg-brand-pink/5 px-2.5 py-1 rounded-md border border-brand-pink/10">
+                    <span className="block text-[#B76E79]">
+                      Frosting Selection Limit: {frostingSelectionLimit}
+                    </span>
+                    <span className="block text-gray-600 font-semibold mt-0.5 leading-tight">
+                      {frostingSelectionLimit === 0 ? "Customer cannot select any options." : `Customer may select up to ${frostingSelectionLimit} frosting${frostingSelectionLimit > 1 ? "s" : ""}.`}
+                    </span>
+                    <span className="block text-gray-500 font-medium mt-0.5">
+                      Customers may select up to {frostingSelectionLimit} of the {frostings.length} available frostings.
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex gap-2 bg-white p-2.5 rounded-xl border border-brand-pink/15 shadow-xs">
+                  <input
+                    type="text"
+                    value={newFrostingName}
+                    onChange={(e) => setNewFrostingName(e.target.value)}
+                    placeholder="e.g., Vanilla Buttercream"
+                    className="flex-1 text-sm bg-brand-cream/5 border border-brand-pink/10 p-2 rounded-xl focus:outline-none focus:ring-1 focus:ring-[#B76E79]"
+                  />
+                  <div className="relative w-20">
+                    <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-gray-400 font-bold">$</span>
+                    <input
+                      type="number"
+                      value={newFrostingPrice || ""}
+                      onChange={(e) => setNewFrostingPrice(Number(e.target.value))}
+                      placeholder="Price"
+                      className="w-full text-sm bg-brand-cream/5 border border-brand-pink/10 p-2 pl-5 rounded-xl focus:outline-none focus:ring-1 focus:ring-[#B76E79] font-bold text-center"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleAddFrostingOption}
+                    className="bg-brand-chocolate text-white text-xs font-bold px-3 py-2 rounded-xl cursor-pointer hover:opacity-90 transition shadow-sm"
+                  >
+                    Add
+                  </button>
+                </div>
+
+                {/* Collapsible Added Items List */}
+                <details className="group border border-brand-pink/10 rounded-xl bg-white overflow-hidden mt-2" open={frostings.length > 0}>
+                  <summary className="flex items-center justify-between p-2.5 cursor-pointer select-none bg-brand-pink/5 hover:bg-brand-pink/10 font-bold text-xs text-brand-chocolate">
+                    <span>Added Frostings ({frostings.length})</span>
+                    <span className="text-[10px] transition-transform group-open:rotate-180">▼</span>
+                  </summary>
+                  <div className="p-3 space-y-1.5 max-h-64 overflow-y-auto border-t border-brand-pink/10">
+                    {frostings.length === 0 ? (
+                      <p className="text-[10px] text-gray-400 italic text-center py-2">No frosting options added yet.</p>
+                    ) : (
+                      frostings.map((f, idx) => {
+                        const isEditing = editingFrostingIdx === idx;
+                        const isDragging = draggedIdx === idx && draggedType === "frostings";
+                        return (
+                          <div
+                            key={idx}
+                            draggable={!isEditing}
+                            onDragStart={(e) => handleDragStart(e, idx, "frostings")}
+                            onDragOver={handleDragOver}
+                            onDrop={(e) => handleDrop(e, idx, "frostings")}
+                            onDragEnd={() => { setDraggedIdx(null); setDraggedType(null); }}
+                            className={`flex items-center gap-2 bg-white p-2.5 rounded-xl border border-brand-pink/10 transition-all ${
+                              isDragging ? "opacity-30 border-dashed border-[#B76E79]" : "hover:border-[#B76E79]/50"
+                            }`}
+                          >
+                            {!isEditing && (
+                              <div className="cursor-grab text-gray-300 hover:text-gray-500 transition px-1">
+                                <GripVertical className="h-4.5 w-4.5" />
+                              </div>
+                            )}
+
+                            {isEditing ? (
+                              <div className="flex-1 flex gap-1.5 items-center">
+                                <input
+                                  type="text"
+                                  value={editingFrostingName}
+                                  onChange={(e) => setEditingFrostingName(e.target.value)}
+                                  className="flex-1 text-xs bg-brand-cream/5 border border-brand-pink/20 p-1.5 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#B76E79]"
+                                />
+                                <div className="relative w-16">
+                                  <span className="absolute left-1.5 top-1/2 -translate-y-1/2 text-[10px] text-gray-400 font-bold">$</span>
+                                  <input
+                                    type="number"
+                                    value={editingFrostingPrice}
+                                    onChange={(e) => setEditingFrostingPrice(Number(e.target.value))}
+                                    className="w-full text-xs bg-brand-cream/5 border border-brand-pink/20 p-1.5 pl-4 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#B76E79] text-center font-bold"
+                                  />
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => handleSaveEditFrosting(idx)}
+                                  className="bg-emerald-500 hover:bg-emerald-600 text-white p-1.5 rounded-lg cursor-pointer"
+                                  title="Save changes"
+                                >
+                                  <Check className="h-3.5 w-3.5" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setEditingFrostingIdx(null)}
+                                  className="bg-gray-100 hover:bg-gray-200 text-gray-500 p-1.5 rounded-lg cursor-pointer"
+                                  title="Cancel"
+                                >
+                                  <X className="h-3.5 w-3.5" />
+                                </button>
+                              </div>
+                            ) : (
+                              <div className="flex-1 flex justify-between items-center text-xs">
+                                <span className="font-bold text-brand-chocolate">{f.name}</span>
+                                <div className="flex items-center gap-3">
+                                  <span className="text-brand-rosegold font-bold bg-brand-pink/5 px-2.5 py-0.5 rounded-md">
+                                    +${f.priceAdd.toFixed(2)}
+                                  </span>
+                                  <div className="flex items-center gap-1.5">
+                                    <button
+                                      type="button"
+                                      onClick={() => handleStartEditFrosting(idx, f.name, f.priceAdd)}
+                                      className="text-[#B76E79] hover:text-[#B76E79]/80 p-1 hover:bg-[#B76E79]/5 rounded transition cursor-pointer"
+                                      title="Edit frosting name/price"
+                                    >
+                                      <Edit2 className="h-3.5 w-3.5" />
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleRemoveFrostingOption(idx)}
+                                      className="text-red-500 hover:text-red-700 p-1 hover:bg-red-50 rounded transition cursor-pointer"
+                                      title="Delete frosting option"
                                     >
                                       <Trash2 className="h-3.5 w-3.5" />
                                     </button>

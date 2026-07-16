@@ -263,9 +263,11 @@ export default function ClientQuotePortal() {
                             <CornerDownRight className="h-3.5 w-3.5 text-brand-rosegold mt-0.5 shrink-0" />
                             <div className="flex-1">
                               <p className="font-semibold">{item.quantity}x {item.name}{item.variationName ? ` (${item.variationName})` : ""}</p>
-                              {(item.size || item.flavor) && (
+                              {(item.size || item.selectedCakeFlavors || item.selectedFrostings || item.flavor) && (
                                 <p className="text-[10px] text-gray-500">
-                                  {item.size ? `Size: ${item.size}` : ""} {item.flavor ? `• Flavor: ${item.flavor}` : ""}
+                                  {item.size ? `Size: ${item.size} ` : ""}
+                                  {item.selectedCakeFlavors && item.selectedCakeFlavors.length > 0 ? `• Cake Flavor: ${item.selectedCakeFlavors.join(", ")} ` : ""}
+                                  {item.selectedFrostings && item.selectedFrostings.length > 0 ? `• Frosting: ${item.selectedFrostings.join(", ")} ` : item.flavor ? `• Frosting: ${item.flavor}` : ""}
                                 </p>
                               )}
                             </div>

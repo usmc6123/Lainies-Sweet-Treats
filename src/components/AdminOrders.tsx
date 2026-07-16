@@ -325,7 +325,14 @@ export default function AdminOrders({ token, triggerRefresh }: AdminOrdersProps)
                            <span>${item.totalPrice.toFixed(2)}</span>
                         </div>
                         {item.size && <p className="text-xs text-gray-500 font-medium">Scale: {item.size}</p>}
-                        {item.flavor && <p className="text-xs text-gray-500 font-medium">Icing/Flavor: {item.flavor}</p>}
+                        {item.selectedCakeFlavors && item.selectedCakeFlavors.length > 0 && (
+                          <p className="text-xs text-gray-500 font-medium">Cake Flavor: {item.selectedCakeFlavors.join(", ")}</p>
+                        )}
+                        {item.selectedFrostings && item.selectedFrostings.length > 0 ? (
+                          <p className="text-xs text-gray-500 font-medium">Frosting: {item.selectedFrostings.join(", ")}</p>
+                        ) : (
+                          item.flavor && <p className="text-xs text-gray-500 font-medium">Frosting: {item.flavor}</p>
+                        )}
                         {item.selectedDrizzle && (
                           <p className="text-xs text-gray-500 font-medium">Drizzle: {item.selectedDrizzle}</p>
                         )}

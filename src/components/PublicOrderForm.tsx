@@ -140,6 +140,8 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
   const [selectedVarId, setSelectedVarId] = useState<string | null>(null);
   const [choiceSize, setChoiceSize] = useState<string>("");
   const [choiceFlavor, setChoiceFlavor] = useState<string>("");
+  const [choiceCakeFlavor, setChoiceCakeFlavor] = useState<string>("");
+  const [choiceFrosting, setChoiceFrosting] = useState<string>("");
   const [choiceDrizzle, setChoiceDrizzle] = useState<string>("");
   const [choiceAddOns, setChoiceAddOns] = useState<string[]>([]);
   const [choiceQty, setChoiceQty] = useState<number>(1);
@@ -150,6 +152,8 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
       setSelectedVarId(null);
       setChoiceSize("");
       setChoiceFlavor("");
+      setChoiceCakeFlavor("");
+      setChoiceFrosting("");
       setChoiceDrizzle("");
       setChoiceAddOns([]);
       setChoiceQty(1);
@@ -225,6 +229,25 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
       defaultFlavor = typeof f === "string" ? f : f.name;
     }
     setChoiceFlavor(hasVariations ? "" : defaultFlavor);
+
+    let defaultCakeFlavor = "";
+    if (p.options.cakeFlavors && p.options.cakeFlavors.length > 0) {
+      const cf = p.options.cakeFlavors[0];
+      defaultCakeFlavor = typeof cf === "string" ? cf : cf.name;
+    }
+    setChoiceCakeFlavor(hasVariations ? "" : defaultCakeFlavor);
+
+    let defaultFrosting = "";
+    const activeFrostings = p.options.frostings || p.options.flavors;
+    if (activeFrostings && activeFrostings.length > 0) {
+      const f = activeFrostings[0];
+      defaultFrosting = typeof f === "string" ? f : f.name;
+    }
+    setChoiceFrosting(hasVariations ? "" : defaultFrosting);
+    if (!defaultFlavor && defaultFrosting) {
+      setChoiceFlavor(hasVariations ? "" : defaultFrosting);
+    }
+
     setChoiceAddOns([]);
     setChoiceQty(1);
     setErrorMessage("");
@@ -245,12 +268,21 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
       if (sizeObj) price += sizeObj.priceAdd;
     }
 
-    // Flavor price addition
-    const rawFlavors = activeVar ? activeVar.options?.flavors : selectedProduct.options?.flavors;
-    const resolvedFlavors = resolveToOptions(rawFlavors);
-    if (choiceFlavor && resolvedFlavors) {
-      const flavorObj = resolvedFlavors.find(f => f.name === choiceFlavor);
-      if (flavorObj) price += flavorObj.priceAdd;
+    // Cake Flavor price addition
+    const rawCakeFlavors = activeVar ? activeVar.options?.cakeFlavors : selectedProduct.options?.cakeFlavors;
+    const resolvedCakeFlavors = resolveToOptions(rawCakeFlavors);
+    if (choiceCakeFlavor && resolvedCakeFlavors) {
+      const cakeFlavorObj = resolvedCakeFlavors.find(cf => cf.name === choiceCakeFlavor);
+      if (cakeFlavorObj) price += cakeFlavorObj.priceAdd;
+    }
+
+    // Frosting price addition
+    const rawFrostings = activeVar ? (activeVar.options?.frostings || activeVar.options?.flavors) : (selectedProduct.options?.frostings || selectedProduct.options?.flavors);
+    const resolvedFrostings = resolveToOptions(rawFrostings);
+    const selectedFrostingVal = choiceFrosting || choiceFlavor;
+    if (selectedFrostingVal && resolvedFrostings) {
+      const frostingObj = resolvedFrostings.find(f => f.name === selectedFrostingVal);
+      if (frostingObj) price += frostingObj.priceAdd;
     }
 
     // Drizzle price addition
@@ -299,7 +331,9 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
       name: selectedProduct.name,
       quantity: choiceQty,
       size: choiceSize || undefined,
-      flavor: choiceFlavor || undefined,
+      flavor: choiceFrosting || choiceFlavor || undefined,
+      selectedCakeFlavors: choiceCakeFlavor ? [choiceCakeFlavor] : undefined,
+      selectedFrostings: choiceFrosting ? [choiceFrosting] : undefined,
       addOns: choiceAddOns.length > 0 ? choiceAddOns : undefined,
       selectedDrizzle: choiceDrizzle || undefined,
       unitPrice,
@@ -766,11 +800,20 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
                           Size: {item.size}
                         </p>
                       )}
-                      {item.flavor && (
+                      {item.selectedCakeFlavors && item.selectedCakeFlavors.length > 0 && (
                         <p className="text-[10px] text-brand-chocolate/70 font-semibold">
-                          Flavor: {item.flavor}
+                          Cake Flavor: {item.selectedCakeFlavors.join(", ")}
                         </p>
                       )}
+                      {item.selectedFrostings && item.selectedFrostings.length > 0 ? (
+                        <p className="text-[10px] text-brand-chocolate/70 font-semibold">
+                          Frosting: {item.selectedFrostings.join(", ")}
+                        </p>
+                      ) : item.flavor ? (
+                        <p className="text-[10px] text-brand-chocolate/70 font-semibold">
+                          Frosting: {item.flavor}
+                        </p>
+                      ) : null}
                       {item.selectedDrizzle && (
                         <p className="text-[10px] text-brand-chocolate/70 font-semibold">
                           Drizzle: {item.selectedDrizzle}
@@ -1186,6 +1229,12 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
         const rawFlavors = activeVar ? activeVar.options?.flavors : selectedProduct.options?.flavors;
         const resolvedFlavors = resolveToOptions(rawFlavors);
 
+        const rawCakeFlavors = activeVar ? activeVar.options?.cakeFlavors : selectedProduct.options?.cakeFlavors;
+        const resolvedCakeFlavors = resolveToOptions(rawCakeFlavors);
+
+        const rawFrostings = activeVar ? (activeVar.options?.frostings || activeVar.options?.flavors) : (selectedProduct.options?.frostings || selectedProduct.options?.flavors);
+        const resolvedFrostings = resolveToOptions(rawFrostings);
+
         const rawToppings = activeVar 
           ? (activeVar.options?.toppings || activeVar.options?.addOns) 
           : (selectedProduct.options?.toppings || selectedProduct.options?.addOns);
@@ -1202,7 +1251,13 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
         const hasDrizzlesConfigured = (!hasVariations || selectedVarId) && resolvedDrizzles && resolvedDrizzles.length > 0;
         const isDrizzleRequiredAndMissing = hasDrizzlesConfigured && !choiceDrizzle;
 
-        const isAddDisabled = (hasVariations && !selectedVarId) || isToppingRequiredAndMissing || isDrizzleRequiredAndMissing;
+        const hasCakeFlavorsConfigured = (!hasVariations || selectedVarId) && resolvedCakeFlavors && resolvedCakeFlavors.length > 0;
+        const isCakeFlavorRequiredAndMissing = hasCakeFlavorsConfigured && !choiceCakeFlavor;
+
+        const hasFrostingsConfigured = (!hasVariations || selectedVarId) && resolvedFrostings && resolvedFrostings.length > 0;
+        const isFrostingRequiredAndMissing = hasFrostingsConfigured && !choiceFrosting && !choiceFlavor;
+
+        const isAddDisabled = (hasVariations && !selectedVarId) || isToppingRequiredAndMissing || isDrizzleRequiredAndMissing || isCakeFlavorRequiredAndMissing || isFrostingRequiredAndMissing;
 
         return (
           <div className="fixed inset-0 bg-brand-chocolate/40 backdrop-blur-xs flex items-center justify-center z-[100] p-4">
@@ -1255,6 +1310,20 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
                           }
                           if (!choiceFlavor && newFlavors.length > 0) {
                             setChoiceFlavor(newFlavors[0]);
+                          }
+                          const newCakeFlavors = resolveToOptions(v.options.cakeFlavors).map(cf => cf.name);
+                          if (choiceCakeFlavor && !newCakeFlavors.includes(choiceCakeFlavor)) {
+                            setChoiceCakeFlavor("");
+                          }
+                          if (!choiceCakeFlavor && newCakeFlavors.length > 0) {
+                            setChoiceCakeFlavor(newCakeFlavors[0]);
+                          }
+                          const newFrostings = resolveToOptions(v.options.frostings || v.options.flavors).map(f => f.name);
+                          if (choiceFrosting && !newFrostings.includes(choiceFrosting)) {
+                            setChoiceFrosting("");
+                          }
+                          if (!choiceFrosting && newFrostings.length > 0) {
+                            setChoiceFrosting(newFrostings[0]);
                           }
                           const newToppings = resolveToOptions(v.options.toppings || v.options.addOns).map(t => t.name);
                           setChoiceAddOns(choiceAddOns.filter(addName => newToppings.includes(addName)));
@@ -1319,19 +1388,43 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
                 </div>
               )}
 
-              {/* Flavors selections */}
-              {(!hasVariations || selectedVarId) && resolvedFlavors && resolvedFlavors.length > 0 && (
+              {/* Available Cake Flavors selections */}
+              {(!hasVariations || selectedVarId) && resolvedCakeFlavors && resolvedCakeFlavors.length > 0 && (
                 <div className="mt-5">
                   <label className="text-xs font-bold text-brand-chocolate uppercase tracking-wider block mb-2">
-                    2. Selected Flavor Preference:
+                    2. Selected Cake Flavor:
                   </label>
                   <select
-                    value={choiceFlavor}
-                    onChange={(e) => setChoiceFlavor(e.target.value)}
+                    value={choiceCakeFlavor}
+                    onChange={(e) => setChoiceCakeFlavor(e.target.value)}
                     className="w-full border border-brand-pink/20 rounded-xl px-3 py-2 text-xs bg-brand-cream/30 focus:outline-none focus:ring-1 focus:ring-brand-rosegold"
                   >
-                    <option value="" disabled>-- Select Flavor --</option>
-                    {resolvedFlavors.map(f => (
+                    <option value="" disabled>-- Select Cake Flavor --</option>
+                    {resolvedCakeFlavors.map(cf => (
+                      <option key={cf.name} value={cf.name}>
+                        {cf.name} {cf.priceAdd > 0 ? `(+$${cf.priceAdd.toFixed(2)})` : ""}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {/* Available Frostings selections */}
+              {(!hasVariations || selectedVarId) && resolvedFrostings && resolvedFrostings.length > 0 && (
+                <div className="mt-5">
+                  <label className="text-xs font-bold text-brand-chocolate uppercase tracking-wider block mb-2">
+                    3. Selected Frosting Preference:
+                  </label>
+                  <select
+                    value={choiceFrosting || choiceFlavor}
+                    onChange={(e) => {
+                      setChoiceFrosting(e.target.value);
+                      setChoiceFlavor(e.target.value);
+                    }}
+                    className="w-full border border-brand-pink/20 rounded-xl px-3 py-2 text-xs bg-brand-cream/30 focus:outline-none focus:ring-1 focus:ring-brand-rosegold"
+                  >
+                    <option value="" disabled>-- Select Frosting --</option>
+                    {resolvedFrostings.map(f => (
                       <option key={f.name} value={f.name}>
                         {f.name} {f.priceAdd > 0 ? `(+$${f.priceAdd.toFixed(2)})` : ""}
                       </option>

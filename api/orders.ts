@@ -45,7 +45,14 @@ function drawLabel(doc: any, order: any, startY: number) {
     let itemText = `• ${item.name} x${item.quantity}`;
     const descParts = [];
     if (item.size) descParts.push(`Scale: ${item.size}`);
-    if (item.flavor) descParts.push(`Icing/Flavor: ${item.flavor}`);
+    if (item.selectedCakeFlavors && item.selectedCakeFlavors.length > 0) {
+      descParts.push(`Cake Flavor: ${item.selectedCakeFlavors.join(', ')}`);
+    }
+    if (item.selectedFrostings && item.selectedFrostings.length > 0) {
+      descParts.push(`Frosting: ${item.selectedFrostings.join(', ')}`);
+    } else if (item.flavor) {
+      descParts.push(`Frosting: ${item.flavor}`);
+    }
     if (item.selectedDrizzle) descParts.push(`Drizzle: ${item.selectedDrizzle}`);
     if (item.addOns && item.addOns.length > 0) descParts.push(`Decor: ${item.addOns.join(', ')}`);
     
@@ -167,7 +174,14 @@ export default async function handler(req: any, res: any) {
           doc.font('Helvetica-Bold').fontSize(10).text(item.name, 60, yTable + 6, { width: 300 });
           const specParts = [];
           if (item.size) specParts.push(`Scale: ${item.size}`);
-          if (item.flavor) specParts.push(`Icing/Flavor: ${item.flavor}`);
+          if (item.selectedCakeFlavors && item.selectedCakeFlavors.length > 0) {
+            specParts.push(`Cake Flavor: ${item.selectedCakeFlavors.join(', ')}`);
+          }
+          if (item.selectedFrostings && item.selectedFrostings.length > 0) {
+            specParts.push(`Frosting: ${item.selectedFrostings.join(', ')}`);
+          } else if (item.flavor) {
+            specParts.push(`Frosting: ${item.flavor}`);
+          }
           if (item.selectedDrizzle) specParts.push(`Drizzle: ${item.selectedDrizzle}`);
           if (item.addOns && item.addOns.length > 0) specParts.push(`Decor: ${item.addOns.join(', ')}`);
           if (specParts.length > 0) {

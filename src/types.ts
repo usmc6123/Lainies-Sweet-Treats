@@ -6,6 +6,8 @@ export interface OptionItem {
 export interface ProductOptions {
   sizes?: OptionItem[];
   flavors?: (string | OptionItem)[];
+  cakeFlavors?: (string | OptionItem)[];
+  frostings?: (string | OptionItem)[];
   addOns?: OptionItem[];
   toppings?: (string | OptionItem)[];
   drizzles?: (string | OptionItem)[];
@@ -26,6 +28,8 @@ export interface ProductVariation {
   flavorSelectionLimit?: number;
   drizzleSelectionLimit?: number;
   toppingSelectionLimit?: number;
+  cakeFlavorSelectionLimit?: number;
+  frostingSelectionLimit?: number;
 }
 
 export interface Product {
@@ -43,6 +47,8 @@ export interface Product {
   flavorSelectionLimit?: number;
   drizzleSelectionLimit?: number;
   toppingSelectionLimit?: number;
+  cakeFlavorSelectionLimit?: number;
+  frostingSelectionLimit?: number;
 }
 
 export interface OrderItem {
@@ -62,6 +68,8 @@ export interface OrderItem {
   selectedFlavors?: string[];
   selectedDrizzles?: string[];
   selectedToppings?: string[];
+  selectedCakeFlavors?: string[];
+  selectedFrostings?: string[];
 }
 
 export type OrderStatus = "Pending" | "Confirmed" | "In Progress" | "Ready" | "Delivered/Picked Up" | "Cancelled";
@@ -184,5 +192,7 @@ export interface SelectedOptions {
   size?: string;
   flavor?: string;
   addOns?: string[];
+  selectedCakeFlavors?: string[];
+  selectedFrostings?: string[];
 }
 
