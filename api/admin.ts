@@ -50,7 +50,8 @@ function drawLabel(doc: any, order: any, startY: number) {
     } else if (item.flavor) {
       descParts.push(`Frosting: ${item.flavor}`);
     }
-    if (item.selectedDrizzle) descParts.push(`Drizzle: ${item.selectedDrizzle}`);
+    const dText = item.selectedDrizzles && item.selectedDrizzles.length > 0 ? item.selectedDrizzles.join(', ') : item.selectedDrizzle;
+    if (dText) descParts.push(`Drizzle: ${dText}`);
     if (item.addOns && item.addOns.length > 0) descParts.push(`Decor: ${item.addOns.join(', ')}`);
     
     if (descParts.length > 0) {
@@ -464,7 +465,8 @@ export default async function handler(req: any, res: any) {
               } else if (item.flavor) {
                 specParts.push(`Frosting: ${item.flavor}`);
               }
-              if (item.selectedDrizzle) specParts.push(`Drizzle: ${item.selectedDrizzle}`);
+              const dText = item.selectedDrizzles && item.selectedDrizzles.length > 0 ? item.selectedDrizzles.join(', ') : item.selectedDrizzle;
+              if (dText) specParts.push(`Drizzle: ${dText}`);
               if (item.addOns && item.addOns.length > 0) specParts.push(`Decor: ${item.addOns.join(', ')}`);
               if (specParts.length > 0) {
                 doc.font('Helvetica').fontSize(8.5).fillColor('#7d6259').text(specParts.join('  |  '), 60, yTable + 20, { width: 300 });

@@ -142,7 +142,7 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
   const [choiceFlavor, setChoiceFlavor] = useState<string>("");
   const [choiceCakeFlavor, setChoiceCakeFlavor] = useState<string>("");
   const [choiceFrosting, setChoiceFrosting] = useState<string>("");
-  const [choiceDrizzle, setChoiceDrizzle] = useState<string>("");
+  const [choiceDrizzle, setChoiceDrizzle] = useState<string[]>([]);
   const [choiceAddOns, setChoiceAddOns] = useState<string[]>([]);
   const [choiceQty, setChoiceQty] = useState<number>(1);
 
@@ -154,7 +154,7 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
       setChoiceFlavor("");
       setChoiceCakeFlavor("");
       setChoiceFrosting("");
-      setChoiceDrizzle("");
+      setChoiceDrizzle([]);
       setChoiceAddOns([]);
       setChoiceQty(1);
     }
@@ -303,9 +303,11 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
     // Drizzle price addition
     const rawDrizzles = activeVar ? activeVar.options?.drizzles : selectedProduct.options?.drizzles;
     const resolvedDrizzles = resolveToOptions(rawDrizzles);
-    if (choiceDrizzle && resolvedDrizzles) {
-      const drizzleObj = resolvedDrizzles.find(d => d.name === choiceDrizzle);
-      if (drizzleObj) price += drizzleObj.priceAdd;
+    if (choiceDrizzle && choiceDrizzle.length > 0 && resolvedDrizzles) {
+      choiceDrizzle.forEach(dName => {
+        const drizzleObj = resolvedDrizzles.find(d => d.name === dName);
+        if (drizzleObj) price += drizzleObj.priceAdd;
+      });
     }
 
     // Topping price addition
@@ -350,7 +352,8 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
       selectedCakeFlavors: choiceCakeFlavor ? [choiceCakeFlavor] : undefined,
       selectedFrostings: choiceFrosting ? [choiceFrosting] : undefined,
       addOns: choiceAddOns.length > 0 ? choiceAddOns : undefined,
-      selectedDrizzle: choiceDrizzle || undefined,
+      selectedDrizzle: choiceDrizzle[0] || undefined,
+      selectedDrizzles: choiceDrizzle.length > 0 ? choiceDrizzle : undefined,
       unitPrice,
       totalPrice: itemTotal,
       variationId: activeVar?.id,
@@ -880,9 +883,9 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
                           Frosting: {item.flavor}
                         </p>
                       ) : null}
-                      {item.selectedDrizzle && (
+                      {((item.selectedDrizzles && item.selectedDrizzles.length > 0) || item.selectedDrizzle) && (
                         <p className="text-[10px] text-brand-chocolate/70 font-semibold">
-                          Drizzle: {item.selectedDrizzle}
+                          Drizzle: {item.selectedDrizzles && item.selectedDrizzles.length > 0 ? item.selectedDrizzles.join(", ") : item.selectedDrizzle}
                         </p>
                       )}
                       {item.addOns && item.addOns.length > 0 && (
@@ -1318,7 +1321,7 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
         const isToppingRequiredAndMissing = hasToppingsConfigured && (!choiceAddOns || choiceAddOns.length === 0 || !choiceAddOns[0]);
         
         const hasDrizzlesConfigured = (!hasVariations || selectedVarId) && resolvedDrizzles && resolvedDrizzles.length > 0;
-        const isDrizzleRequiredAndMissing = hasDrizzlesConfigured && !choiceDrizzle;
+        const isDrizzleRequiredAndMissing = false; // Drizzles are optional (0 is allowed)
 
         const hasCakeFlavorsConfigured = (!hasVariations || selectedVarId) && resolvedCakeFlavors && resolvedCakeFlavors.length > 0;
         const isCakeFlavorRequiredAndMissing = hasCakeFlavorsConfigured && !choiceCakeFlavor;
@@ -1503,25 +1506,56 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
               )}
 
               {/* Selected Drizzle selections */}
-              {(!hasVariations || selectedVarId) && resolvedDrizzles && resolvedDrizzles.length > 0 && (
-                <div className="mt-5">
-                  <label className="text-xs font-bold text-brand-chocolate uppercase tracking-wider block mb-2">
-                    SELECTED DRIZZLE:
-                  </label>
-                  <select
-                    value={choiceDrizzle}
-                    onChange={(e) => setChoiceDrizzle(e.target.value)}
-                    className="w-full border border-brand-pink/20 rounded-xl px-3 py-2 text-xs bg-brand-cream/30 focus:outline-none focus:ring-1 focus:ring-brand-rosegold"
-                  >
-                    <option value="" disabled>-- Select a drizzle --</option>
-                    {resolvedDrizzles.map(d => (
-                      <option key={d.name} value={d.name}>
-                        {d.name} {d.priceAdd > 0 ? `(+$${d.priceAdd.toFixed(2)})` : ""}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
+              {(!hasVariations || selectedVarId) && resolvedDrizzles && resolvedDrizzles.length > 0 && (() => {
+                const limit = activeVar?.drizzleSelectionLimit ?? selectedProduct.drizzleSelectionLimit ?? 1;
+                return (
+                  <div className="mt-5">
+                    <label className="text-xs font-bold text-brand-chocolate uppercase tracking-wider block mb-1">
+                      Choose Available Drizzles:
+                    </label>
+                    <p className="text-[10px] text-brand-chocolate/60 font-semibold mb-2.5">
+                      Choose up to {limit} drizzle{limit > 1 ? "s" : ""}
+                    </p>
+                    <div className="space-y-2">
+                      {resolvedDrizzles.map(d => {
+                        const isSelected = choiceDrizzle.includes(d.name);
+                        return (
+                          <label
+                            key={d.name}
+                            className={`flex items-center justify-between p-3 rounded-xl border text-xs cursor-pointer transition-all ${
+                              isSelected
+                                ? "bg-brand-pink/20 border-brand-rosegold font-semibold"
+                                : "border-gray-100 hover:bg-brand-cream/50"
+                            }`}
+                          >
+                            <div className="flex items-center space-x-2">
+                              <input
+                                type="checkbox"
+                                checked={isSelected}
+                                disabled={!isSelected && choiceDrizzle.length >= limit}
+                                onChange={() => {
+                                  if (isSelected) {
+                                    setChoiceDrizzle(choiceDrizzle.filter(x => x !== d.name));
+                                  } else {
+                                    if (choiceDrizzle.length < limit) {
+                                      setChoiceDrizzle([...choiceDrizzle, d.name]);
+                                    }
+                                  }
+                                }}
+                                className="accent-brand-rosegold rounded"
+                              />
+                              <span>{d.name}</span>
+                            </div>
+                            <span className="text-brand-rosegold font-semibold">
+                              {d.priceAdd > 0 ? `+$${d.priceAdd.toFixed(2)}` : "Included"}
+                            </span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })()}
 
               {/* Toppings List dropdown selector */}
               {(!hasVariations || selectedVarId) && resolvedToppings && resolvedToppings.length > 0 && (
