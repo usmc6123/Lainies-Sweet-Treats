@@ -21,10 +21,26 @@ export const resolveToOptions = (rawList: (string | OptionItem)[] | undefined): 
     }
     return {
       name: item?.name || "",
-      priceAdd: Number(item?.priceAdd) || 0
+      priceAdd: Number(item?.priceAdd) || 0,
+      dozenCount: (item as any)?.dozenCount
     };
   });
 };
+
+export function getDozenCount(sizeName: string, sizeObj?: any): number {
+  if (sizeObj && typeof sizeObj.dozenCount === "number" && sizeObj.dozenCount > 0) {
+    return sizeObj.dozenCount;
+  }
+  const name = (sizeName || "").toLowerCase().trim();
+  if (name === "dozen" || name === "one dozen") return 1;
+  if (name === "two dozen") return 2;
+  if (name === "three dozen") return 3;
+  if (name === "four dozen") return 4;
+  if (name === "five dozen") return 5;
+  
+  console.warn(`[getDozenCount] Could not determine dozen count for size name: "${sizeName}". Defaulting to 1.`);
+  return 1;
+}
 
 export interface PricingInputItem {
   productId: string;
@@ -112,6 +128,10 @@ export async function calculateAuthoritativePricing(
     let selectedFullPrice: number | null = null;
     let sizePriceModifier = 0;
 
+    const isMiniCakes = product.category === "Mini Cakes" || product.name === "Mini Cakes";
+    let dozenCount = 1;
+    let addonPrice = 0;
+
     if (inputItem.size && activeSizes.length > 0) {
       const sizeObj = activeSizes.find(s => s.name === inputItem.size);
       if (!sizeObj) {
@@ -123,6 +143,10 @@ export async function calculateAuthoritativePricing(
         sizePriceModifier = sizeObj.priceAdd || 0;
       } else {
         selectedFullPrice = sizeObj.priceAdd || 0;
+      }
+
+      if (isMiniCakes) {
+        dozenCount = getDozenCount(inputItem.size, sizeObj);
       }
     }
 
@@ -146,7 +170,11 @@ export async function calculateAuthoritativePricing(
         if (!cfObj) {
           throw new Error(`Invalid cake flavor selection: "${cfName}" for product: ${product.name}`);
         }
-        itemUnitPrice += cfObj.priceAdd;
+        if (isMiniCakes) {
+          addonPrice += cfObj.priceAdd;
+        } else {
+          itemUnitPrice += cfObj.priceAdd;
+        }
       }
     }
 
@@ -170,7 +198,11 @@ export async function calculateAuthoritativePricing(
         if (!fObj) {
           throw new Error(`Invalid frosting selection: "${fName}" for product: ${product.name}`);
         }
-        itemUnitPrice += fObj.priceAdd;
+        if (isMiniCakes) {
+          addonPrice += fObj.priceAdd;
+        } else {
+          itemUnitPrice += fObj.priceAdd;
+        }
       }
     }
 
@@ -188,7 +220,11 @@ export async function calculateAuthoritativePricing(
         if (!dObj) {
           throw new Error(`Invalid drizzle selection: "${dName}" for product: ${product.name}`);
         }
-        itemUnitPrice += dObj.priceAdd;
+        if (isMiniCakes) {
+          addonPrice += dObj.priceAdd;
+        } else {
+          itemUnitPrice += dObj.priceAdd;
+        }
       }
     }
 
@@ -211,7 +247,11 @@ export async function calculateAuthoritativePricing(
           if (!sObj) {
             throw new Error(`Invalid sprinkle selection: "${sName}" for product: ${product.name}`);
           }
-          itemUnitPrice += sObj.priceAdd;
+          if (isMiniCakes) {
+            addonPrice += sObj.priceAdd;
+          } else {
+            itemUnitPrice += sObj.priceAdd;
+          }
         }
       }
     } else {
@@ -228,9 +268,21 @@ export async function calculateAuthoritativePricing(
           if (!tObj) {
             throw new Error(`Invalid topping selection: "${tName}" for product: ${product.name}`);
           }
-          itemUnitPrice += tObj.priceAdd;
+          if (isMiniCakes) {
+            addonPrice += tObj.priceAdd;
+          } else {
+            itemUnitPrice += tObj.priceAdd;
+          }
         }
       }
+    }
+
+    if (isMiniCakes) {
+      const basePriceCents = toCents(itemUnitPrice);
+      const addonSubtotalCents = toCents(addonPrice);
+      const scaledAddonTotalCents = addonSubtotalCents * dozenCount;
+      const unitPriceCents = basePriceCents + scaledAddonTotalCents;
+      itemUnitPrice = fromCents(unitPriceCents);
     }
 
     const unitPriceCents = toCents(itemUnitPrice);

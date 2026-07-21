@@ -77,21 +77,55 @@ async function runTests() {
       options: {},
       variations: [
         {
-          id: "var-normal",
+          id: "normal",
           name: "Normal Mini Cake",
           basePrice: 12.0,
+          sprinkleSelectionLimit: 5,
+          toppingSelectionLimit: 5,
           options: {
-            sizes: [{ name: "Small", priceAdd: 0 }],
-            flavors: [{ name: "Vanilla", priceAdd: 0 }]
+            sizes: [
+              { name: "One Dozen", priceAdd: 40.0 },
+              { name: "Two Dozen", priceAdd: 75.0 }
+            ],
+            cakeFlavors: [
+              { name: "Vanilla", priceAdd: 0 },
+              { name: "Marble Premium", priceAdd: 5.0 }
+            ],
+            flavors: [
+              { name: "Buttercream", priceAdd: 0 }
+            ],
+            drizzles: [
+              { name: "Chocolate Drizzle", priceAdd: 2.0 }
+            ],
+            sprinkles: [
+              { name: "Rainbow Sprinkles", priceAdd: 1.0 }
+            ]
           }
         },
         {
-          id: "var-specialty",
+          id: "specialty",
           name: "Specialty Mini Cake",
           basePrice: 18.0,
+          sprinkleSelectionLimit: 5,
+          toppingSelectionLimit: 5,
           options: {
-            sizes: [{ name: "Large", priceAdd: 4.0 }],
-            flavors: [{ name: "Choco Luxury", priceAdd: 2.5 }]
+            sizes: [
+              { name: "One Dozen", priceAdd: 40.0 },
+              { name: "Two Dozen", priceAdd: 75.0 }
+            ],
+            cakeFlavors: [
+              { name: "Vanilla", priceAdd: 0 },
+              { name: "Marble Premium", priceAdd: 5.0 }
+            ],
+            flavors: [
+              { name: "Buttercream", priceAdd: 0 }
+            ],
+            drizzles: [
+              { name: "Chocolate Drizzle", priceAdd: 2.0 }
+            ],
+            toppings: [
+              { name: "Rainbow Sprinkles", priceAdd: 1.0 }
+            ]
           }
         }
       ]
@@ -170,7 +204,7 @@ async function runTests() {
   // 2. Product variation base price
   {
     const result = await calculateAuthoritativePricing(
-      [{ productId: "prod-variations", variationId: "var-specialty", quantity: 1 }],
+      [{ productId: "prod-variations", variationId: "specialty", quantity: 1 }],
       undefined,
       "none",
       0,
@@ -474,6 +508,76 @@ async function runTests() {
       assert(e.message.includes("Invalid quantity"), "Negative quantity error message");
     }
     console.log("✅ Passed: 25. Invalid quantity check");
+  }
+
+  // 26. Mini Cakes Normal Per-Dozen Pricing Calculation (Two Dozen)
+  {
+    const result = await calculateAuthoritativePricing(
+      [{
+        productId: "prod-variations",
+        variationId: "normal",
+        quantity: 1,
+        size: "Two Dozen",
+        selectedCakeFlavors: ["Marble Premium"],
+        selectedDrizzles: ["Chocolate Drizzle"],
+        selectedSprinkles: ["Rainbow Sprinkles"]
+      }],
+      undefined,
+      "none",
+      0,
+      "pickup"
+    );
+    // Base (Two Dozen) = 75.0
+    // Add-ons per dozen = Marble Premium (5.0) + Chocolate Drizzle (2.0) + Rainbow Sprinkles (1.0) = 8.0
+    // Total for Two Dozen = 75.0 + (8.0 * 2) = 91.0 => 9100 cents
+    assert(result.subtotalCents === 9100, `Expected 9100 but got ${result.subtotalCents}`);
+    console.log("✅ Passed: 26. Mini Cakes Normal Per-Dozen Pricing (Two Dozen)");
+  }
+
+  // 27. Mini Cakes Specialty Per-Dozen Pricing Calculation (Two Dozen)
+  {
+    const result = await calculateAuthoritativePricing(
+      [{
+        productId: "prod-variations",
+        variationId: "specialty",
+        quantity: 1,
+        size: "Two Dozen",
+        selectedCakeFlavors: ["Marble Premium"],
+        selectedDrizzles: ["Chocolate Drizzle"],
+        selectedToppings: ["Rainbow Sprinkles"]
+      }],
+      undefined,
+      "none",
+      0,
+      "pickup"
+    );
+    // Base (Two Dozen) = 75.0
+    // Add-ons per dozen = Marble Premium (5.0) + Chocolate Drizzle (2.0) + Rainbow Sprinkles (1.0) = 8.0
+    // Total for Two Dozen = 75.0 + (8.0 * 2) = 91.0 => 9100 cents
+    assert(result.subtotalCents === 9100, `Expected 9100 but got ${result.subtotalCents}`);
+    console.log("✅ Passed: 27. Mini Cakes Specialty Per-Dozen Pricing (Two Dozen)");
+  }
+
+  // 28. Mini Cakes Normal Per-Dozen Pricing Calculation (One Dozen)
+  {
+    const result = await calculateAuthoritativePricing(
+      [{
+        productId: "prod-variations",
+        variationId: "normal",
+        quantity: 1,
+        size: "One Dozen",
+        selectedCakeFlavors: ["Marble Premium"]
+      }],
+      undefined,
+      "none",
+      0,
+      "pickup"
+    );
+    // Base (One Dozen) = 40.0
+    // Add-ons per dozen = Marble Premium (5.0) = 5.0
+    // Total for One Dozen = 40.0 + (5.0 * 1) = 45.0 => 4500 cents
+    assert(result.subtotalCents === 4500, `Expected 4500 but got ${result.subtotalCents}`);
+    console.log("✅ Passed: 28. Mini Cakes Normal Per-Dozen Pricing (One Dozen)");
   }
 
   console.log("\n✨ All Automated pricing tests completed successfully!");

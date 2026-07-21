@@ -256,6 +256,160 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
     setSelectedVarId(null);
   };
 
+  const getPriceSuffix = (priceAdd: number) => {
+    if (priceAdd <= 0) return "";
+    const isMiniCakes = selectedProduct && (selectedProduct.category === "Mini Cakes" || selectedProduct.name === "Mini Cakes");
+    if (isMiniCakes) {
+      return ` (+$${priceAdd.toFixed(2)} per dozen)`;
+    }
+    return ` (+$${priceAdd.toFixed(2)})`;
+  };
+
+  const getPriceLabel = (priceAdd: number) => {
+    if (priceAdd <= 0) return "Included";
+    const isMiniCakes = selectedProduct && (selectedProduct.category === "Mini Cakes" || selectedProduct.name === "Mini Cakes");
+    if (isMiniCakes) {
+      return `+$${priceAdd.toFixed(2)}/dozen`;
+    }
+    return `+$${priceAdd.toFixed(2)}`;
+  };
+
+  const getMiniCakesBreakdown = (item: OrderItem) => {
+    const product = products.find(p => p.id === item.productId);
+    if (!product) return null;
+    const isMiniCakes = product.category === "Mini Cakes" || product.name === "Mini Cakes";
+    if (!isMiniCakes) return null;
+
+    const activeVar = product.variations?.find(v => v.id === item.variationId);
+    const activeSizes = activeVar ? (activeVar.options.sizes || []) : (product.options.sizes || []);
+    
+    let selectedFullPrice: number | null = null;
+    let sizePriceModifier = 0;
+    let dozenCount = 1;
+
+    if (item.size && activeSizes.length > 0) {
+      const sizeObj = activeSizes.find(s => s.name === item.size);
+      if (sizeObj) {
+        const isAdditive = sizeObj.name.includes('+') || activeSizes.some(s => Number(s.priceAdd || 0) === 0);
+        if (isAdditive) {
+          sizePriceModifier = sizeObj.priceAdd || 0;
+        } else {
+          selectedFullPrice = sizeObj.priceAdd || 0;
+        }
+        
+        if (typeof (sizeObj as any).dozenCount === "number" && (sizeObj as any).dozenCount > 0) {
+          dozenCount = (sizeObj as any).dozenCount;
+        } else {
+          const nameLower = sizeObj.name.toLowerCase().trim();
+          if (nameLower === "dozen" || nameLower === "one dozen") dozenCount = 1;
+          else if (nameLower === "two dozen") dozenCount = 2;
+          else if (nameLower === "three dozen") dozenCount = 3;
+          else if (nameLower === "four dozen") dozenCount = 4;
+          else if (nameLower === "five dozen") dozenCount = 5;
+        }
+      }
+    }
+
+    if (selectedFullPrice === null) {
+      selectedFullPrice = activeVar ? activeVar.basePrice : product.basePrice;
+    }
+
+    const basePrice = selectedFullPrice + sizePriceModifier;
+    const breakdownItems: Array<{ name: string; unitPrice: number; totalPrice: number }> = [];
+
+    // Cake flavors
+    const rawCakeFlavors = activeVar ? activeVar.options?.cakeFlavors : product.options?.cakeFlavors;
+    const resolvedCakeFlavors = resolveToOptions(rawCakeFlavors);
+    if (item.selectedCakeFlavors && resolvedCakeFlavors) {
+      item.selectedCakeFlavors.forEach(cfName => {
+        const cfObj = resolvedCakeFlavors.find(cf => cf.name === cfName);
+        if (cfObj && cfObj.priceAdd > 0) {
+          breakdownItems.push({
+            name: cfName,
+            unitPrice: cfObj.priceAdd,
+            totalPrice: cfObj.priceAdd * dozenCount
+          });
+        }
+      });
+    }
+
+    // Frostings
+    const rawFrostings = activeVar ? (activeVar.options?.frostings || activeVar.options?.flavors) : (product.options?.frostings || product.options?.flavors);
+    const resolvedFrostings = resolveToOptions(rawFrostings);
+    const selectedFrostings = item.selectedFrostings || (item.flavor ? [item.flavor] : []);
+    if (selectedFrostings && resolvedFrostings) {
+      selectedFrostings.forEach(fName => {
+        const fObj = resolvedFrostings.find(f => f.name === fName);
+        if (fObj && fObj.priceAdd > 0) {
+          breakdownItems.push({
+            name: fName,
+            unitPrice: fObj.priceAdd,
+            totalPrice: fObj.priceAdd * dozenCount
+          });
+        }
+      });
+    }
+
+    // Drizzles
+    const rawDrizzles = activeVar ? activeVar.options?.drizzles : product.options?.drizzles;
+    const resolvedDrizzles = resolveToOptions(rawDrizzles);
+    const selectedDrizzles = item.selectedDrizzles || (item.selectedDrizzle ? [item.selectedDrizzle] : []);
+    if (selectedDrizzles && resolvedDrizzles) {
+      selectedDrizzles.forEach(dName => {
+        const dObj = resolvedDrizzles.find(d => d.name === dName);
+        if (dObj && dObj.priceAdd > 0) {
+          breakdownItems.push({
+            name: dName,
+            unitPrice: dObj.priceAdd,
+            totalPrice: dObj.priceAdd * dozenCount
+          });
+        }
+      });
+    }
+
+    // Toppings or Sprinkles
+    const isNormalMiniCakes = item.variationId === "normal";
+    if (isNormalMiniCakes) {
+      const rawSprinkles = activeVar?.options?.sprinkles !== undefined ? activeVar.options.sprinkles : (activeVar?.options?.toppings || activeVar?.options?.addOns);
+      const resolvedSprinkles = resolveToOptions(rawSprinkles);
+      const selectedSprinkles = item.selectedSprinkles || item.addOns || [];
+      if (selectedSprinkles && resolvedSprinkles) {
+        selectedSprinkles.forEach(sName => {
+          const sObj = resolvedSprinkles.find(s => s.name === sName);
+          if (sObj && sObj.priceAdd > 0) {
+            breakdownItems.push({
+              name: sName,
+              unitPrice: sObj.priceAdd,
+              totalPrice: sObj.priceAdd * dozenCount
+            });
+          }
+        });
+      }
+    } else {
+      const rawToppings = activeVar ? (activeVar.options?.toppings || activeVar.options?.addOns) : (product.options?.toppings || product.options?.addOns);
+      const resolvedToppings = resolveToOptions(rawToppings);
+      const selectedToppings = item.selectedToppings || item.addOns || [];
+      if (selectedToppings && resolvedToppings) {
+        selectedToppings.forEach(tName => {
+          const tObj = resolvedToppings.find(t => t.name === tName);
+          if (tObj && tObj.priceAdd > 0) {
+            breakdownItems.push({
+              name: tName,
+              unitPrice: tObj.priceAdd,
+              totalPrice: tObj.priceAdd * dozenCount
+            });
+          }
+        });
+      }
+    }
+
+    return {
+      basePrice,
+      dozenCount,
+      breakdownItems
+    };
+  };
+
   // Live item total calculation
   const getSelectedProductPrice = () => {
     if (!selectedProduct) return 0;
@@ -285,12 +439,35 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
 
     price = selectedFullPrice + sizePriceModifier;
 
+    const isMiniCakes = selectedProduct.category === "Mini Cakes" || selectedProduct.name === "Mini Cakes";
+    let dozenCount = 1;
+    let addonPrice = 0;
+
+    if (isMiniCakes && choiceSize && activeSizes.length > 0) {
+      const sizeObj = activeSizes.find(s => s.name === choiceSize);
+      if (sizeObj) {
+        if (typeof (sizeObj as any).dozenCount === "number" && (sizeObj as any).dozenCount > 0) {
+          dozenCount = (sizeObj as any).dozenCount;
+        } else {
+          const nameLower = sizeObj.name.toLowerCase().trim();
+          if (nameLower === "dozen" || nameLower === "one dozen") dozenCount = 1;
+          else if (nameLower === "two dozen") dozenCount = 2;
+          else if (nameLower === "three dozen") dozenCount = 3;
+          else if (nameLower === "four dozen") dozenCount = 4;
+          else if (nameLower === "five dozen") dozenCount = 5;
+        }
+      }
+    }
+
     // Cake Flavor price addition
     const rawCakeFlavors = activeVar ? activeVar.options?.cakeFlavors : selectedProduct.options?.cakeFlavors;
     const resolvedCakeFlavors = resolveToOptions(rawCakeFlavors);
     if (choiceCakeFlavor && resolvedCakeFlavors) {
       const cakeFlavorObj = resolvedCakeFlavors.find(cf => cf.name === choiceCakeFlavor);
-      if (cakeFlavorObj) price += cakeFlavorObj.priceAdd;
+      if (cakeFlavorObj) {
+        if (isMiniCakes) addonPrice += cakeFlavorObj.priceAdd;
+        else price += cakeFlavorObj.priceAdd;
+      }
     }
 
     // Frosting price addition
@@ -299,7 +476,10 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
     const selectedFrostingVal = choiceFrosting || choiceFlavor;
     if (selectedFrostingVal && resolvedFrostings) {
       const frostingObj = resolvedFrostings.find(f => f.name === selectedFrostingVal);
-      if (frostingObj) price += frostingObj.priceAdd;
+      if (frostingObj) {
+        if (isMiniCakes) addonPrice += frostingObj.priceAdd;
+        else price += frostingObj.priceAdd;
+      }
     }
 
     // Drizzle price addition
@@ -308,7 +488,10 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
     if (choiceDrizzle && choiceDrizzle.length > 0 && resolvedDrizzles) {
       choiceDrizzle.forEach(dName => {
         const drizzleObj = resolvedDrizzles.find(d => d.name === dName);
-        if (drizzleObj) price += drizzleObj.priceAdd;
+        if (drizzleObj) {
+          if (isMiniCakes) addonPrice += drizzleObj.priceAdd;
+          else price += drizzleObj.priceAdd;
+        }
       });
     }
 
@@ -320,7 +503,10 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
       if (choiceSprinkles && choiceSprinkles.length > 0 && resolvedSprinkles) {
         choiceSprinkles.forEach(sName => {
           const sprinkleObj = resolvedSprinkles.find(s => s.name === sName);
-          if (sprinkleObj) price += sprinkleObj.priceAdd;
+          if (sprinkleObj) {
+            if (isMiniCakes) addonPrice += sprinkleObj.priceAdd;
+            else price += sprinkleObj.priceAdd;
+          }
         });
       }
     } else {
@@ -331,8 +517,17 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
       const selectedToppingName = choiceAddOns[0];
       if (selectedToppingName && resolvedToppings) {
         const toppingObj = resolvedToppings.find(t => t.name === selectedToppingName);
-        if (toppingObj) price += toppingObj.priceAdd;
+        if (toppingObj) {
+          if (isMiniCakes) addonPrice += toppingObj.priceAdd;
+          else price += toppingObj.priceAdd;
+        }
       }
+    }
+
+    if (isMiniCakes) {
+      const baseCents = Math.round(price * 100);
+      const addonCents = Math.round(addonPrice * 100);
+      price = (baseCents + addonCents * dozenCount) / 100;
     }
 
     return price;
@@ -927,6 +1122,26 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
                           </div>
                         </div>
                       )}
+                      {(() => {
+                        const bd = getMiniCakesBreakdown(item);
+                        if (!bd) return null;
+                        return (
+                          <div className="mt-2 p-2 bg-brand-pink/5 rounded-lg border border-brand-pink/10 space-y-1 text-[10px] text-brand-chocolate/75 font-semibold">
+                            <div className="flex justify-between">
+                              <span>Base Price ({item.size}):</span>
+                              <span>${bd.basePrice.toFixed(2)}</span>
+                            </div>
+                            {bd.breakdownItems.map((bi, i) => (
+                              <div key={i} className="flex justify-between">
+                                <span className="capitalize">{bi.name}:</span>
+                                <span className="text-right">
+                                  ${bi.unitPrice.toFixed(2)} × {bd.dozenCount} doz = ${bi.totalPrice.toFixed(2)}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        );
+                      })()}
                     </div>
                     <span className="font-bold text-brand-chocolate shrink-0">
                       ${item.totalPrice.toFixed(2)}
@@ -1513,7 +1728,7 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
                     <option value="" disabled>-- Select Cake Flavor --</option>
                     {resolvedCakeFlavors.map(cf => (
                       <option key={cf.name} value={cf.name}>
-                        {cf.name} {cf.priceAdd > 0 ? `(+$${cf.priceAdd.toFixed(2)})` : ""}
+                        {cf.name}{getPriceSuffix(cf.priceAdd)}
                       </option>
                     ))}
                   </select>
@@ -1537,7 +1752,7 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
                     <option value="" disabled>-- Select Frosting --</option>
                     {resolvedFrostings.map(f => (
                       <option key={f.name} value={f.name}>
-                        {f.name} {f.priceAdd > 0 ? `(+$${f.priceAdd.toFixed(2)})` : ""}
+                        {f.name}{getPriceSuffix(f.priceAdd)}
                       </option>
                     ))}
                   </select>
@@ -1586,7 +1801,7 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
                               <span>{d.name}</span>
                             </div>
                             <span className="text-brand-rosegold font-semibold">
-                              {d.priceAdd > 0 ? `+$${d.priceAdd.toFixed(2)}` : "Included"}
+                              {getPriceLabel(d.priceAdd)}
                             </span>
                           </label>
                         );
@@ -1644,7 +1859,7 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
                                 <span>{s.name}</span>
                               </div>
                               <span className="text-brand-rosegold font-semibold">
-                                {s.priceAdd > 0 ? `+$${s.priceAdd.toFixed(2)}` : "Included"}
+                                {getPriceLabel(s.priceAdd)}
                               </span>
                             </label>
                           );
@@ -1667,7 +1882,7 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
                         <option value="" disabled>-- Select Topping --</option>
                         {resolvedToppings.map(t => (
                           <option key={t.name} value={t.name}>
-                            {t.name} {t.priceAdd > 0 ? `(+$${t.priceAdd.toFixed(2)})` : ""}
+                            {t.name}{getPriceSuffix(t.priceAdd)}
                           </option>
                         ))}
                       </select>
