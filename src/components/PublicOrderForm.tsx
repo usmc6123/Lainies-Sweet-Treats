@@ -259,14 +259,29 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
     if (!selectedProduct) return 0;
     
     const activeVar = selectedProduct.variations?.find(v => v.id === selectedVarId);
-    let price = activeVar ? activeVar.basePrice : selectedProduct.basePrice;
-
-    // Size price addition
     const activeSizes = activeVar ? (activeVar.options.sizes || []) : (selectedProduct.options.sizes || []);
-    if (choiceSize && activeSizes) {
+    
+    let price = 0;
+    let selectedFullPrice: number | null = null;
+    let sizePriceModifier = 0;
+
+    if (choiceSize && activeSizes.length > 0) {
       const sizeObj = activeSizes.find(s => s.name === choiceSize);
-      if (sizeObj) price += sizeObj.priceAdd;
+      if (sizeObj) {
+        const isAdditive = sizeObj.name.includes('+') || activeSizes.some(s => Number(s.priceAdd || 0) === 0);
+        if (isAdditive) {
+          sizePriceModifier = sizeObj.priceAdd || 0;
+        } else {
+          selectedFullPrice = sizeObj.priceAdd || 0;
+        }
+      }
     }
+
+    if (selectedFullPrice === null) {
+      selectedFullPrice = activeVar ? activeVar.basePrice : selectedProduct.basePrice;
+    }
+
+    price = selectedFullPrice + sizePriceModifier;
 
     // Cake Flavor price addition
     const rawCakeFlavors = activeVar ? activeVar.options?.cakeFlavors : selectedProduct.options?.cakeFlavors;

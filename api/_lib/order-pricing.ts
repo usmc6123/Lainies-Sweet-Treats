@@ -105,17 +105,30 @@ export async function calculateAuthoritativePricing(
       }
     }
 
-    let itemUnitPrice = activeVar ? activeVar.basePrice : product.basePrice;
-
-    // Validate Size
     const activeSizes = activeVar ? (activeVar.options?.sizes || []) : (product.options?.sizes || []);
+    let itemUnitPrice = 0;
+    let selectedFullPrice: number | null = null;
+    let sizePriceModifier = 0;
+
     if (inputItem.size && activeSizes.length > 0) {
       const sizeObj = activeSizes.find(s => s.name === inputItem.size);
       if (!sizeObj) {
         throw new Error(`Invalid size selected: "${inputItem.size}" for product: ${product.name}`);
       }
-      itemUnitPrice += sizeObj.priceAdd;
+      
+      const isAdditive = sizeObj.name.includes('+') || activeSizes.some(s => Number(s.priceAdd || 0) === 0);
+      if (isAdditive) {
+        sizePriceModifier = sizeObj.priceAdd || 0;
+      } else {
+        selectedFullPrice = sizeObj.priceAdd || 0;
+      }
     }
+
+    if (selectedFullPrice === null) {
+      selectedFullPrice = activeVar ? activeVar.basePrice : product.basePrice;
+    }
+
+    itemUnitPrice = selectedFullPrice + sizePriceModifier;
 
     // Validate Cake Flavors
     const rawCakeFlavors = activeVar ? activeVar.options?.cakeFlavors : product.options?.cakeFlavors;
