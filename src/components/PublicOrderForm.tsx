@@ -935,36 +935,7 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
           <div className="lg:col-span-2 xl:col-span-3 space-y-8">
             {/* Search & Product items block */}
             <div className="w-full space-y-6">
-              {/* Search Bar Block */}
-              <div className="relative">
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search sweet treats by name, ingredient, or category..."
-                  className="w-full bg-white border border-brand-rosegold/50 text-xs sm:text-sm text-brand-chocolate px-5 py-3.5 rounded-full pl-12 focus:outline-none focus:ring-2 focus:ring-brand-pink placeholder-brand-chocolate/40 transition-all font-medium shadow-md"
-                />
-              <svg className="h-4.5 w-4.5 text-brand-chocolate/40 absolute left-4.5 top-4 md:top-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-              </svg>
-              {searchQuery && (
-                <button 
-                  type="button"
-                  onClick={() => setSearchQuery("")}
-                  className="absolute right-4.5 top-3.5 md:top-4 text-brand-chocolate/60 hover:text-brand-chocolate hover:scale-110 text-xs font-black p-1 transition-transform"
-                >
-                  ✕
-                </button>
-              )}
-            </div>
-
-            {searchQuery && (
-              <p className="text-xs text-brand-chocolate/70 pl-2 font-semibold">
-                Showing results for "<span className="text-brand-rosegold font-bold">{searchQuery}</span>" ({filteredProducts.length} items found)
-              </p>
-            )}
-
-            {/* Product Items grid */}
+              {/* Product Items grid */}
             {filteredProducts.length === 0 ? (
               <div className="bg-white border border-brand-pink/15 rounded-[1.5rem] p-12 text-center space-y-4 shadow-md">
                 <div className="text-4xl text-brand-rosegold">🧁🔍</div>
