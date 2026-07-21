@@ -743,21 +743,37 @@ export default async function handler(req: any, res: any) {
       // PRODUCTS
       // ------------------------------------------
       case "products": {
-        if (req.method === 'POST') {
-          const newProduct = await dbService.insert("products", req.body);
-          return res.status(201).json(newProduct);
-        }
+        try {
+          if (req.method === 'POST') {
+            const newProduct = await dbService.insert("products", req.body);
+            return res.status(201).json(newProduct);
+          }
 
-        if (req.method === 'PUT') {
-          if (!id) return res.status(400).json({ error: "Missing product ID in URL" });
-          const updatedProduct = await dbService.update("products", id, req.body);
-          return res.status(200).json(updatedProduct);
-        }
+          if (req.method === 'PUT') {
+            if (!id) return res.status(400).json({ error: "Missing product ID in URL" });
+            const updatedProduct = await dbService.update("products", id, req.body);
+            return res.status(200).json(updatedProduct);
+          }
 
-        if (req.method === 'DELETE') {
-          if (!id) return res.status(400).json({ error: "Missing product ID in URL" });
-          await dbService.delete("products", id);
-          return res.status(200).json({ success: true });
+          if (req.method === 'DELETE') {
+            if (!id) return res.status(400).json({ error: "Missing product ID in URL" });
+            await dbService.delete("products", id);
+            return res.status(200).json({ success: true });
+          }
+        } catch (dbError: any) {
+          console.error("[Diagnostics] Firestore Product Operation Failed:", {
+            action: req.method === 'POST' ? 'INSERT' : req.method === 'PUT' ? 'UPDATE' : 'DELETE',
+            collection: 'products',
+            documentId: id || 'N/A',
+            payloadKeys: req.body ? Object.keys(req.body) : [],
+            payloadKeysCount: req.body ? Object.keys(req.body).length : 0,
+            errorMessage: dbError.message,
+            stack: dbError.stack
+          });
+          return res.status(500).json({
+            error: `Database save failed: ${dbError.message}`,
+            details: dbError.stack || dbError.message
+          });
         }
         break;
       }

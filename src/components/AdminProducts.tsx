@@ -98,6 +98,8 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
 
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [initialFormState, setInitialFormState] = useState<any>(null);
 
   const handleSlotFileChange = async (e: React.ChangeEvent<HTMLInputElement>, slotIndex: number) => {
     const file = e.target.files?.[0];
@@ -537,6 +539,45 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
       setDrizzleSelectionLimit(p.drizzleSelectionLimit ?? 1);
       setToppingSelectionLimit(p.toppingSelectionLimit ?? 1);
     }
+
+    const initialSnapshot = {
+      name: p.name,
+      description: p.description,
+      category: p.category,
+      basePrice: Number(p.basePrice),
+      isVisible: p.isVisible !== false,
+      photos: pPhotos,
+      sizes: productVariations.length > 0 
+        ? (productVariations.find(v => v.id === "normal")?.options.sizes || []) 
+        : (p.options.sizes || []),
+      cakeFlavors: productVariations.length > 0 
+        ? normalizeOptions(productVariations.find(v => v.id === "normal")?.options.cakeFlavors) 
+        : normalizeOptions(p.options.cakeFlavors),
+      frostings: productVariations.length > 0 
+        ? normalizeOptions(productVariations.find(v => v.id === "normal")?.options.frostings || productVariations.find(v => v.id === "normal")?.options.flavors) 
+        : normalizeOptions(p.options.frostings || p.options.flavors),
+      toppings: productVariations.length > 0 
+        ? normalizeOptions(productVariations.find(v => v.id === "normal")?.options.toppings || productVariations.find(v => v.id === "normal")?.options.addOns) 
+        : normalizeOptions(p.options.toppings || p.options.addOns),
+      drizzles: productVariations.length > 0 
+        ? normalizeOptions(productVariations.find(v => v.id === "normal")?.options.drizzles) 
+        : normalizeOptions(p.options.drizzles),
+      cakeFlavorSelectionLimit: productVariations.length > 0 
+        ? (productVariations.find(v => v.id === "normal")?.cakeFlavorSelectionLimit ?? 1) 
+        : (p.cakeFlavorSelectionLimit ?? 1),
+      frostingSelectionLimit: productVariations.length > 0 
+        ? (productVariations.find(v => v.id === "normal")?.frostingSelectionLimit ?? productVariations.find(v => v.id === "normal")?.flavorSelectionLimit ?? 1) 
+        : (p.frostingSelectionLimit ?? p.flavorSelectionLimit ?? 1),
+      drizzleSelectionLimit: productVariations.length > 0 
+        ? (productVariations.find(v => v.id === "normal")?.drizzleSelectionLimit ?? 1) 
+        : (p.drizzleSelectionLimit ?? 1),
+      toppingSelectionLimit: productVariations.length > 0 
+        ? (productVariations.find(v => v.id === "normal")?.toppingSelectionLimit ?? 1) 
+        : (p.toppingSelectionLimit ?? 1),
+      currentVariations: productVariations.length > 0 ? productVariations : undefined,
+      prodIngredients: p.ingredients || []
+    };
+    setInitialFormState(initialSnapshot);
   };
 
   const handleNewClick = () => {
@@ -567,6 +608,27 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
 
     setActiveVarId(null);
     setCurrentVariations(undefined);
+
+    const initialSnapshot = {
+      name: "",
+      description: "",
+      category: "Mini Cakes",
+      basePrice: 0,
+      isVisible: true,
+      photos: [],
+      sizes: [],
+      cakeFlavors: [],
+      frostings: [],
+      toppings: [],
+      drizzles: [],
+      cakeFlavorSelectionLimit: 1,
+      frostingSelectionLimit: 1,
+      drizzleSelectionLimit: 1,
+      toppingSelectionLimit: 1,
+      currentVariations: undefined,
+      prodIngredients: []
+    };
+    setInitialFormState(initialSnapshot);
   };
 
   const handleAddSizeOption = () => {
@@ -809,15 +871,157 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
     return 0;
   });
 
-  const handleSaveProduct = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!name) return;
+  const checkIsDirty = (): boolean => {
+    if (!initialFormState) return false;
+    
+    // Helper to deeply compare options
+    const compareOptions = (arr1: any[] | undefined, arr2: any[] | undefined) => {
+      const a1 = arr1 || [];
+      const a2 = arr2 || [];
+      if (a1.length !== a2.length) return false;
+      for (let i = 0; i < a1.length; i++) {
+        const item1 = a1[i];
+        const item2 = a2[i];
+        if (!item1 || !item2) return false;
+        if (typeof item1 === 'string' || typeof item2 === 'string') {
+          const name1 = typeof item1 === 'string' ? item1 : item1.name;
+          const name2 = typeof item2 === 'string' ? item2 : item2.name;
+          if (name1 !== name2) return false;
+        } else {
+          if (item1.name !== item2.name || Number(item1.priceAdd) !== Number(item2.priceAdd)) {
+            return false;
+          }
+        }
+      }
+      return true;
+    };
 
+    // Helper to compare photos
+    const comparePhotos = (p1: any[] | undefined, p2: any[] | undefined) => {
+      const a1 = p1 || [];
+      const a2 = p2 || [];
+      if (a1.length !== a2.length) return false;
+      for (let i = 0; i < a1.length; i++) {
+        if (a1[i].url !== a2[i].url || !!a1[i].isPrimary !== !!a2[i].isPrimary) {
+          return false;
+        }
+      }
+      return true;
+    };
+
+    // Helper to compare ingredients
+    const compareIngredients = (i1: any[] | undefined, i2: any[] | undefined) => {
+      const a1 = i1 || [];
+      const a2 = i2 || [];
+      if (a1.length !== a2.length) return false;
+      for (let i = 0; i < a1.length; i++) {
+        if (a1[i].ingredientId !== a2[i].ingredientId || Number(a1[i].quantity) !== Number(a2[i].quantity)) {
+          return false;
+        }
+      }
+      return true;
+    };
+
+    // Helper to compare variations
+    const compareVariations = (v1?: any[], v2?: any[]) => {
+      if (!v1 && !v2) return true;
+      if (!v1 || !v2) return false;
+      if (v1.length !== v2.length) return false;
+      for (let i = 0; i < v1.length; i++) {
+        const var1 = v1[i];
+        const var2 = v2[i];
+        if (var1.id !== var2.id || var1.name !== var2.name || Number(var1.basePrice) !== Number(var2.basePrice)) {
+          return false;
+        }
+        if ((var1.description || "") !== (var2.description || "")) return false;
+        if (!comparePhotos(var1.photos || [], var2.photos || [])) return false;
+        if ((var1.cakeFlavorSelectionLimit ?? 1) !== (var2.cakeFlavorSelectionLimit ?? 1)) return false;
+        if ((var1.frostingSelectionLimit ?? var1.flavorSelectionLimit ?? 1) !== (var2.frostingSelectionLimit ?? var2.flavorSelectionLimit ?? 1)) return false;
+        if ((var1.drizzleSelectionLimit ?? 1) !== (var2.drizzleSelectionLimit ?? 1)) return false;
+        if ((var1.toppingSelectionLimit ?? 1) !== (var2.toppingSelectionLimit ?? 1)) return false;
+        
+        // compare variation options
+        const o1 = var1.options || {};
+        const o2 = var2.options || {};
+        if (!compareOptions(o1.sizes, o2.sizes)) return false;
+        if (!compareOptions(o1.cakeFlavors, o2.cakeFlavors)) return false;
+        if (!compareOptions(o1.frostings || o1.flavors, o2.frostings || o2.flavors)) return false;
+        if (!compareOptions(o1.toppings || o1.addOns, o2.toppings || o2.addOns)) return false;
+        if (!compareOptions(o1.drizzles, o2.drizzles)) return false;
+      }
+      return true;
+    };
+
+    const currentCategory = useCustomCategory ? customCategory.trim() : category;
+
+    if (name !== initialFormState.name) return true;
+    if (description !== initialFormState.description) return true;
+    if (currentCategory !== initialFormState.category) return true;
+    if (Number(basePrice) !== initialFormState.basePrice) return true;
+    if (!!isVisible !== !!initialFormState.isVisible) return true;
+    if (cakeFlavorSelectionLimit !== initialFormState.cakeFlavorSelectionLimit) return true;
+    if (frostingSelectionLimit !== initialFormState.frostingSelectionLimit) return true;
+    if (drizzleSelectionLimit !== initialFormState.drizzleSelectionLimit) return true;
+    if (toppingSelectionLimit !== initialFormState.toppingSelectionLimit) return true;
+
+    if (!comparePhotos(photos, initialFormState.photos)) return true;
+    if (!compareOptions(sizes, initialFormState.sizes)) return true;
+    if (!compareOptions(cakeFlavors, initialFormState.cakeFlavors)) return true;
+    if (!compareOptions(frostings, initialFormState.frostings)) return true;
+    if (!compareOptions(toppings, initialFormState.toppings)) return true;
+    if (!compareOptions(drizzles, initialFormState.drizzles)) return true;
+    if (!compareIngredients(prodIngredients, initialFormState.prodIngredients)) return true;
+
+    let virtualVariations = currentVariations;
+    if (activeVarId && currentVariations) {
+      virtualVariations = currentVariations.map(v => {
+        if (v.id === activeVarId) {
+          return {
+            ...v,
+            basePrice: Number(basePrice),
+            description,
+            photos,
+            options: {
+              sizes,
+              cakeFlavors,
+              flavors: frostings,
+              frostings,
+              toppings,
+              drizzles,
+              addOns: toppings
+            },
+            cakeFlavorSelectionLimit,
+            flavorSelectionLimit: frostingSelectionLimit,
+            frostingSelectionLimit,
+            drizzleSelectionLimit,
+            toppingSelectionLimit
+          };
+        }
+        return v;
+      });
+    }
+
+    if (!compareVariations(virtualVariations, initialFormState.currentVariations)) return true;
+
+    return false;
+  };
+
+  const isDirty = checkIsDirty();
+
+  const handlePublishClick = async () => {
+    if (uploading || saving) return;
+    if (!name || name.trim() === "") {
+      alert("Please enter a valid product name.");
+      return;
+    }
+    
     const finalCategory = useCustomCategory ? customCategory.trim() : category;
-    if (!finalCategory) {
+    if (!finalCategory || finalCategory.trim() === "") {
       alert("Please select or enter a valid category name.");
       return;
     }
+
+    setSaving(true);
 
     let finalVariations = currentVariations;
     let finalBasePrice = Number(basePrice);
@@ -862,8 +1066,6 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
       });
       finalVariations = updated;
       
-      // Keep the product level basePrice/options/description/photos equal to the "Normal" variation
-      // so it remains 100% backward-compatible and does not break list/summary views
       const normalVar = updated.find(v => v.id === "normal") || updated[0];
       finalBasePrice = normalVar.basePrice;
       finalOptions = normalVar.options;
@@ -874,6 +1076,7 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
     // Validation:
     if (finalBasePrice < 0 || isNaN(finalBasePrice)) {
       alert("Price cannot be negative or invalid.");
+      setSaving(false);
       return;
     }
 
@@ -882,53 +1085,110 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
       const duplicate = ids.some((val, i) => ids.indexOf(val) !== i);
       if (duplicate) {
         alert("Duplicate variation IDs are not allowed.");
+        setSaving(false);
         return;
       }
 
       for (const v of finalVariations) {
         if (!v.name || v.name.trim() === "") {
           alert("All variations must have a valid name.");
+          setSaving(false);
           return;
         }
         if (v.basePrice < 0 || isNaN(v.basePrice)) {
           alert(`Variation ${v.name} cannot have a negative or invalid price.`);
+          setSaving(false);
           return;
         }
       }
     }
 
-    const primaryPhoto = finalPhotos.find(ph => ph.isPrimary) || finalPhotos[0];
+    const cleanList = (list: any[]) => {
+      if (!list) return [];
+      return list
+        .map(item => {
+          if (!item) return null;
+          if (typeof item === 'string') {
+            return { name: item.trim(), priceAdd: 0 };
+          }
+          const optionName = (item.name || "").trim();
+          const priceAdd = Number(item.priceAdd);
+          if (!optionName) return null;
+          return {
+            name: optionName,
+            priceAdd: isNaN(priceAdd) || priceAdd < 0 ? 0 : priceAdd
+          };
+        })
+        .filter(Boolean);
+    };
+
+    const normalizePayloadOptions = (opts: any) => {
+      if (!opts) return {};
+      return {
+        sizes: cleanList(opts.sizes),
+        cakeFlavors: cleanList(opts.cakeFlavors),
+        flavors: cleanList(opts.frostings || opts.flavors),
+        frostings: cleanList(opts.frostings || opts.flavors),
+        toppings: cleanList(opts.toppings || opts.addOns),
+        drizzles: cleanList(opts.drizzles),
+        addOns: cleanList(opts.toppings || opts.addOns)
+      };
+    };
+
+    const cleanLimit = (val: any) => {
+      const parsed = parseInt(val, 10);
+      return isNaN(parsed) || parsed < 0 ? 1 : parsed;
+    };
+
+    const cleanPhotos = finalPhotos.map((ph: any) => ({
+      url: ph.url || "",
+      isPrimary: !!ph.isPrimary
+    })).filter(ph => ph.url);
+
+    const primaryPhoto = cleanPhotos.find(ph => ph.isPrimary) || cleanPhotos[0];
     const finalImgUrl = primaryPhoto ? primaryPhoto.url : "";
 
     const payload: any = {
-      name,
-      description: finalDescription,
+      name: name.trim(),
+      description: finalDescription ? finalDescription.trim() : "",
       category: finalCategory,
       basePrice: Number(finalBasePrice),
       imgUrl: finalImgUrl,
-      photos: finalPhotos,
+      photos: cleanPhotos,
       isVisible: isVisible !== false,
-      options: finalOptions,
-      ingredients: prodIngredients,
-      cakeFlavorSelectionLimit: (activeVarId && finalVariations)
+      options: normalizePayloadOptions(finalOptions),
+      ingredients: prodIngredients || [],
+      cakeFlavorSelectionLimit: cleanLimit((activeVarId && finalVariations)
         ? (finalVariations.find(v => v.id === "normal")?.cakeFlavorSelectionLimit ?? 1)
-        : cakeFlavorSelectionLimit,
-      flavorSelectionLimit: (activeVarId && finalVariations)
+        : cakeFlavorSelectionLimit),
+      flavorSelectionLimit: cleanLimit((activeVarId && finalVariations)
         ? (finalVariations.find(v => v.id === "normal")?.frostingSelectionLimit ?? 1)
-        : frostingSelectionLimit,
-      frostingSelectionLimit: (activeVarId && finalVariations)
+        : frostingSelectionLimit),
+      frostingSelectionLimit: cleanLimit((activeVarId && finalVariations)
         ? (finalVariations.find(v => v.id === "normal")?.frostingSelectionLimit ?? 1)
-        : frostingSelectionLimit,
-      drizzleSelectionLimit: (activeVarId && finalVariations)
+        : frostingSelectionLimit),
+      drizzleSelectionLimit: cleanLimit((activeVarId && finalVariations)
         ? (finalVariations.find(v => v.id === "normal")?.drizzleSelectionLimit ?? 1)
-        : drizzleSelectionLimit,
-      toppingSelectionLimit: (activeVarId && finalVariations)
+        : drizzleSelectionLimit),
+      toppingSelectionLimit: cleanLimit((activeVarId && finalVariations)
         ? (finalVariations.find(v => v.id === "normal")?.toppingSelectionLimit ?? 1)
-        : toppingSelectionLimit
+        : toppingSelectionLimit)
     };
 
     if (finalVariations) {
-      payload.variations = finalVariations;
+      payload.variations = finalVariations.map((v: any) => ({
+        id: v.id,
+        name: (v.name || "").trim(),
+        basePrice: isNaN(Number(v.basePrice)) || Number(v.basePrice) < 0 ? 0 : Number(v.basePrice),
+        description: (v.description || "").trim(),
+        photos: (v.photos || []).map((ph: any) => ({ url: ph.url || "", isPrimary: !!ph.isPrimary })).filter((ph: any) => ph.url),
+        options: normalizePayloadOptions(v.options),
+        cakeFlavorSelectionLimit: cleanLimit(v.cakeFlavorSelectionLimit),
+        flavorSelectionLimit: cleanLimit(v.frostingSelectionLimit ?? v.flavorSelectionLimit),
+        frostingSelectionLimit: cleanLimit(v.frostingSelectionLimit ?? v.flavorSelectionLimit),
+        drizzleSelectionLimit: cleanLimit(v.drizzleSelectionLimit),
+        toppingSelectionLimit: cleanLimit(v.toppingSelectionLimit)
+      }));
     }
 
     try {
@@ -971,11 +1231,30 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
         setEditingProduct(null);
         setIsAdding(false);
         triggerRefresh();
-        alert("Product catalog changes saved successfully.");
+        alert("Catalog changes published successfully.");
+      } else {
+        const errData = await res.json().catch(() => ({}));
+        const errMsg = errData.error || `Server responded with status ${res.status}`;
+        if (res.status === 401 || res.status === 403) {
+          alert(`Your admin session has expired. Please sign in again. (Details: ${errMsg})`);
+          localStorage.removeItem("lainie_admin_token");
+          localStorage.removeItem("lainie_admin_email");
+          window.location.href = "/";
+        } else {
+          alert(`Failed to save changes: ${errMsg}`);
+        }
       }
-    } catch {
-      alert("Error uploading product payload.");
+    } catch (err: any) {
+      console.error("Save catalog failed:", err);
+      alert(`Error publishing catalog changes: ${err.message || err}`);
+    } finally {
+      setSaving(false);
     }
+  };
+
+  const handleSaveProduct = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await handlePublishClick();
   };
 
   const handleDeleteProduct = async (productId: string) => {
@@ -2303,16 +2582,17 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
           </div>
 
           <button
-            type="submit"
-            disabled={uploading}
+            type="button"
+            onClick={handlePublishClick}
+            disabled={uploading || saving || !isDirty}
             className={`w-full py-4 rounded-xl text-sm font-bold transition shadow-sm flex items-center justify-center space-x-2 ${
-              uploading 
+              (uploading || saving || !isDirty)
                 ? "bg-gray-300 text-gray-500 cursor-not-allowed opacity-75" 
                 : "bg-brand-chocolate text-brand-cream hover:bg-brand-chocolate/95 cursor-pointer"
             }`}
           >
             <Sparkles className="h-5 w-5 text-brand-pink animate-pulse" />
-            <span>{uploading ? "Image Uploading..." : "Publish Catalog Changes"}</span>
+            <span>{saving ? "Publishing..." : uploading ? "Image Uploading..." : "Publish Catalog Changes"}</span>
           </button>
         </form>
       ) : (
