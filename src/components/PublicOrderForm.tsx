@@ -144,6 +144,7 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
   const [choiceFrosting, setChoiceFrosting] = useState<string>("");
   const [choiceDrizzle, setChoiceDrizzle] = useState<string[]>([]);
   const [choiceAddOns, setChoiceAddOns] = useState<string[]>([]);
+  const [choiceSprinkles, setChoiceSprinkles] = useState<string[]>([]);
   const [choiceQty, setChoiceQty] = useState<number>(1);
 
   // Reset variation and selections on product change
@@ -156,6 +157,7 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
       setChoiceFrosting("");
       setChoiceDrizzle([]);
       setChoiceAddOns([]);
+      setChoiceSprinkles([]);
       setChoiceQty(1);
     }
   }, [selectedProduct]);
@@ -310,15 +312,27 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
       });
     }
 
-    // Topping price addition
-    const rawToppings = activeVar 
-      ? (activeVar.options?.toppings || activeVar.options?.addOns) 
-      : (selectedProduct.options?.toppings || selectedProduct.options?.addOns);
-    const resolvedToppings = resolveToOptions(rawToppings);
-    const selectedToppingName = choiceAddOns[0];
-    if (selectedToppingName && resolvedToppings) {
-      const toppingObj = resolvedToppings.find(t => t.name === selectedToppingName);
-      if (toppingObj) price += toppingObj.priceAdd;
+    // Topping or Sprinkle price addition
+    const isNormalMiniCakes = (selectedProduct.category === "Mini Cakes" || selectedProduct.name === "Mini Cakes") && selectedVarId === "normal";
+    if (isNormalMiniCakes) {
+      const rawSprinkles = activeVar?.options?.sprinkles !== undefined ? activeVar.options.sprinkles : (activeVar?.options?.toppings || activeVar?.options?.addOns);
+      const resolvedSprinkles = resolveToOptions(rawSprinkles);
+      if (choiceSprinkles && choiceSprinkles.length > 0 && resolvedSprinkles) {
+        choiceSprinkles.forEach(sName => {
+          const sprinkleObj = resolvedSprinkles.find(s => s.name === sName);
+          if (sprinkleObj) price += sprinkleObj.priceAdd;
+        });
+      }
+    } else {
+      const rawToppings = activeVar 
+        ? (activeVar.options?.toppings || activeVar.options?.addOns) 
+        : (selectedProduct.options?.toppings || selectedProduct.options?.addOns);
+      const resolvedToppings = resolveToOptions(rawToppings);
+      const selectedToppingName = choiceAddOns[0];
+      if (selectedToppingName && resolvedToppings) {
+        const toppingObj = resolvedToppings.find(t => t.name === selectedToppingName);
+        if (toppingObj) price += toppingObj.priceAdd;
+      }
     }
 
     return price;
@@ -343,6 +357,8 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
       if (sizeObj) sizePriceAdd = sizeObj.priceAdd;
     }
 
+    const isNormalMiniCakes = (selectedProduct.category === "Mini Cakes" || selectedProduct.name === "Mini Cakes") && selectedVarId === "normal";
+
     const cartItem: OrderItem = {
       productId: selectedProduct.id,
       name: selectedProduct.name,
@@ -351,7 +367,8 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
       flavor: choiceFrosting || choiceFlavor || undefined,
       selectedCakeFlavors: choiceCakeFlavor ? [choiceCakeFlavor] : undefined,
       selectedFrostings: choiceFrosting ? [choiceFrosting] : undefined,
-      addOns: choiceAddOns.length > 0 ? choiceAddOns : undefined,
+      addOns: !isNormalMiniCakes && choiceAddOns.length > 0 ? choiceAddOns : undefined,
+      selectedSprinkles: isNormalMiniCakes && choiceSprinkles.length > 0 ? choiceSprinkles : undefined,
       selectedDrizzle: choiceDrizzle[0] || undefined,
       selectedDrizzles: choiceDrizzle.length > 0 ? choiceDrizzle : undefined,
       unitPrice,
@@ -486,7 +503,8 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
         selectedCakeFlavors: item.selectedCakeFlavors || undefined,
         selectedFrostings: item.selectedFrostings || undefined,
         selectedDrizzles: item.selectedDrizzle ? [item.selectedDrizzle] : undefined,
-        selectedToppings: item.addOns || undefined
+        selectedToppings: item.addOns || undefined,
+        selectedSprinkles: item.selectedSprinkles || undefined
       })),
       fulfillmentDate,
       fulfillmentType,
@@ -895,6 +913,18 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
                               {add}
                             </span>
                           ))}
+                        </div>
+                      )}
+                      {item.selectedSprinkles && item.selectedSprinkles.length > 0 && (
+                        <div className="space-y-0.5 mt-1">
+                          <p className="text-[10px] text-brand-chocolate/70 font-semibold">Sprinkles:</p>
+                          <div className="flex flex-wrap gap-1">
+                            {item.selectedSprinkles.map((sp, i) => (
+                              <span key={i} className="text-[9px] bg-brand-pink/15 text-brand-rosegold font-black px-2 py-0.5 rounded border border-brand-pink/20">
+                                {sp}
+                              </span>
+                            ))}
+                          </div>
                         </div>
                       )}
                     </div>
@@ -1397,8 +1427,17 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
                           if (!choiceFrosting && newFrostings.length > 0) {
                             setChoiceFrosting(newFrostings[0]);
                           }
-                          const newToppings = resolveToOptions(v.options.toppings || v.options.addOns).map(t => t.name);
-                          setChoiceAddOns(choiceAddOns.filter(addName => newToppings.includes(addName)));
+                          const isNormalMiniCakes = (selectedProduct.category === "Mini Cakes" || selectedProduct.name === "Mini Cakes") && v.id === "normal";
+                          if (isNormalMiniCakes) {
+                            const rawSprinkles = v.options.sprinkles !== undefined ? v.options.sprinkles : (v.options.toppings || v.options.addOns);
+                            const newSprinkles = resolveToOptions(rawSprinkles).map(s => s.name);
+                            setChoiceSprinkles(choiceSprinkles.filter(sName => newSprinkles.includes(sName)));
+                            setChoiceAddOns([]);
+                          } else {
+                            const newToppings = resolveToOptions(v.options.toppings || v.options.addOns).map(t => t.name);
+                            setChoiceAddOns(choiceAddOns.filter(addName => newToppings.includes(addName)));
+                            setChoiceSprinkles([]);
+                          }
                           const newDrizzles = resolveToOptions(v.options.drizzles).map(d => d.name);
                           if (choiceDrizzle && !newDrizzles.includes(choiceDrizzle)) {
                             setChoiceDrizzle("");
@@ -1557,26 +1596,85 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
                 );
               })()}
 
-              {/* Toppings List dropdown selector */}
-              {(!hasVariations || selectedVarId) && resolvedToppings && resolvedToppings.length > 0 && (
-                <div className="mt-5">
-                  <label className="text-xs font-bold text-brand-chocolate uppercase tracking-wider block mb-2">
-                    Selected Topping:
-                  </label>
-                  <select
-                    value={choiceAddOns[0] || ""}
-                    onChange={(e) => setChoiceAddOns(e.target.value ? [e.target.value] : [])}
-                    className="w-full border border-brand-pink/20 rounded-xl px-3 py-2 text-xs bg-brand-cream/30 focus:outline-none focus:ring-1 focus:ring-brand-rosegold"
-                  >
-                    <option value="" disabled>-- Select Topping --</option>
-                    {resolvedToppings.map(t => (
-                      <option key={t.name} value={t.name}>
-                        {t.name} {t.priceAdd > 0 ? `(+$${t.priceAdd.toFixed(2)})` : ""}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
+              {/* Toppings or Sprinkles selection */}
+              {(!hasVariations || selectedVarId) && (() => {
+                const isNormalMiniCakes = (selectedProduct.category === "Mini Cakes" || selectedProduct.name === "Mini Cakes") && selectedVarId === "normal";
+                if (isNormalMiniCakes) {
+                  const rawSprinkles = activeVar?.options?.sprinkles !== undefined ? activeVar.options.sprinkles : (activeVar?.options?.toppings || activeVar?.options?.addOns);
+                  const resolvedSprinkles = resolveToOptions(rawSprinkles);
+                  if (!resolvedSprinkles || resolvedSprinkles.length === 0) return null;
+                  const limit = activeVar?.sprinkleSelectionLimit !== undefined ? activeVar.sprinkleSelectionLimit : (activeVar?.toppingSelectionLimit ?? 0);
+
+                  return (
+                    <div className="mt-5">
+                      <label className="text-xs font-bold text-brand-chocolate uppercase tracking-wider block mb-1">
+                        Available Sprinkles:
+                      </label>
+                      <p className="text-[10px] text-brand-chocolate/60 font-semibold mb-2.5">
+                        Choose up to {limit} sprinkle{limit !== 1 ? "s" : ""}
+                      </p>
+                      <div className="space-y-2">
+                        {resolvedSprinkles.map(s => {
+                          const isSelected = choiceSprinkles.includes(s.name);
+                          return (
+                            <label
+                              key={s.name}
+                              className={`flex items-center justify-between p-2.5 rounded-xl border text-xs transition-all cursor-pointer ${
+                                isSelected 
+                                  ? "bg-brand-pink/15 border-brand-rosegold text-brand-chocolate font-bold" 
+                                  : "bg-white border-brand-pink/15 text-brand-chocolate/75 hover:bg-brand-pink/5"
+                              }`}
+                            >
+                              <div className="flex items-center space-x-2">
+                                <input
+                                  type="checkbox"
+                                  checked={isSelected}
+                                  disabled={!isSelected && choiceSprinkles.length >= limit}
+                                  onChange={() => {
+                                    if (isSelected) {
+                                      setChoiceSprinkles(choiceSprinkles.filter(x => x !== s.name));
+                                    } else {
+                                      if (choiceSprinkles.length < limit) {
+                                        setChoiceSprinkles([...choiceSprinkles, s.name]);
+                                      }
+                                    }
+                                  }}
+                                  className="accent-brand-rosegold rounded"
+                                />
+                                <span>{s.name}</span>
+                              </div>
+                              <span className="text-brand-rosegold font-semibold">
+                                {s.priceAdd > 0 ? `+$${s.priceAdd.toFixed(2)}` : "Included"}
+                              </span>
+                            </label>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                } else {
+                  if (!resolvedToppings || resolvedToppings.length === 0) return null;
+                  return (
+                    <div className="mt-5">
+                      <label className="text-xs font-bold text-brand-chocolate uppercase tracking-wider block mb-2">
+                        Selected Topping:
+                      </label>
+                      <select
+                        value={choiceAddOns[0] || ""}
+                        onChange={(e) => setChoiceAddOns(e.target.value ? [e.target.value] : [])}
+                        className="w-full border border-brand-pink/20 rounded-xl px-3 py-2 text-xs bg-brand-cream/30 focus:outline-none focus:ring-1 focus:ring-brand-rosegold"
+                      >
+                        <option value="" disabled>-- Select Topping --</option>
+                        {resolvedToppings.map(t => (
+                          <option key={t.name} value={t.name}>
+                            {t.name} {t.priceAdd > 0 ? `(+$${t.priceAdd.toFixed(2)})` : ""}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  );
+                }
+              })()}
 
               {/* Quantity and Checkout action */}
               <div className="mt-6 pt-4 border-t border-brand-pink/10 flex items-center justify-between">

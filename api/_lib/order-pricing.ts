@@ -35,6 +35,7 @@ export interface PricingInputItem {
   selectedFrostings?: string[];
   selectedDrizzles?: string[];
   selectedToppings?: string[];
+  selectedSprinkles?: string[];
   // Fallbacks for older client fields
   flavor?: string;
   selectedDrizzle?: string;
@@ -53,6 +54,7 @@ export interface PricingResult {
     selectedFrostings?: string[];
     selectedDrizzles?: string[];
     selectedToppings?: string[];
+    selectedSprinkles?: string[];
     flavor?: string; // Fallback
     unitPrice: number; // in dollars for backward-compatibility
     totalPrice: number; // in dollars for backward-compatibility
@@ -190,21 +192,44 @@ export async function calculateAuthoritativePricing(
       }
     }
 
-    // Validate Toppings / Add-ons
-    const rawToppings = activeVar ? (activeVar.options?.toppings || activeVar.options?.addOns) : (product.options?.toppings || product.options?.addOns);
-    const resolvedToppings = resolveToOptions(rawToppings);
-    const selectedToppings = inputItem.selectedToppings || inputItem.addOns || [];
-    if (selectedToppings.length > 0 && resolvedToppings.length > 0) {
-      const limit = activeVar?.toppingSelectionLimit ?? product.toppingSelectionLimit ?? 1;
-      if (selectedToppings.length > limit) {
-        throw new Error(`Topping selection limit exceeded (${limit}) for product: ${product.name}`);
-      }
-      for (const tName of selectedToppings) {
-        const tObj = resolvedToppings.find(t => t.name === tName);
-        if (!tObj) {
-          throw new Error(`Invalid topping selection: "${tName}" for product: ${product.name}`);
+    // Validate Toppings / Add-ons / Sprinkles
+    const isNormalMiniCakes = (product.category === "Mini Cakes" || product.name === "Mini Cakes") && activeVar?.id === "normal";
+    let selectedToppings: string[] = [];
+    let selectedSprinkles: string[] = [];
+
+    if (isNormalMiniCakes) {
+      const rawSprinkles = activeVar?.options?.sprinkles !== undefined ? activeVar.options.sprinkles : (activeVar?.options?.toppings || activeVar?.options?.addOns);
+      const resolvedSprinkles = resolveToOptions(rawSprinkles);
+      selectedSprinkles = inputItem.selectedSprinkles || inputItem.addOns || [];
+      if (selectedSprinkles.length > 0 && resolvedSprinkles.length > 0) {
+        const limit = activeVar?.sprinkleSelectionLimit !== undefined ? activeVar.sprinkleSelectionLimit : (activeVar?.toppingSelectionLimit ?? 0);
+        if (selectedSprinkles.length > limit) {
+          throw new Error(`Sprinkle selection limit exceeded (${limit}) for product: ${product.name}`);
         }
-        itemUnitPrice += tObj.priceAdd;
+        for (const sName of selectedSprinkles) {
+          const sObj = resolvedSprinkles.find(s => s.name === sName);
+          if (!sObj) {
+            throw new Error(`Invalid sprinkle selection: "${sName}" for product: ${product.name}`);
+          }
+          itemUnitPrice += sObj.priceAdd;
+        }
+      }
+    } else {
+      const rawToppings = activeVar ? (activeVar.options?.toppings || activeVar.options?.addOns) : (product.options?.toppings || product.options?.addOns);
+      const resolvedToppings = resolveToOptions(rawToppings);
+      selectedToppings = inputItem.selectedToppings || inputItem.addOns || [];
+      if (selectedToppings.length > 0 && resolvedToppings.length > 0) {
+        const limit = activeVar?.toppingSelectionLimit ?? product.toppingSelectionLimit ?? 1;
+        if (selectedToppings.length > limit) {
+          throw new Error(`Topping selection limit exceeded (${limit}) for product: ${product.name}`);
+        }
+        for (const tName of selectedToppings) {
+          const tObj = resolvedToppings.find(t => t.name === tName);
+          if (!tObj) {
+            throw new Error(`Invalid topping selection: "${tName}" for product: ${product.name}`);
+          }
+          itemUnitPrice += tObj.priceAdd;
+        }
       }
     }
 
@@ -223,6 +248,7 @@ export async function calculateAuthoritativePricing(
       selectedFrostings: selectedFrostings.length > 0 ? selectedFrostings : undefined,
       selectedDrizzles: selectedDrizzles.length > 0 ? selectedDrizzles : undefined,
       selectedToppings: selectedToppings.length > 0 ? selectedToppings : undefined,
+      selectedSprinkles: selectedSprinkles.length > 0 ? selectedSprinkles : undefined,
       flavor: selectedFrostings[0] || undefined, // Fallback for old orders view
       unitPrice: roundCurrency(itemUnitPrice),
       totalPrice: roundCurrency(itemUnitPrice * qty),

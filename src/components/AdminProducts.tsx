@@ -263,6 +263,8 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
   const [activeVarId, setActiveVarId] = useState<string | null>(null);
   const [currentVariations, setCurrentVariations] = useState<ProductVariation[] | undefined>(undefined);
 
+  const isNormalMiniCakes = (category === "Mini Cakes" || name === "Mini Cakes") && activeVarId === "normal";
+
   const handleSwitchVariation = (nextVarId: string) => {
     if (!activeVarId || !currentVariations) return;
     if (activeVarId === nextVarId) return;
@@ -2307,10 +2309,10 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
               <div className="bg-brand-cream/15 p-5 rounded-[2rem] border-2 border-brand-pink/20 space-y-4">
                 <div className="border-b border-brand-pink/10 pb-2.5">
                   <div className="flex items-center justify-between">
-                    <h4 className="text-sm font-extrabold text-[#B76E79] uppercase tracking-wider">AVAILABLE TOPPINGS</h4>
+                    <h4 className="text-sm font-extrabold text-[#B76E79] uppercase tracking-wider">{isNormalMiniCakes ? "AVAILABLE SPRINKLES" : "AVAILABLE TOPPINGS"}</h4>
                     <span className="text-[8px] bg-brand-chocolate text-white px-1.5 py-0.5 rounded uppercase font-black tracking-widest">Storefront Choice</span>
                   </div>
-                  <p className="text-[10px] text-gray-500 font-semibold leading-tight">Choose the toppings customers can select.</p>
+                  <p className="text-[10px] text-gray-500 font-semibold leading-tight">{isNormalMiniCakes ? "Choose the sprinkles customers can select." : "Choose the toppings customers can select."}</p>
                 </div>
 
                 {/* Topping Selection Limit Control */}
@@ -2318,10 +2320,10 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
                   <div className="flex items-center justify-between">
                     <div>
                       <span className="text-xs font-extrabold text-[#B76E79] uppercase tracking-wider block">
-                        Topping Selection Limit
+                        {isNormalMiniCakes ? "Sprinkle Selection Limit" : "Topping Selection Limit"}
                       </span>
                       <span className="text-[10px] text-gray-500 font-semibold">
-                        “How many toppings may the customer select?”
+                        {isNormalMiniCakes ? "“How many sprinkles may the customer select?”" : "“How many toppings may the customer select?”"}
                       </span>
                     </div>
                     <div className="flex items-center space-x-1.5">
@@ -2359,13 +2361,21 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
                   </div>
                   <div className="text-[10px] text-brand-chocolate/80 font-bold bg-brand-pink/5 px-2.5 py-1 rounded-md border border-brand-pink/10">
                     <span className="block text-[#B76E79]">
-                      Topping Selection Limit: {toppingSelectionLimit}
+                      {isNormalMiniCakes ? "Sprinkle Selection Limit" : "Topping Selection Limit"}: {toppingSelectionLimit}
                     </span>
                     <span className="block text-gray-600 font-semibold mt-0.5 leading-tight">
-                      {toppingSelectionLimit === 0 ? "Customer cannot select any options." : `Customer may select up to ${toppingSelectionLimit} topping${toppingSelectionLimit > 1 ? "s" : ""}.`}
+                      {isNormalMiniCakes
+                        ? toppingSelectionLimit === 0
+                          ? "Customers cannot select any sprinkles."
+                          : `Customer may select up to ${toppingSelectionLimit} sprinkle${toppingSelectionLimit > 1 ? "s" : ""}.`
+                        : toppingSelectionLimit === 0
+                          ? "Customer cannot select any options."
+                          : `Customer may select up to ${toppingSelectionLimit} topping${toppingSelectionLimit > 1 ? "s" : ""}.`}
                     </span>
                     <span className="block text-gray-500 font-medium mt-0.5">
-                      Customers may select up to {toppingSelectionLimit} of the {toppings.length} available toppings.
+                      {isNormalMiniCakes
+                        ? `Customers may select up to ${toppingSelectionLimit} of the ${toppings.length} available sprinkles.`
+                        : `Customers may select up to ${toppingSelectionLimit} of the ${toppings.length} available toppings.`}
                     </span>
                   </div>
                 </div>
@@ -2375,7 +2385,7 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
                     type="text"
                     value={newToppingName}
                     onChange={(e) => setNewToppingName(e.target.value)}
-                    placeholder="e.g., Reese's Pieces"
+                    placeholder={isNormalMiniCakes ? "e.g., Rainbow Sprinkles" : "e.g., Reese's Pieces"}
                     className="flex-1 text-sm bg-brand-cream/5 border border-brand-pink/10 p-2 rounded-xl focus:outline-none focus:ring-1 focus:ring-[#B76E79]"
                   />
                   <div className="relative w-20">
@@ -2400,12 +2410,12 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
                 {/* Collapsible Added Items List */}
                 <details className="group border border-brand-pink/10 rounded-xl bg-white overflow-hidden mt-2" open={toppings.length > 0}>
                   <summary className="flex items-center justify-between p-2.5 cursor-pointer select-none bg-brand-pink/5 hover:bg-brand-pink/10 font-bold text-xs text-brand-chocolate">
-                    <span>Added Toppings ({toppings.length})</span>
+                    <span>{isNormalMiniCakes ? `Added Sprinkles (${toppings.length})` : `Added Toppings (${toppings.length})`}</span>
                     <span className="text-[10px] transition-transform group-open:rotate-180">▼</span>
                   </summary>
                   <div className="p-3 space-y-1.5 max-h-64 overflow-y-auto border-t border-brand-pink/10">
                     {toppings.length === 0 ? (
-                      <p className="text-[10px] text-gray-400 italic text-center py-2">No topping options added yet.</p>
+                      <p className="text-[10px] text-gray-400 italic text-center py-2">{isNormalMiniCakes ? "No sprinkle options added yet." : "No topping options added yet."}</p>
                     ) : (
                       toppings.map((t, idx) => {
                         const isEditing = editingToppingIdx === idx;
@@ -2474,7 +2484,7 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
                                       type="button"
                                       onClick={() => handleStartEditTopping(idx, t.name, t.priceAdd)}
                                       className="text-[#B76E79] hover:text-[#B76E79]/80 p-1 hover:bg-[#B76E79]/5 rounded transition cursor-pointer"
-                                      title="Edit topping name/price"
+                                      title={isNormalMiniCakes ? "Edit sprinkle name/price" : "Edit topping name/price"}
                                     >
                                       <Edit2 className="h-3.5 w-3.5" />
                                     </button>
@@ -2482,7 +2492,7 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
                                       type="button"
                                       onClick={() => handleRemoveToppingOption(idx)}
                                       className="text-red-500 hover:text-red-700 p-1 hover:bg-red-50 rounded transition cursor-pointer"
-                                      title="Delete topping option"
+                                      title={isNormalMiniCakes ? "Delete sprinkle option" : "Delete topping option"}
                                     >
                                       <Trash2 className="h-3.5 w-3.5" />
                                     </button>

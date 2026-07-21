@@ -11,6 +11,7 @@ export interface ProductOptions {
   addOns?: OptionItem[];
   toppings?: (string | OptionItem)[];
   drizzles?: (string | OptionItem)[];
+  sprinkles?: (string | OptionItem)[];
 }
 
 export interface ProductIngredientLink {
@@ -30,6 +31,7 @@ export interface ProductVariation {
   toppingSelectionLimit?: number;
   cakeFlavorSelectionLimit?: number;
   frostingSelectionLimit?: number;
+  sprinkleSelectionLimit?: number;
 }
 
 export interface Product {
@@ -49,6 +51,7 @@ export interface Product {
   toppingSelectionLimit?: number;
   cakeFlavorSelectionLimit?: number;
   frostingSelectionLimit?: number;
+  sprinkleSelectionLimit?: number;
 }
 
 export interface OrderItem {
@@ -68,6 +71,7 @@ export interface OrderItem {
   selectedFlavors?: string[];
   selectedDrizzles?: string[];
   selectedToppings?: string[];
+  selectedSprinkles?: string[];
   selectedCakeFlavors?: string[];
   selectedFrostings?: string[];
 }

@@ -141,6 +141,9 @@ export default async function handler(req: any, res: any) {
         if (item.selectedToppings && item.selectedToppings.length > 0) {
           descParts.push(`Toppings: ${item.selectedToppings.join(", ")}`);
         }
+        if (item.selectedSprinkles && item.selectedSprinkles.length > 0) {
+          descParts.push(`Sprinkles: ${item.selectedSprinkles.join(", ")}`);
+        }
 
         lineItems.push({
           price_data: {
@@ -354,7 +357,8 @@ export default async function handler(req: any, res: any) {
         selectedCakeFlavors: item.selectedCakeFlavors || null,
         selectedFrostings: item.selectedFrostings || null,
         selectedDrizzles: item.selectedDrizzles || null,
-        selectedToppings: item.selectedToppings || null
+        selectedToppings: item.selectedToppings || null,
+        selectedSprinkles: item.selectedSprinkles || null
       }));
 
       const firstName = freshOrder.customerName ? freshOrder.customerName.split(" ")[0] : "";
@@ -439,7 +443,8 @@ export default async function handler(req: any, res: any) {
         selectedCakeFlavors: item.selectedCakeFlavors || undefined,
         selectedFrostings: item.selectedFrostings || undefined,
         selectedDrizzles: item.selectedDrizzles || undefined,
-        selectedToppings: item.selectedToppings || undefined
+        selectedToppings: item.selectedToppings || undefined,
+        selectedSprinkles: item.selectedSprinkles || undefined
       }));
 
       // Revalidate pricing, coupons, options, fulfillment date, and capacity
