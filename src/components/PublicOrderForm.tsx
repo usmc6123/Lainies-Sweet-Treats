@@ -834,22 +834,12 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
             </h2>
             
             <p 
-              className="text-sm md:text-base text-brand-cream/90 leading-relaxed font-normal mb-8 font-heading"
+              className="text-sm md:text-base text-brand-cream/90 leading-relaxed font-normal mb-2 font-heading"
               style={{ textShadow: "0 2px 12px rgba(0,0,0,0.4)" }}
             >
               Based in Royse City, TX. Lainie custom-bakes every celebration treat.<br />
               Experience personalized designs and custom buttercream artistry.
             </p>
-
-            <div className="flex justify-center">
-              <button
-                onClick={onSwitchToQuote}
-                className="bg-brand-pink text-white hover:bg-brand-rosegold hover:text-brand-chocolate text-base uppercase tracking-widest px-8 py-3.5 rounded-full font-black hover:scale-105 active:scale-95 transition-all duration-300 shadow-[0_4px_20px_rgba(255,45,150,0.3)] flex items-center justify-center space-x-2 cursor-pointer transform-gpu"
-              >
-                <Sparkles className="h-4 w-4 animate-pulse text-white group-hover:text-brand-chocolate" />
-                <span className="text-base">REQUEST A CUSTOM QUOTE</span>
-              </button>
-            </div>
           </div>
         </div>
 
