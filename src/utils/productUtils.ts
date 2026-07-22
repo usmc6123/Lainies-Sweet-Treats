@@ -96,6 +96,8 @@ export function normalizeProductNameAndCategory(product: any): { name: string; c
     category = "Mini Cakes";
   } else if (name === "Jumbo Cookies" || category === "Cookies that people like") {
     category = "Cookies";
+  } else if (category === "Seasonal Specials" || name === "Seasonal Specials") {
+    category = "Dipped Pretzels";
   }
 
   return { name, category };

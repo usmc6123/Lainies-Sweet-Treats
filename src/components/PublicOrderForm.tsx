@@ -746,7 +746,7 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
     }
   };
 
-  const categories = ["All", "Mini Cakes", "Cupcakes", "Cookies", "Seasonal Specials"];
+  const categories = ["All", "Mini Cakes", "Cupcakes", "Cookies", "Dipped Pretzels"];
   const filteredProducts = products.filter(p => {
     const matchesCategory = activeCategory === "All" || p.category === activeCategory;
     const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
