@@ -514,13 +514,14 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
         ? (activeVar.options?.toppings || activeVar.options?.addOns) 
         : (selectedProduct.options?.toppings || selectedProduct.options?.addOns);
       const resolvedToppings = resolveToOptions(rawToppings);
-      const selectedToppingName = choiceAddOns[0];
-      if (selectedToppingName && resolvedToppings) {
-        const toppingObj = resolvedToppings.find(t => t.name === selectedToppingName);
-        if (toppingObj) {
-          if (isMiniCakes) addonPrice += toppingObj.priceAdd;
-          else price += toppingObj.priceAdd;
-        }
+      if (choiceAddOns && choiceAddOns.length > 0 && resolvedToppings) {
+        choiceAddOns.forEach(tName => {
+          const toppingObj = resolvedToppings.find(t => t.name === tName);
+          if (toppingObj) {
+            if (isMiniCakes) addonPrice += toppingObj.priceAdd;
+            else price += toppingObj.priceAdd;
+          }
+        });
       }
     }
 
@@ -697,8 +698,8 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
         size: item.size || undefined,
         selectedCakeFlavors: item.selectedCakeFlavors || undefined,
         selectedFrostings: item.selectedFrostings || undefined,
-        selectedDrizzles: item.selectedDrizzle ? [item.selectedDrizzle] : undefined,
-        selectedToppings: item.addOns || undefined,
+        selectedDrizzles: (item.selectedDrizzles && item.selectedDrizzles.length > 0) ? item.selectedDrizzles : (item.selectedDrizzle ? [item.selectedDrizzle] : undefined),
+        selectedToppings: (item.selectedToppings && item.selectedToppings.length > 0) ? item.selectedToppings : (item.addOns || undefined),
         selectedSprinkles: item.selectedSprinkles || undefined
       })),
       fulfillmentDate,
@@ -1845,6 +1846,60 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
                   );
                 } else {
                   if (!resolvedToppings || resolvedToppings.length === 0) return null;
+
+                  const isSpecialtyMiniCakes = (selectedProduct.category === "Mini Cakes" || selectedProduct.name === "Mini Cakes") && selectedVarId === "specialty";
+
+                  if (isSpecialtyMiniCakes) {
+                    const limit = activeVar?.toppingSelectionLimit ?? selectedProduct.toppingSelectionLimit ?? 2;
+                    return (
+                      <div className="mt-5">
+                        <label className="text-xs font-bold text-brand-chocolate uppercase tracking-wider block mb-1">
+                          AVAILABLE TOPPINGS:
+                        </label>
+                        <p className="text-[10px] text-brand-chocolate/60 font-semibold mb-2.5">
+                          Choose up to {limit} topping{limit !== 1 ? "s" : ""}
+                        </p>
+                        <div className="space-y-2">
+                          {resolvedToppings.map(t => {
+                            const isSelected = choiceAddOns.includes(t.name);
+                            return (
+                              <label
+                                key={t.name}
+                                className={`flex items-center justify-between p-2.5 rounded-xl border text-xs transition-all cursor-pointer ${
+                                  isSelected 
+                                    ? "bg-brand-pink/15 border-brand-rosegold text-brand-chocolate font-bold" 
+                                    : "bg-white border-brand-pink/15 text-brand-chocolate/75 hover:bg-brand-pink/5"
+                                }`}
+                              >
+                                <div className="flex items-center space-x-2">
+                                  <input
+                                    type="checkbox"
+                                    checked={isSelected}
+                                    disabled={!isSelected && choiceAddOns.length >= limit}
+                                    onChange={() => {
+                                      if (isSelected) {
+                                        setChoiceAddOns(choiceAddOns.filter(x => x !== t.name));
+                                      } else {
+                                        if (choiceAddOns.length < limit) {
+                                          setChoiceAddOns([...choiceAddOns, t.name]);
+                                        }
+                                      }
+                                    }}
+                                    className="accent-brand-rosegold rounded"
+                                  />
+                                  <span>{t.name}</span>
+                                </div>
+                                <span className="text-brand-rosegold font-semibold">
+                                  {getPriceLabel(t.priceAdd)}
+                                </span>
+                              </label>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  }
+
                   return (
                     <div className="mt-5">
                       <label className="text-xs font-bold text-brand-chocolate uppercase tracking-wider block mb-2">

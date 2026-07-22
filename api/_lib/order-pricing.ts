@@ -259,9 +259,13 @@ export async function calculateAuthoritativePricing(
       const resolvedToppings = resolveToOptions(rawToppings);
       selectedToppings = inputItem.selectedToppings || inputItem.addOns || [];
       if (selectedToppings.length > 0 && resolvedToppings.length > 0) {
-        const limit = activeVar?.toppingSelectionLimit ?? product.toppingSelectionLimit ?? 1;
+        const isSpecialtyMiniCakes = isMiniCakes && activeVar?.id === "specialty";
+        const limit = activeVar?.toppingSelectionLimit ?? product.toppingSelectionLimit ?? (isSpecialtyMiniCakes ? 2 : 1);
         if (selectedToppings.length > limit) {
           throw new Error(`Topping selection limit exceeded (${limit}) for product: ${product.name}`);
+        }
+        if (new Set(selectedToppings).size !== selectedToppings.length) {
+          throw new Error(`Duplicate topping selection found for product: ${product.name}`);
         }
         for (const tName of selectedToppings) {
           const tObj = resolvedToppings.find(t => t.name === tName);

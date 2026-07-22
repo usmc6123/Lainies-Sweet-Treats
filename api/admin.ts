@@ -52,8 +52,8 @@ function drawLabel(doc: any, order: any, startY: number) {
     }
     const dText = item.selectedDrizzles && item.selectedDrizzles.length > 0 ? item.selectedDrizzles.join(', ') : item.selectedDrizzle;
     if (dText) descParts.push(`Drizzle: ${dText}`);
-    if (item.addOns && item.addOns.length > 0) descParts.push(`Decor: ${item.addOns.join(', ')}`);
-    if (item.selectedToppings && item.selectedToppings.length > 0) descParts.push(`Toppings: ${item.selectedToppings.join(', ')}`);
+    const toppingsList = (item.selectedToppings && item.selectedToppings.length > 0) ? item.selectedToppings : item.addOns;
+    if (toppingsList && toppingsList.length > 0) descParts.push(`Toppings: ${toppingsList.join(', ')}`);
     if (item.selectedSprinkles && item.selectedSprinkles.length > 0) descParts.push(`Sprinkles: ${item.selectedSprinkles.join(', ')}`);
     
     if (descParts.length > 0) {
@@ -469,8 +469,8 @@ export default async function handler(req: any, res: any) {
               }
               const dText = item.selectedDrizzles && item.selectedDrizzles.length > 0 ? item.selectedDrizzles.join(', ') : item.selectedDrizzle;
               if (dText) specParts.push(`Drizzle: ${dText}`);
-              if (item.addOns && item.addOns.length > 0) specParts.push(`Decor: ${item.addOns.join(', ')}`);
-              if (item.selectedToppings && item.selectedToppings.length > 0) specParts.push(`Toppings: ${item.selectedToppings.join(', ')}`);
+              const tList = (item.selectedToppings && item.selectedToppings.length > 0) ? item.selectedToppings : item.addOns;
+              if (tList && tList.length > 0) specParts.push(`Toppings: ${tList.join(', ')}`);
               if (item.selectedSprinkles && item.selectedSprinkles.length > 0) specParts.push(`Sprinkles: ${item.selectedSprinkles.join(', ')}`);
               if (specParts.length > 0) {
                 doc.font('Helvetica').fontSize(8.5).fillColor('#7d6259').text(specParts.join('  |  '), 60, yTable + 20, { width: 300 });

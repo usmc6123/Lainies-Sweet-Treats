@@ -405,11 +405,8 @@ export default function AdminOrders({ token, triggerRefresh }: AdminOrdersProps)
                         {item.selectedDrizzle && (
                           <p className="text-xs text-gray-500 font-medium">Drizzle: {item.selectedDrizzle}</p>
                         )}
-                        {item.addOns && item.addOns.length > 0 && (
-                          <p className="text-xs text-brand-rosegold font-bold">Toppings: {item.addOns.join(", ")}</p>
-                        )}
-                        {item.selectedToppings && item.selectedToppings.length > 0 && (
-                          <p className="text-xs text-brand-rosegold font-bold">Toppings: {item.selectedToppings.join(", ")}</p>
+                        {((item.selectedToppings && item.selectedToppings.length > 0) || (item.addOns && item.addOns.length > 0)) && (
+                          <p className="text-xs text-brand-rosegold font-bold">Toppings: {(item.selectedToppings && item.selectedToppings.length > 0 ? item.selectedToppings : item.addOns)!.join(", ")}</p>
                         )}
                         {item.selectedSprinkles && item.selectedSprinkles.length > 0 && (
                           <p className="text-xs text-brand-rosegold font-bold">Sprinkles: {item.selectedSprinkles.join(", ")}</p>

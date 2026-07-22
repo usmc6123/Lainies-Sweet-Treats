@@ -580,6 +580,77 @@ async function runTests() {
     console.log("✅ Passed: 28. Mini Cakes Normal Per-Dozen Pricing (One Dozen)");
   }
 
+  // 29. Mini Cakes Specialty Multiple Toppings Calculation
+  {
+    const result = await calculateAuthoritativePricing(
+      [{
+        productId: "prod-variations",
+        variationId: "specialty",
+        quantity: 1,
+        size: "Two Dozen",
+        selectedCakeFlavors: ["Vanilla"],
+        selectedToppings: ["Rainbow Sprinkles"]
+      }],
+      undefined,
+      "none",
+      0,
+      "pickup"
+    );
+    // Base (Two Dozen) = 75.0
+    // Add-ons per dozen = Rainbow Sprinkles (1.0) = 1.0
+    // Total for Two Dozen = 75.0 + (1.0 * 2) = 77.0 => 7700 cents
+    assert(result.subtotalCents === 7700, `Expected 7700 but got ${result.subtotalCents}`);
+    console.log("✅ Passed: 29. Mini Cakes Specialty Multiple Toppings Calculation");
+  }
+
+  // 30. Topping Selection Limit Exceeded
+  {
+    let caught = false;
+    try {
+      await calculateAuthoritativePricing(
+        [{
+          productId: "prod-cupcake",
+          quantity: 1,
+          selectedToppings: ["Sprinkles", "Chocolate Chips"]
+        }],
+        undefined,
+        "none",
+        0,
+        "pickup"
+      );
+    } catch (e: any) {
+      caught = true;
+      assert(e.message.includes("limit exceeded"), "Error message should mention limit exceeded");
+    }
+    assert(caught, "Should reject when exceeding topping selection limit");
+    console.log("✅ Passed: 30. Topping Selection Limit Exceeded Check");
+  }
+
+  // 31. Duplicate Topping Selection Check
+  {
+    let caught = false;
+    try {
+      await calculateAuthoritativePricing(
+        [{
+          productId: "prod-variations",
+          variationId: "specialty",
+          quantity: 1,
+          size: "Two Dozen",
+          selectedToppings: ["Rainbow Sprinkles", "Rainbow Sprinkles"]
+        }],
+        undefined,
+        "none",
+        0,
+        "pickup"
+      );
+    } catch (e: any) {
+      caught = true;
+      assert(e.message.includes("Duplicate"), `Error message should mention duplicate but got ${e.message}`);
+    }
+    assert(caught, "Should reject duplicate toppings");
+    console.log("✅ Passed: 31. Duplicate Topping Selection Check");
+  }
+
   console.log("\n✨ All Automated pricing tests completed successfully!");
 }
 
