@@ -831,7 +831,7 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
               className="text-3xl md:text-[38px] lg:text-[42px] text-brand-cream font-bold font-heading leading-tight mb-4"
               style={{ textShadow: "0 2px 12px rgba(0,0,0,0.4)", letterSpacing: "0.8px" }}
             >
-              Lainie's Handmade Bakery Menu
+              Lainie's Treat Menu
             </h2>
             
             <p 
