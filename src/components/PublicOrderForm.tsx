@@ -1045,7 +1045,7 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
                       )}
                       {item.selectedCakeFlavors && item.selectedCakeFlavors.length > 0 && (
                         <p className="text-[10px] text-brand-chocolate/70 font-semibold">
-                          Cake Flavor: {item.selectedCakeFlavors.join(", ")}
+                          {item.category === "Dipped Pretzels" || item.name?.includes("Dipped Pretzels") ? "Dip Flavor: " : "Cake Flavor: "}{item.selectedCakeFlavors.join(", ")}
                         </p>
                       )}
                       {item.selectedFrostings && item.selectedFrostings.length > 0 ? (
@@ -1521,21 +1521,33 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
         const rawDrizzles = activeVar ? activeVar.options?.drizzles : selectedProduct.options?.drizzles;
         const resolvedDrizzles = resolveToOptions(rawDrizzles);
 
+        const rawSprinkles = activeVar?.options?.sprinkles !== undefined 
+          ? activeVar.options.sprinkles 
+          : (activeVar?.options?.toppings || activeVar?.options?.addOns);
+        const resolvedSprinkles = resolveToOptions(rawSprinkles);
+
         const activeDescription = activeVar?.description || selectedProduct.description || "";
 
-        const hasToppingsConfigured = (!hasVariations || selectedVarId) && resolvedToppings && resolvedToppings.length > 0;
-        const isToppingRequiredAndMissing = hasToppingsConfigured && (!choiceAddOns || choiceAddOns.length === 0 || !choiceAddOns[0]);
-        
-        const hasDrizzlesConfigured = (!hasVariations || selectedVarId) && resolvedDrizzles && resolvedDrizzles.length > 0;
-        const isDrizzleRequiredAndMissing = false; // Drizzles are optional (0 is allowed)
+        const isNormalMiniCakes = (selectedProduct.category === "Mini Cakes" || selectedProduct.name === "Mini Cakes") && selectedVarId === "normal";
 
-        const hasCakeFlavorsConfigured = (!hasVariations || selectedVarId) && resolvedCakeFlavors && resolvedCakeFlavors.length > 0;
-        const isCakeFlavorRequiredAndMissing = hasCakeFlavorsConfigured && !choiceCakeFlavor;
+        const cakeFlavorLimit = activeVar?.cakeFlavorSelectionLimit ?? selectedProduct.cakeFlavorSelectionLimit ?? (resolvedCakeFlavors && resolvedCakeFlavors.length > 0 ? 1 : 0);
+        const frostingLimit = activeVar?.frostingSelectionLimit ?? activeVar?.flavorSelectionLimit ?? selectedProduct.frostingSelectionLimit ?? selectedProduct.flavorSelectionLimit ?? (resolvedFrostings && resolvedFrostings.length > 0 ? 1 : 0);
+        const drizzleLimit = activeVar?.drizzleSelectionLimit ?? selectedProduct.drizzleSelectionLimit ?? 1;
+        const toppingLimit = activeVar?.toppingSelectionLimit ?? selectedProduct.toppingSelectionLimit ?? 1;
+        const sprinkleLimit = activeVar?.sprinkleSelectionLimit !== undefined 
+          ? activeVar.sprinkleSelectionLimit 
+          : (activeVar?.toppingSelectionLimit ?? selectedProduct.sprinkleSelectionLimit ?? selectedProduct.toppingSelectionLimit ?? 1);
 
-        const hasFrostingsConfigured = (!hasVariations || selectedVarId) && resolvedFrostings && resolvedFrostings.length > 0;
-        const isFrostingRequiredAndMissing = hasFrostingsConfigured && !choiceFrosting && !choiceFlavor;
+        const isVariationMissing = hasVariations && !selectedVarId;
+        const isSizeMissing = (!hasVariations || selectedVarId) && activeSizes && activeSizes.length > 0 && !choiceSize;
+        const isCakeFlavorMissing = (!hasVariations || selectedVarId) && resolvedCakeFlavors && resolvedCakeFlavors.length > 0 && cakeFlavorLimit > 0 && !choiceCakeFlavor;
+        const isFrostingMissing = (!hasVariations || selectedVarId) && resolvedFrostings && resolvedFrostings.length > 0 && frostingLimit > 0 && !choiceFrosting && !choiceFlavor;
 
-        const isAddDisabled = (hasVariations && !selectedVarId) || isToppingRequiredAndMissing || isDrizzleRequiredAndMissing || isCakeFlavorRequiredAndMissing || isFrostingRequiredAndMissing;
+        const isDrizzleExceeded = choiceDrizzle && choiceDrizzle.length > drizzleLimit;
+        const isSprinkleExceeded = isNormalMiniCakes && choiceSprinkles && choiceSprinkles.length > sprinkleLimit;
+        const isToppingExceeded = !isNormalMiniCakes && choiceAddOns && choiceAddOns.length > toppingLimit;
+
+        const isAddDisabled = isVariationMissing || isSizeMissing || isCakeFlavorMissing || isFrostingMissing || isDrizzleExceeded || isSprinkleExceeded || isToppingExceeded;
 
         return (
           <div className="fixed inset-0 bg-brand-chocolate/40 backdrop-blur-xs flex items-center justify-center z-[100] p-4">
@@ -1615,8 +1627,8 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
                             setChoiceSprinkles([]);
                           }
                           const newDrizzles = resolveToOptions(v.options.drizzles).map(d => d.name);
-                          if (choiceDrizzle && !newDrizzles.includes(choiceDrizzle)) {
-                            setChoiceDrizzle("");
+                          if (choiceDrizzle && choiceDrizzle.length > 0) {
+                            setChoiceDrizzle(choiceDrizzle.filter(d => newDrizzles.includes(d)));
                           }
                         }}
                         className={`py-2.5 px-3 rounded-xl text-xs font-bold transition-all duration-200 text-center flex flex-col justify-center items-center ${
@@ -1675,26 +1687,29 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
                 </div>
               )}
 
-              {/* Available Cake Flavors selections */}
-              {(!hasVariations || selectedVarId) && resolvedCakeFlavors && resolvedCakeFlavors.length > 0 && (
-                <div className="mt-5">
-                  <label className="text-xs font-bold text-brand-chocolate uppercase tracking-wider block mb-2">
-                    2. Selected Cake Flavor:
-                  </label>
-                  <select
-                    value={choiceCakeFlavor}
-                    onChange={(e) => setChoiceCakeFlavor(e.target.value)}
-                    className="w-full border border-brand-pink/20 rounded-xl px-3 py-2 text-xs bg-brand-cream/30 focus:outline-none focus:ring-1 focus:ring-brand-rosegold"
-                  >
-                    <option value="" disabled>-- Select Cake Flavor --</option>
-                    {resolvedCakeFlavors.map(cf => (
-                      <option key={cf.name} value={cf.name}>
-                        {cf.name}{getPriceSuffix(cf.priceAdd)}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
+              {/* Available Cake Flavors / Dip Flavors selections */}
+              {(!hasVariations || selectedVarId) && resolvedCakeFlavors && resolvedCakeFlavors.length > 0 && (() => {
+                const isDippedPretzels = selectedProduct.category === "Dipped Pretzels" || selectedProduct.name === "Dipped Pretzels";
+                return (
+                  <div className="mt-5">
+                    <label className="text-xs font-bold text-brand-chocolate uppercase tracking-wider block mb-2">
+                      2. {isDippedPretzels ? "Selected Dip Flavor:" : "Selected Cake Flavor:"}
+                    </label>
+                    <select
+                      value={choiceCakeFlavor}
+                      onChange={(e) => setChoiceCakeFlavor(e.target.value)}
+                      className="w-full border border-brand-pink/20 rounded-xl px-3 py-2 text-xs bg-brand-cream/30 focus:outline-none focus:ring-1 focus:ring-brand-rosegold"
+                    >
+                      <option value="" disabled>-- {isDippedPretzels ? "Select Dip Flavor" : "Select Cake Flavor"} --</option>
+                      {resolvedCakeFlavors.map(cf => (
+                        <option key={cf.name} value={cf.name}>
+                          {cf.name}{getPriceSuffix(cf.priceAdd)}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                );
+              })()}
 
               {/* Available Frostings selections */}
               {(!hasVariations || selectedVarId) && resolvedFrostings && resolvedFrostings.length > 0 && (

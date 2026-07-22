@@ -266,7 +266,7 @@ export default function ClientQuotePortal() {
                               {(item.size || item.selectedCakeFlavors || item.selectedFrostings || item.flavor) && (
                                 <p className="text-[10px] text-gray-500">
                                   {item.size ? `Size: ${item.size} ` : ""}
-                                  {item.selectedCakeFlavors && item.selectedCakeFlavors.length > 0 ? `• Cake Flavor: ${item.selectedCakeFlavors.join(", ")} ` : ""}
+                                  {item.selectedCakeFlavors && item.selectedCakeFlavors.length > 0 ? `• ${item.name?.includes("Dipped Pretzels") || item.category === "Dipped Pretzels" ? "Dip Flavor" : "Cake Flavor"}: ${item.selectedCakeFlavors.join(", ")} ` : ""}
                                   {item.selectedFrostings && item.selectedFrostings.length > 0 ? `• Frosting: ${item.selectedFrostings.join(", ")} ` : item.flavor ? `• Frosting: ${item.flavor}` : ""}
                                 </p>
                               )}

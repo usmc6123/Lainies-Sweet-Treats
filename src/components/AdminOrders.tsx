@@ -392,7 +392,10 @@ export default function AdminOrders({ token, triggerRefresh }: AdminOrdersProps)
                         </div>
                         {item.size && <p className="text-xs text-gray-500 font-medium">Scale: {item.size}</p>}
                         {item.selectedCakeFlavors && item.selectedCakeFlavors.length > 0 && (
-                          <p className="text-xs text-gray-500 font-medium">Cake Flavor: {item.selectedCakeFlavors.join(", ")}</p>
+                          <p className="text-xs text-gray-500 font-medium">
+                            {item.name?.includes("Dipped Pretzels") || item.category === "Dipped Pretzels" ? "Dip Flavor: " : "Cake Flavor: "}
+                            {item.selectedCakeFlavors.join(", ")}
+                          </p>
                         )}
                         {item.selectedFrostings && item.selectedFrostings.length > 0 ? (
                           <p className="text-xs text-gray-500 font-medium">Frosting: {item.selectedFrostings.join(", ")}</p>

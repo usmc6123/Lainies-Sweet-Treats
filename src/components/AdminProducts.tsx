@@ -1277,6 +1277,8 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
     }
   };
 
+  const isDippedPretzels = category === "Dipped Pretzels" || name === "Dipped Pretzels" || editingProduct?.category === "Dipped Pretzels" || editingProduct?.name === "Dipped Pretzels";
+
   return (
     <div id="admin-menu-tab" className="space-y-6 animate-in fade-in duration-300">
       <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center bg-white border border-brand-pink/20 rounded-2xl p-5 shadow-sm">
@@ -1720,25 +1722,29 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
                 </details>
               </div>
 
-              {/* AVAILABLE CAKE FLAVORS */}
+              {/* AVAILABLE CAKE FLAVORS / DIP FLAVORS */}
               <div className="bg-brand-cream/15 p-5 rounded-[2rem] border-2 border-brand-pink/20 space-y-4">
                 <div className="border-b border-brand-pink/10 pb-2.5">
                   <div className="flex items-center justify-between">
-                    <h4 className="text-sm font-extrabold text-[#B76E79] uppercase tracking-wider">AVAILABLE CAKE FLAVORS</h4>
+                    <h4 className="text-sm font-extrabold text-[#B76E79] uppercase tracking-wider">
+                      {isDippedPretzels ? "AVAILABLE DIP FLAVORS" : "AVAILABLE CAKE FLAVORS"}
+                    </h4>
                     <span className="text-[8px] bg-brand-chocolate text-white px-1.5 py-0.5 rounded uppercase font-black tracking-widest">Storefront Choice</span>
                   </div>
-                  <p className="text-[10px] text-gray-500 font-semibold leading-tight">These are the cake flavor options customers can choose from.</p>
+                  <p className="text-[10px] text-gray-500 font-semibold leading-tight">
+                    {isDippedPretzels ? "These are the dip flavor options customers can choose from." : "These are the cake flavor options customers can choose from."}
+                  </p>
                 </div>
 
-                {/* Cake Flavor Selection Limit Control */}
+                {/* Cake Flavor / Dip Flavor Selection Limit Control */}
                 <div className="bg-white p-3.5 rounded-2xl border border-brand-pink/25 space-y-2.5 shadow-xs">
                   <div className="flex items-center justify-between">
                     <div>
                       <span className="text-xs font-extrabold text-[#B76E79] uppercase tracking-wider block">
-                        Cake Flavor Selection Limit
+                        {isDippedPretzels ? "Dip Flavor Selection Limit" : "Cake Flavor Selection Limit"}
                       </span>
                       <span className="text-[10px] text-gray-500 font-semibold">
-                        “How many cake flavors may the customer select?”
+                        {isDippedPretzels ? "“How many dip flavors may the customer select?”" : "“How many cake flavors may the customer select?”"}
                       </span>
                     </div>
                     <div className="flex items-center space-x-1.5">
@@ -1776,13 +1782,15 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
                   </div>
                   <div className="text-[10px] text-brand-chocolate/80 font-bold bg-brand-pink/5 px-2.5 py-1 rounded-md border border-brand-pink/10">
                     <span className="block text-[#B76E79]">
-                      Cake Flavor Selection Limit: {cakeFlavorSelectionLimit}
+                      {isDippedPretzels ? "Dip Flavor Selection Limit" : "Cake Flavor Selection Limit"}: {cakeFlavorSelectionLimit}
                     </span>
                     <span className="block text-gray-600 font-semibold mt-0.5 leading-tight">
-                      {cakeFlavorSelectionLimit === 0 ? "Customer cannot select any options." : `Customer may select up to ${cakeFlavorSelectionLimit} cake flavor${cakeFlavorSelectionLimit > 1 ? "s" : ""}.`}
+                      {cakeFlavorSelectionLimit === 0 
+                        ? "Customer cannot select any options." 
+                        : `Customer may select up to ${cakeFlavorSelectionLimit} ${isDippedPretzels ? "dip flavor" : "cake flavor"}${cakeFlavorSelectionLimit > 1 ? "s" : ""}.`}
                     </span>
                     <span className="block text-gray-500 font-medium mt-0.5">
-                      Customers may select up to {cakeFlavorSelectionLimit} of the {cakeFlavors.length} available cake flavors.
+                      Customers may select up to {cakeFlavorSelectionLimit} of the {cakeFlavors.length} available {isDippedPretzels ? "dip flavors" : "cake flavors"}.
                     </span>
                   </div>
                 </div>
@@ -1792,7 +1800,7 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
                     type="text"
                     value={newCakeFlavorName}
                     onChange={(e) => setNewCakeFlavorName(e.target.value)}
-                    placeholder="e.g., Chocolate Sponge"
+                    placeholder={isDippedPretzels ? "e.g., Milk Chocolate" : "e.g., Chocolate Sponge"}
                     className="flex-1 text-sm bg-brand-cream/5 border border-brand-pink/10 p-2 rounded-xl focus:outline-none focus:ring-1 focus:ring-[#B76E79]"
                   />
                   <div className="relative w-20">
@@ -1817,12 +1825,14 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
                 {/* Collapsible Added Items List */}
                 <details className="group border border-brand-pink/10 rounded-xl bg-white overflow-hidden mt-2" open={cakeFlavors.length > 0}>
                   <summary className="flex items-center justify-between p-2.5 cursor-pointer select-none bg-brand-pink/5 hover:bg-brand-pink/10 font-bold text-xs text-brand-chocolate">
-                    <span>Added Cake Flavors ({cakeFlavors.length})</span>
+                    <span>Added {isDippedPretzels ? "Dip Flavors" : "Cake Flavors"} ({cakeFlavors.length})</span>
                     <span className="text-[10px] transition-transform group-open:rotate-180">▼</span>
                   </summary>
                   <div className="p-3 space-y-1.5 max-h-64 overflow-y-auto border-t border-brand-pink/10">
                     {cakeFlavors.length === 0 ? (
-                      <p className="text-[10px] text-gray-400 italic text-center py-2">No cake flavor options added yet.</p>
+                      <p className="text-[10px] text-gray-400 italic text-center py-2">
+                        No {isDippedPretzels ? "dip flavor" : "cake flavor"} options added yet.
+                      </p>
                     ) : (
                       cakeFlavors.map((f, idx) => {
                         const isEditing = editingCakeFlavorIdx === idx;
@@ -1891,7 +1901,7 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
                                       type="button"
                                       onClick={() => handleStartEditCakeFlavor(idx, f.name, f.priceAdd)}
                                       className="text-[#B76E79] hover:text-[#B76E79]/80 p-1 hover:bg-[#B76E79]/5 rounded transition cursor-pointer"
-                                      title="Edit cake flavor name/price"
+                                      title={isDippedPretzels ? "Edit dip flavor name/price" : "Edit cake flavor name/price"}
                                     >
                                       <Edit2 className="h-3.5 w-3.5" />
                                     </button>
@@ -1899,7 +1909,7 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
                                       type="button"
                                       onClick={() => handleRemoveCakeFlavorOption(idx)}
                                       className="text-red-500 hover:text-red-700 p-1 hover:bg-red-50 rounded transition cursor-pointer"
-                                      title="Delete cake flavor option"
+                                      title={isDippedPretzels ? "Delete dip flavor option" : "Delete cake flavor option"}
                                     >
                                       <Trash2 className="h-3.5 w-3.5" />
                                     </button>
