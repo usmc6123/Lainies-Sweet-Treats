@@ -828,18 +828,17 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
           {/* Centered Headline, Subtext, and CTA Button Group */}
           <div className="max-w-2xl mx-auto text-center relative z-10">
             <h2 
-              className="text-3xl md:text-[38px] lg:text-[42px] text-brand-cream font-bold font-heading leading-tight mb-4"
-              style={{ textShadow: "0 2px 12px rgba(0,0,0,0.4)", letterSpacing: "0.8px" }}
+              className="text-3xl md:text-[38px] lg:text-[42px] text-black font-bold font-heading leading-tight mb-4"
+              style={{ textShadow: "0 2px 12px rgba(255,255,255,0.4)", letterSpacing: "0.8px" }}
             >
-              Baked with Love by Lainie 🧁
+              Baked with Love by Lainie
             </h2>
             
             <p 
-              className="text-sm md:text-base text-brand-cream/90 leading-relaxed font-normal mb-2 font-heading"
-              style={{ textShadow: "0 2px 12px rgba(0,0,0,0.4)" }}
+              className="text-sm md:text-base text-black leading-relaxed font-normal mb-2 font-heading"
+              style={{ textShadow: "0 2px 12px rgba(255,255,255,0.4)" }}
             >
-              Based in Royse City, TX. Lainie custom-bakes every celebration treat.<br />
-              Experience personalized designs and custom buttercream artistry.
+              Based in Royse City, TX. Lainie specializes in beautifully crafted mini cakes made fresh for birthdays, showers, weddings, and life's sweetest celebrations.
             </p>
           </div>
         </div>
