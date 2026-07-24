@@ -514,7 +514,7 @@ export default function App() {
         <div className="max-w-2xl mx-auto space-y-3">
           <p className="font-heading italic text-base text-brand-pink tracking-wide">Lainie's Sweet Treats</p>
           <p className="text-[10px] text-gray-300 leading-relaxed max-w-lg mx-auto">
-            Delivering gorgeous, delicious mini cakes, custom cookies, cupcakes, dessert boxes & catering baskets in Royse City, Texas and surrounding Rockwall County. Made with organic butter, love, and sweet Texas charm.
+            Delivering gorgeous, delicious mini cakes, cupcakes, dipped pretzels & catering options in Royse City, Texas and surrounding Rockwall County. Made with love, and sweet Texas charm.
           </p>
           <div className="pt-2 border-t border-brand-pink/10 text-[9px] text-gray-400">
             Lainie's Sweet Treats & Custom Design Bakery © 2026 • Secure Admin Office Protected by Cryptographic Token Lookups
