@@ -44,6 +44,8 @@ export interface Product {
   ingredients: ProductIngredientLink[];
   imgUrl?: string; // Keep for fallback/backward compatibility
   isVisible?: boolean; // New visible/hidden toggle
+  isTaxable?: boolean; // Controls whether product is subject to sales tax
+  taxable?: boolean; // Backward compatibility alias
   photos?: { url: string; isPrimary: boolean }[]; // Multiple photos array
   variations?: ProductVariation[]; // Optional variations list for multi-type products (e.g. Mini Cakes)
   flavorSelectionLimit?: number;
@@ -98,6 +100,7 @@ export interface Order {
   customerPhone: string;
   items: OrderItem[];
   subtotal: number;
+  taxableSubtotal?: number;
   tax: number;
   deliveryFee: number;
   total: number;
@@ -116,6 +119,7 @@ export interface Order {
   currency?: string;
 
   subtotalCents?: number;
+  taxableSubtotalCents?: number;
   discountAmountCents?: number;
   tipAmountCents?: number;
   taxAmountCents?: number;
@@ -151,6 +155,7 @@ export interface Order {
   pricingSnapshot?: {
     items: OrderItem[];
     subtotalCents: number;
+    taxableSubtotalCents?: number;
     discountAmountCents: number;
     tipAmountCents: number;
     taxAmountCents: number;

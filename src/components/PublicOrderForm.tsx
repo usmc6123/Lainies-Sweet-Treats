@@ -589,6 +589,28 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
   // Computed Cart metrics with Feature 5 dynamic coupon logic
   const cartSubtotal = cart.reduce((sum, item) => sum + item.totalPrice, 0);
 
+  // Calculate taxable subtotal (ONLY Mini Cakes or items explicitly marked taxable)
+  const cartTaxableSubtotal = cart.reduce((sum, item) => {
+    const product = products.find(p => p.id === item.productId);
+    let isTaxable = false;
+    if (product) {
+      if (typeof product.isTaxable === "boolean") {
+        isTaxable = product.isTaxable;
+      } else if (typeof (product as any).taxable === "boolean") {
+        isTaxable = (product as any).taxable;
+      } else {
+        const cat = (product.category || "").toLowerCase().trim();
+        const pName = (product.name || "").toLowerCase().trim();
+        isTaxable = cat === "mini cakes" || pName === "mini cakes" || pName.includes("mini cake");
+      }
+    } else {
+      const iName = (item.name || "").toLowerCase().trim();
+      const iCat = ((item as any).category || "").toLowerCase().trim();
+      isTaxable = iCat === "mini cakes" || iName === "mini cakes" || iName.includes("mini cake");
+    }
+    return isTaxable ? sum + item.totalPrice : sum;
+  }, 0);
+
   let calculatedDiscount = 0;
   if (couponMeta) {
     if (cartSubtotal >= couponMeta.minOrderAmount) {
@@ -602,6 +624,8 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
 
   const taxRate = settings?.taxRate || 0.0825;
   const discountedSubtotal = Math.max(0, cartSubtotal - calculatedDiscount);
+  const discountRatio = cartSubtotal > 0 ? (calculatedDiscount / cartSubtotal) : 0;
+  const discountedTaxableSubtotal = Math.max(0, cartTaxableSubtotal * (1 - discountRatio));
 
   // Calculate tip value based on discounted subtotal
   let cartTipAmount = 0;
@@ -616,7 +640,7 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
     cartTipAmount = isNaN(parsed) || parsed < 0 ? 0 : parsed;
   }
 
-  const cartTax = parseFloat((discountedSubtotal * taxRate).toFixed(2));
+  const cartTax = parseFloat((discountedTaxableSubtotal * taxRate).toFixed(2));
   const deliveryCost = fulfillmentType === "delivery" ? (settings?.deliveryFeePerMile ? settings.deliveryRadius * settings.deliveryFeePerMile : 15.00) : 0;
   const cartTotal = parseFloat((discountedSubtotal + cartTipAmount + cartTax + deliveryCost).toFixed(2));
 

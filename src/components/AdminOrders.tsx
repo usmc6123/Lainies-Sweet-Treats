@@ -447,6 +447,12 @@ export default function AdminOrders({ token, triggerRefresh }: AdminOrdersProps)
                     <span>Subtotal:</span>
                     <span className="font-semibold">${selectedOrder.subtotal.toFixed(2)}</span>
                   </div>
+                  {(selectedOrder.taxableSubtotal !== undefined || selectedOrder.taxableSubtotalCents !== undefined) && (
+                    <div className="flex justify-between text-gray-500 text-xs">
+                      <span>Taxable Sales:</span>
+                      <span className="font-medium">${(selectedOrder.taxableSubtotal ?? (selectedOrder.taxableSubtotalCents! / 100)).toFixed(2)}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between text-gray-500">
                     <span>Sales Tax (TX):</span>
                     <span className="font-semibold">${selectedOrder.tax.toFixed(2)}</span>

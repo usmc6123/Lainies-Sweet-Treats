@@ -260,6 +260,7 @@ export default async function handler(req: any, res: any) {
         customerPhone,
         items: pricing.items as any,
         subtotal: roundCurrency(fromCents(pricing.subtotalCents)),
+        taxableSubtotal: roundCurrency(fromCents(pricing.taxableSubtotalCents)),
         tax: roundCurrency(fromCents(pricing.taxAmountCents)),
         deliveryFee: roundCurrency(fromCents(pricing.deliveryFeeCents)),
         total: roundCurrency(fromCents(pricing.totalAmountCents)),
@@ -277,6 +278,7 @@ export default async function handler(req: any, res: any) {
         paymentProvider: "stripe",
         currency: stripeCurrency,
         subtotalCents: pricing.subtotalCents,
+        taxableSubtotalCents: pricing.taxableSubtotalCents,
         discountAmountCents: pricing.discountAmountCents,
         tipAmountCents: pricing.tipAmountCents,
         taxAmountCents: pricing.taxAmountCents,
@@ -572,6 +574,7 @@ export default async function handler(req: any, res: any) {
 
       if (totalChanged) {
         updatedFields.subtotal = roundCurrency(fromCents(pricing.subtotalCents));
+        updatedFields.taxableSubtotal = roundCurrency(fromCents(pricing.taxableSubtotalCents));
         updatedFields.tax = roundCurrency(fromCents(pricing.taxAmountCents));
         updatedFields.deliveryFee = roundCurrency(fromCents(pricing.deliveryFeeCents));
         updatedFields.total = roundCurrency(fromCents(pricing.totalAmountCents));
@@ -579,6 +582,7 @@ export default async function handler(req: any, res: any) {
         updatedFields.tipAmount = pricing.tipAmountCents > 0 ? roundCurrency(fromCents(pricing.tipAmountCents)) : undefined;
 
         updatedFields.subtotalCents = pricing.subtotalCents;
+        updatedFields.taxableSubtotalCents = pricing.taxableSubtotalCents;
         updatedFields.discountAmountCents = pricing.discountAmountCents;
         updatedFields.tipAmountCents = pricing.tipAmountCents;
         updatedFields.taxAmountCents = pricing.taxAmountCents;

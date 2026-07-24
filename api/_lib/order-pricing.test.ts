@@ -651,6 +651,52 @@ async function runTests() {
     console.log("✅ Passed: 31. Duplicate Topping Selection Check");
   }
 
+  // 32. Taxable Subtotal Calculation for Mixed Items (Mini Cakes vs Non-Taxable Cupcakes)
+  {
+    const result = await calculateAuthoritativePricing(
+      [
+        {
+          productId: "prod-cupcake", // Non-taxable cupcake ($4.50)
+          quantity: 2 // $9.00 -> 900 cents
+        },
+        {
+          productId: "prod-variations", // Mini Cakes ($12.00) -> Taxable
+          variationId: "normal",
+          quantity: 1 // 1200 cents
+        }
+      ],
+      undefined,
+      "none",
+      0,
+      "pickup"
+    );
+    assert(result.subtotalCents === 2100, `Expected subtotal 2100 but got ${result.subtotalCents}`);
+    assert(result.taxableSubtotalCents === 1200, `Expected taxable subtotal 1200 but got ${result.taxableSubtotalCents}`);
+    const expectedTax = Math.round(1200 * 0.0825); // 99 cents
+    assert(result.taxAmountCents === expectedTax, `Expected tax amount ${expectedTax} but got ${result.taxAmountCents}`);
+    console.log("✅ Passed: 32. Taxable Subtotal Calculation for Mixed Items");
+  }
+
+  // 33. Non-taxable items only result in 0 tax
+  {
+    const result = await calculateAuthoritativePricing(
+      [
+        {
+          productId: "prod-cupcake", // Non-taxable cupcake
+          quantity: 4 // $18.00 -> 1800 cents
+        }
+      ],
+      undefined,
+      "none",
+      0,
+      "pickup"
+    );
+    assert(result.subtotalCents === 1800, `Expected subtotal 1800 but got ${result.subtotalCents}`);
+    assert(result.taxableSubtotalCents === 0, `Expected taxable subtotal 0 but got ${result.taxableSubtotalCents}`);
+    assert(result.taxAmountCents === 0, `Expected tax amount 0 but got ${result.taxAmountCents}`);
+    console.log("✅ Passed: 33. Non-taxable items only tax check");
+  }
+
   console.log("\n✨ All Automated pricing tests completed successfully!");
 }
 

@@ -811,8 +811,32 @@ export default async function handler(req: any, res: any) {
               let customerId: string;
               
               const subtotal = quote.priceProposal || 0;
+              const products = await dbService.list("products");
+              const proposedItems = quote.proposedItems || [];
+              let taxableSubtotal = 0;
+              if (proposedItems.length > 0) {
+                for (const item of proposedItems) {
+                  const prod = products.find((p: any) => p.id === item.productId);
+                  let isTaxable = false;
+                  if (prod) {
+                    if (typeof prod.isTaxable === "boolean") isTaxable = prod.isTaxable;
+                    else if (typeof prod.taxable === "boolean") isTaxable = prod.taxable;
+                    else {
+                      const cat = (prod.category || "").toLowerCase();
+                      const pName = (prod.name || "").toLowerCase();
+                      isTaxable = cat === "mini cakes" || pName === "mini cakes" || pName.includes("mini cake");
+                    }
+                  } else {
+                    const iName = (item.name || "").toLowerCase();
+                    isTaxable = iName.includes("mini cake");
+                  }
+                  if (isTaxable) {
+                    taxableSubtotal += item.totalPrice || (item.unitPrice * item.quantity) || 0;
+                  }
+                }
+              }
               const taxRate = settings.taxRate || 0.0825;
-              const tax = parseFloat((subtotal * taxRate).toFixed(2));
+              const tax = parseFloat((taxableSubtotal * taxRate).toFixed(2));
               const total = parseFloat((subtotal + tax).toFixed(2));
 
               if (!customer) {
@@ -853,9 +877,14 @@ export default async function handler(req: any, res: any) {
                   } as any
                 ],
                 subtotal,
+                taxableSubtotal,
                 tax,
                 deliveryFee: 0,
                 total,
+                subtotalCents: Math.round(subtotal * 100),
+                taxableSubtotalCents: Math.round(taxableSubtotal * 100),
+                taxAmountCents: Math.round(tax * 100),
+                totalAmountCents: Math.round(total * 100),
                 orderDate: new Date().toISOString(),
                 fulfillmentDate: quote.eventDate,
                 type: "pickup",

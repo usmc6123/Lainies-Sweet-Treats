@@ -89,6 +89,7 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
   
   // Feature 1: Catalog visibility toggle state
   const [isVisible, setIsVisible] = useState(true);
+  const [isTaxable, setIsTaxable] = useState(true);
 
   // Feature 2: Photo Gallery state
   const [photos, setPhotos] = useState<{ url: string; isPrimary: boolean }[]>([]);
@@ -468,6 +469,8 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
     setCustomCategory("");
     
     setIsVisible(p.isVisible !== false);
+    const initialIsTaxable = p.isTaxable !== undefined ? p.isTaxable : (p.taxable !== undefined ? p.taxable : (p.category === "Mini Cakes" || p.name === "Mini Cakes" || p.name?.includes("Mini Cakes")));
+    setIsTaxable(initialIsTaxable);
 
     const pPhotos = normalizeProductPhotos(p);
     setProdIngredients(p.ingredients || []);
@@ -594,6 +597,7 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
     setBasePrice(0);
     
     setIsVisible(true);
+    setIsTaxable(false);
     setPhotos([]);
     setTempUploadId(`new-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`);
     
@@ -1158,6 +1162,8 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
       imgUrl: finalImgUrl,
       photos: cleanPhotos,
       isVisible: isVisible !== false,
+      isTaxable: isTaxable === true,
+      taxable: isTaxable === true,
       options: normalizePayloadOptions(finalOptions),
       ingredients: prodIngredients || [],
       cakeFlavorSelectionLimit: cleanLimit((activeVarId && finalVariations)
@@ -1420,6 +1426,23 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
                     >
                       <span
                         className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${isVisible ? 'translate-x-5' : 'translate-x-0'}`}
+                      />
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-brand-chocolate uppercase tracking-wider block">Sales Tax (8.25%)</label>
+                  <p className="text-[10px] text-gray-500 font-semibold mb-2.5">Controls whether state sales tax is charged on this product.</p>
+                  <div className="flex items-center justify-between p-3.5 bg-white border border-brand-pink/15 rounded-xl">
+                    <span className="text-[11px] text-brand-chocolate font-semibold">{isTaxable ? "Sales Tax Applied (Taxable)" : "No Sales Tax (Tax-Exempt)"}</span>
+                    <button
+                      type="button"
+                      onClick={() => setIsTaxable(!isTaxable)}
+                      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${isTaxable ? 'bg-brand-rosegold' : 'bg-gray-200'}`}
+                    >
+                      <span
+                        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${isTaxable ? 'translate-x-5' : 'translate-x-0'}`}
                       />
                     </button>
                   </div>

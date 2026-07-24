@@ -58,6 +58,19 @@ export interface PricingInputItem {
   addOns?: string[];
 }
 
+export function isProductTaxable(product: { category?: string; name?: string; isTaxable?: boolean; taxable?: boolean }): boolean {
+  if (typeof product.isTaxable === "boolean") {
+    return product.isTaxable;
+  }
+  if (typeof product.taxable === "boolean") {
+    return product.taxable;
+  }
+  // Default rule: ONLY Mini Cakes are taxable unless explicitly set
+  const cat = (product.category || "").toLowerCase().trim();
+  const name = (product.name || "").toLowerCase().trim();
+  return cat === "mini cakes" || name === "mini cakes" || name.includes("mini cake");
+}
+
 export interface PricingResult {
   items: Array<{
     productId: string;
@@ -78,6 +91,7 @@ export interface PricingResult {
     lineTotalCents: number;
   }>;
   subtotalCents: number;
+  taxableSubtotalCents: number;
   discountAmountCents: number;
   tipAmountCents: number;
   taxAmountCents: number;
@@ -99,6 +113,7 @@ export async function calculateAuthoritativePricing(
 
   const verifiedItems: PricingResult["items"] = [];
   let subtotalCents = 0;
+  let taxableSubtotalCents = 0;
 
   for (const inputItem of inputItems) {
     const product = products.find(p => p.id === inputItem.productId);
@@ -292,6 +307,9 @@ export async function calculateAuthoritativePricing(
     const unitPriceCents = toCents(itemUnitPrice);
     const lineTotalCents = unitPriceCents * qty;
     subtotalCents += lineTotalCents;
+    if (isProductTaxable(product)) {
+      taxableSubtotalCents += lineTotalCents;
+    }
 
     verifiedItems.push({
       productId: product.id,
@@ -371,9 +389,11 @@ export async function calculateAuthoritativePricing(
     }
   }
 
-  // Handle Tax calculation after discount on verified merchandise
+  // Handle Tax calculation after discount on verified merchandise (ONLY taxable products)
+  const discountRatio = subtotalCents > 0 ? (discountAmountCents / subtotalCents) : 0;
+  const discountedTaxableSubtotalCents = Math.max(0, Math.round(taxableSubtotalCents * (1 - discountRatio)));
   const taxRate = settings.taxRate || 0.0825;
-  const taxAmountCents = Math.round(discountedSubtotalCents * taxRate);
+  const taxAmountCents = Math.round(discountedTaxableSubtotalCents * taxRate);
 
   // Handle Delivery recalculation
   let deliveryFeeCents = 0;
@@ -389,6 +409,7 @@ export async function calculateAuthoritativePricing(
   return {
     items: verifiedItems,
     subtotalCents,
+    taxableSubtotalCents,
     discountAmountCents,
     tipAmountCents,
     taxAmountCents,
