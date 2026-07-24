@@ -735,7 +735,15 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
         }));
         
         // Redirect to Stripe Checkout Session
-        window.location.assign(data.checkoutUrl);
+        // Must navigate the top-level browsing context, not just this frame — Stripe Checkout
+        // refuses to render inside an iframe (e.g. when this app is embedded in GoHighLevel).
+        try {
+          window.top!.location.assign(data.checkoutUrl);
+        } catch (e) {
+          // Cross-origin/sandboxed iframe blocked top-level navigation — fall back to opening
+          // Checkout in a new tab so the flow still works.
+          window.open(data.checkoutUrl, "_blank");
+        }
       } else {
         setErrorMessage(data.error || "Something went wrong. Please check your order criteria.");
       }
