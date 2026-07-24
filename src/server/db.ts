@@ -34,6 +34,11 @@ export function getDb(): any {
     }
 
     realDb = getFirestore(getApp());
+    // Firestore rejects `undefined` values in nested fields (e.g. optional order item
+    // properties like variationId on non-variation products). Since the app relies on
+    // undefined-to-omit optional fields throughout, tell the SDK to strip them instead
+    // of throwing on every write that includes one.
+    realDb.settings({ ignoreUndefinedProperties: true });
     return realDb;
   } catch (error: any) {
     console.error("Firebase Admin initialization failed:", error);
