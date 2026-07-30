@@ -641,8 +641,15 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
   }
 
   const cartTax = parseFloat((discountedTaxableSubtotal * taxRate).toFixed(2));
-  const deliveryCost = fulfillmentType === "delivery" ? (settings?.deliveryFeePerMile ? settings.deliveryRadius * settings.deliveryFeePerMile : 15.00) : 0;
-  const cartTotal = parseFloat((discountedSubtotal + cartTipAmount + cartTax + deliveryCost).toFixed(2));
+  const deliveryRadius = typeof settings?.deliveryRadius === "number" ? settings.deliveryRadius : 15;
+  const deliveryFlatFee = typeof settings?.deliveryFee === "number" ? settings.deliveryFee : 15.00;
+  const deliveryFeePerMile = typeof settings?.deliveryFeePerMile === "number" ? settings.deliveryFeePerMile : 0;
+  const deliveryCost = fulfillmentType === "delivery" ? (deliveryFeePerMile > 0 ? deliveryRadius * deliveryFeePerMile : deliveryFlatFee) : 0;
+  const safeDiscountedSubtotal = isNaN(discountedSubtotal) ? 0 : discountedSubtotal;
+  const safeTipAmount = isNaN(cartTipAmount) ? 0 : cartTipAmount;
+  const safeTax = isNaN(cartTax) ? 0 : cartTax;
+  const safeDeliveryCost = isNaN(deliveryCost) ? 0 : deliveryCost;
+  const cartTotal = parseFloat((safeDiscountedSubtotal + safeTipAmount + safeTax + safeDeliveryCost).toFixed(2));
 
   const handleApplyCoupon = async () => {
     if (!enteredCoupon.trim()) return;

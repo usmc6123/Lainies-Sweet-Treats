@@ -14,6 +14,7 @@ export default function AdminSettings({ token, triggerRefresh }: AdminSettingsPr
   // Settings Form States
   const [businessName, setBusinessName] = useState("");
   const [taxRate, setTaxRate] = useState(0);
+  const [deliveryFee, setDeliveryFee] = useState(15);
   const [deliveryFeePerMile, setDeliveryFeePerMile] = useState(0);
   const [minimumLeadDays, setMinimumLeadDays] = useState(5);
   const [autoEmailTemplate, setAutoEmailTemplate] = useState("");
@@ -60,6 +61,7 @@ export default function AdminSettings({ token, triggerRefresh }: AdminSettingsPr
           
           setBusinessName(data.businessName || "Lainie's Sweet Treats");
           setTaxRate(data.taxRate || 0);
+          setDeliveryFee(data.deliveryFee !== undefined ? Number(data.deliveryFee) : 15.00);
           setDeliveryFeePerMile(data.deliveryFeePerMile || 0);
           setMinimumLeadDays(data.minimumLeadDays || 5);
           setAutoEmailTemplate(data.autoEmailTemplate || "");
@@ -160,6 +162,7 @@ export default function AdminSettings({ token, triggerRefresh }: AdminSettingsPr
     const payload = {
       businessName,
       taxRate: Number(taxRate),
+      deliveryFee: Number(deliveryFee),
       deliveryFeePerMile: Number(deliveryFeePerMile),
       minimumLeadDays: Number(minimumLeadDays),
       autoEmailTemplate,
@@ -297,6 +300,22 @@ export default function AdminSettings({ token, triggerRefresh }: AdminSettingsPr
               className="w-full text-sm bg-brand-cream/10 border border-brand-pink/20 rounded-xl p-3.5 mt-2 focus:outline-none focus:ring-1 focus:ring-brand-rosegold font-semibold text-brand-chocolate"
             />
             <p className="text-xs text-gray-400 mt-1.5 font-medium">Lainie's Sweet Treats is located in Royse City, TX (State tax rate 8.25%).</p>
+          </div>
+
+          {/* Local Delivery Flat Fee */}
+          <div>
+            <label className="text-xs uppercase font-bold text-brand-chocolate/70 tracking-wider block">
+              Local Delivery Fee ($)
+            </label>
+            <input
+              type="number"
+              required
+              step="0.01"
+              value={deliveryFee}
+              onChange={(e) => setDeliveryFee(Number(e.target.value))}
+              className="w-full text-sm bg-brand-cream/10 border border-brand-pink/20 rounded-xl p-3.5 mt-2 focus:outline-none focus:ring-1 focus:ring-brand-rosegold font-semibold text-brand-chocolate"
+            />
+            <p className="text-xs text-gray-400 mt-1.5 font-medium">Flat local delivery fee (default: $15.00).</p>
           </div>
 
           {/* Surcharge mileage fee */}

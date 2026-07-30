@@ -17,6 +17,7 @@ async function runTests() {
       id: "prod-cupcake",
       name: "Cupcake",
       category: "cupcakes",
+      isTaxable: true,
       basePrice: 4.5,
       isVisible: true,
       options: {
@@ -36,6 +37,15 @@ async function runTests() {
           { name: "Caramel", priceAdd: 0.5 }
         ]
       }
+    },
+    {
+      id: "prod-non-taxable",
+      name: "Non-Taxable Cupcake",
+      category: "cupcakes",
+      isTaxable: false,
+      basePrice: 4.5,
+      isVisible: true,
+      options: {}
     },
     {
       id: "prod-cake",
@@ -656,7 +666,7 @@ async function runTests() {
     const result = await calculateAuthoritativePricing(
       [
         {
-          productId: "prod-cupcake", // Non-taxable cupcake ($4.50)
+          productId: "prod-non-taxable", // Non-taxable cupcake ($4.50)
           quantity: 2 // $9.00 -> 900 cents
         },
         {
@@ -682,7 +692,7 @@ async function runTests() {
     const result = await calculateAuthoritativePricing(
       [
         {
-          productId: "prod-cupcake", // Non-taxable cupcake
+          productId: "prod-non-taxable", // Non-taxable cupcake
           quantity: 4 // $18.00 -> 1800 cents
         }
       ],

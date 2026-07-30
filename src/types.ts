@@ -214,6 +214,7 @@ export interface Settings {
   address: string;
   leadTimeDays: number;
   deliveryRadius: number;
+  deliveryFee?: number;
   deliveryFeePerMile: number;
   taxRate: number; // e.g., 0.0825 for 8.25% in Royse City / TX
   emailTemplateConfirmation: string;
