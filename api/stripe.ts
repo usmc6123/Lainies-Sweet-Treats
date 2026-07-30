@@ -128,7 +128,11 @@ export default async function handler(req: any, res: any) {
         const descParts: string[] = [];
         if (item.size) descParts.push(`Size: ${item.size}`);
         if (item.selectedCakeFlavors && item.selectedCakeFlavors.length > 0) {
-          descParts.push(`Cake Flavor: ${item.selectedCakeFlavors.join(", ")}`);
+          if ((item as any).flavorUpchargeTotal && (item as any).flavorUpchargeTotal > 0) {
+            descParts.push(`Cake Flavor: ${item.selectedCakeFlavors.join(", ")} (+$${(item as any).flavorPricePerDozen} per dozen x ${(item as any).selectedDozenQuantity} dozen = +$${(item as any).flavorUpchargeTotal})`);
+          } else {
+            descParts.push(`Cake Flavor: ${item.selectedCakeFlavors.join(", ")}`);
+          }
         }
         if (item.selectedFrostings && item.selectedFrostings.length > 0) {
           descParts.push(`Frosting: ${item.selectedFrostings.join(", ")}`);

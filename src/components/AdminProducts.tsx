@@ -250,13 +250,20 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
     }
   }, [toppings, toppingSelectionLimit]);
 
-  const normalizeOptions = (items: any[] | undefined): { name: string; priceAdd: number }[] => {
+  const normalizeOptions = (items: any[] | undefined, prodCategory?: string, prodName?: string): { name: string; priceAdd: number }[] => {
     if (!items) return [];
+    const isCupcakes = (prodCategory || category) === "Cupcakes" || (prodName || name) === "Cupcakes";
     return items.map(item => {
       if (typeof item === 'string') {
-        return { name: item, priceAdd: 0 };
+        const isMarble = item.toLowerCase().includes("marble");
+        return { name: item, priceAdd: (isCupcakes && isMarble) ? 5.0 : 0 };
       }
-      return { name: item.name || "", priceAdd: Number(item.priceAdd) || 0 };
+      const isMarble = (item.name || "").toLowerCase().includes("marble");
+      let priceAdd = Number(item.priceAdd) || 0;
+      if (isCupcakes && isMarble && priceAdd === 0) {
+        priceAdd = 5.0;
+      }
+      return { name: item.name || "", priceAdd };
     });
   };
 
@@ -1917,7 +1924,7 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
                                 <span className="font-bold text-brand-chocolate">{f.name}</span>
                                 <div className="flex items-center gap-3">
                                   <span className="text-brand-rosegold font-bold bg-brand-pink/5 px-2.5 py-0.5 rounded-md">
-                                    +${f.priceAdd.toFixed(2)}
+                                    +${f.priceAdd.toFixed(2)}{(category === "Cupcakes" || name === "Cupcakes") ? " per dozen" : ""}
                                   </span>
                                   <div className="flex items-center gap-1.5">
                                     <button

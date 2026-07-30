@@ -76,6 +76,10 @@ export interface OrderItem {
   selectedSprinkles?: string[];
   selectedCakeFlavors?: string[];
   selectedFrostings?: string[];
+  flavorName?: string;
+  flavorPricePerDozen?: number;
+  selectedDozenQuantity?: number;
+  flavorUpchargeTotal?: number;
 }
 
 export type OrderStatus = "Pending" | "Confirmed" | "In Progress" | "Ready" | "Delivered/Picked Up" | "Cancelled";

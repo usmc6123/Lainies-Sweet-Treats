@@ -39,6 +39,29 @@ async function runTests() {
       }
     },
     {
+      id: "prod-cupcakes-dozen",
+      name: "Cupcakes",
+      category: "Cupcakes",
+      isTaxable: false,
+      basePrice: 32.0,
+      isVisible: true,
+      options: {
+        sizes: [
+          { name: "Dozen", priceAdd: 32.0 },
+          { name: "Two Dozen", priceAdd: 59.0 },
+          { name: "Three Dozen", priceAdd: 86.0 },
+          { name: "Four Dozen", priceAdd: 113.0 },
+          { name: "Five Dozen", priceAdd: 140.0 }
+        ],
+        cakeFlavors: [
+          { name: "Vanilla", priceAdd: 0 },
+          { name: "Chocolate", priceAdd: 0 },
+          { name: "Marble", priceAdd: 5.0 }
+        ]
+      },
+      cakeFlavorSelectionLimit: 1
+    },
+    {
       id: "prod-non-taxable",
       name: "Non-Taxable Cupcake",
       category: "cupcakes",
@@ -706,6 +729,121 @@ async function runTests() {
     assert(result.taxableSubtotalCents === 0, `Expected taxable subtotal 0 but got ${result.taxableSubtotalCents}`);
     assert(result.taxAmountCents === 0, `Expected tax amount 0 but got ${result.taxAmountCents}`);
     console.log("✅ Passed: 33. Non-taxable items only tax check");
+  }
+
+  // 34. Cupcakes 1 dozen with Marble flavor (add $5.00)
+  {
+    const result = await calculateAuthoritativePricing(
+      [{
+        productId: "prod-cupcakes-dozen",
+        size: "Dozen",
+        selectedCakeFlavors: ["Marble"],
+        quantity: 1
+      }],
+      undefined,
+      "none",
+      0,
+      "pickup"
+    );
+    // Base Dozen ($32.00) + Marble ($5.00 * 1 dozen) = $37.00 => 3700 cents
+    assert(result.subtotalCents === 3700, `Expected 3700 but got ${result.subtotalCents}`);
+    assert(result.taxAmountCents === 0, `Expected 0 tax but got ${result.taxAmountCents}`);
+    console.log("✅ Passed: 34. Cupcakes 1 dozen with Marble ($37.00)");
+  }
+
+  // 35. Cupcakes 2 dozen with Marble flavor (add $10.00)
+  {
+    const result = await calculateAuthoritativePricing(
+      [{
+        productId: "prod-cupcakes-dozen",
+        size: "Two Dozen",
+        selectedCakeFlavors: ["Marble"],
+        quantity: 1
+      }],
+      undefined,
+      "none",
+      0,
+      "pickup"
+    );
+    // Base Two Dozen ($59.00) + Marble ($5.00 * 2 dozen) = $69.00 => 6900 cents
+    assert(result.subtotalCents === 6900, `Expected 6900 but got ${result.subtotalCents}`);
+    console.log("✅ Passed: 35. Cupcakes 2 dozen with Marble ($69.00)");
+  }
+
+  // 36. Cupcakes 3 dozen with Marble flavor (add $15.00)
+  {
+    const result = await calculateAuthoritativePricing(
+      [{
+        productId: "prod-cupcakes-dozen",
+        size: "Three Dozen",
+        selectedCakeFlavors: ["Marble"],
+        quantity: 1
+      }],
+      undefined,
+      "none",
+      0,
+      "pickup"
+    );
+    // Base Three Dozen ($86.00) + Marble ($5.00 * 3 dozen) = $101.00 => 10100 cents
+    assert(result.subtotalCents === 10100, `Expected 10100 but got ${result.subtotalCents}`);
+    console.log("✅ Passed: 36. Cupcakes 3 dozen with Marble ($101.00)");
+  }
+
+  // 37. Cupcakes 4 dozen with Marble flavor (add $20.00)
+  {
+    const result = await calculateAuthoritativePricing(
+      [{
+        productId: "prod-cupcakes-dozen",
+        size: "Four Dozen",
+        selectedCakeFlavors: ["Marble"],
+        quantity: 1
+      }],
+      undefined,
+      "none",
+      0,
+      "pickup"
+    );
+    // Base Four Dozen ($113.00) + Marble ($5.00 * 4 dozen) = $133.00 => 13300 cents
+    assert(result.subtotalCents === 13300, `Expected 13300 but got ${result.subtotalCents}`);
+    console.log("✅ Passed: 37. Cupcakes 4 dozen with Marble ($133.00)");
+  }
+
+  // 38. Cupcakes 5 dozen with Marble flavor (add $25.00)
+  {
+    const result = await calculateAuthoritativePricing(
+      [{
+        productId: "prod-cupcakes-dozen",
+        size: "Five Dozen",
+        selectedCakeFlavors: ["Marble"],
+        quantity: 1
+      }],
+      undefined,
+      "none",
+      0,
+      "pickup"
+    );
+    // Base Five Dozen ($140.00) + Marble ($5.00 * 5 dozen) = $165.00 => 16500 cents
+    assert(result.subtotalCents === 16500, `Expected 16500 but got ${result.subtotalCents}`);
+    console.log("✅ Passed: 38. Cupcakes 5 dozen with Marble ($165.00)");
+  }
+
+  // 39. Cupcakes with Vanilla flavor (no extra charge)
+  {
+    const result = await calculateAuthoritativePricing(
+      [{
+        productId: "prod-cupcakes-dozen",
+        size: "Dozen",
+        selectedCakeFlavors: ["Vanilla"],
+        quantity: 1
+      }],
+      undefined,
+      "none",
+      0,
+      "pickup"
+    );
+    // Base Dozen ($32.00) + Vanilla ($0) = $32.00 => 3200 cents
+    assert(result.subtotalCents === 3200, `Expected 3200 but got ${result.subtotalCents}`);
+    console.log("✅ Passed: 39. Cupcakes 1 dozen with Vanilla ($32.00)");
   }
 
   console.log("\n✨ All Automated pricing tests completed successfully!");

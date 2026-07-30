@@ -85,6 +85,10 @@ export interface PricingResult {
     selectedToppings?: string[];
     selectedSprinkles?: string[];
     flavor?: string; // Fallback
+    flavorName?: string;
+    flavorPricePerDozen?: number;
+    selectedDozenQuantity?: number;
+    flavorUpchargeTotal?: number;
     unitPrice: number; // in dollars for backward-compatibility
     totalPrice: number; // in dollars for backward-compatibility
     unitPriceCents: number;
@@ -143,7 +147,8 @@ export async function calculateAuthoritativePricing(
     let selectedFullPrice: number | null = null;
     let sizePriceModifier = 0;
 
-    const isMiniCakes = product.category === "Mini Cakes" || product.name === "Mini Cakes";
+    const isMiniCakes = (product.category || "").toLowerCase().trim() === "mini cakes" || (product.name || "").toLowerCase().trim() === "mini cakes";
+    const isCupcakes = (product.category || "").toLowerCase().trim() === "cupcakes" || (product.name || "").toLowerCase().trim() === "cupcakes";
     let dozenCount = 1;
     let addonPrice = 0;
 
@@ -160,9 +165,7 @@ export async function calculateAuthoritativePricing(
         selectedFullPrice = sizeObj.priceAdd || 0;
       }
 
-      if (isMiniCakes) {
-        dozenCount = getDozenCount(inputItem.size, sizeObj);
-      }
+      dozenCount = getDozenCount(inputItem.size, sizeObj);
     }
 
     if (selectedFullPrice === null) {
@@ -175,6 +178,11 @@ export async function calculateAuthoritativePricing(
     const rawCakeFlavors = activeVar ? activeVar.options?.cakeFlavors : product.options?.cakeFlavors;
     const resolvedCakeFlavors = resolveToOptions(rawCakeFlavors);
     const selectedCakeFlavors = inputItem.selectedCakeFlavors || [];
+    let flavorName: string | undefined;
+    let flavorPricePerDozen: number | undefined;
+    let selectedDozenQuantity: number | undefined;
+    let flavorUpchargeTotal: number | undefined;
+
     if (selectedCakeFlavors.length > 0 && resolvedCakeFlavors.length > 0) {
       const limit = activeVar?.cakeFlavorSelectionLimit ?? product.cakeFlavorSelectionLimit ?? 1;
       if (selectedCakeFlavors.length > limit) {
@@ -185,10 +193,25 @@ export async function calculateAuthoritativePricing(
         if (!cfObj) {
           throw new Error(`Invalid cake flavor selection: "${cfName}" for product: ${product.name}`);
         }
+
+        let priceAdd = cfObj.priceAdd;
+        if (isCupcakes && cfName.toLowerCase().includes("marble") && priceAdd === 0) {
+          priceAdd = 5.0;
+        }
+
         if (isMiniCakes) {
-          addonPrice += cfObj.priceAdd;
+          addonPrice += priceAdd;
+        } else if (isCupcakes) {
+          const upcharge = priceAdd * dozenCount;
+          itemUnitPrice += upcharge;
+          if (priceAdd > 0) {
+            flavorName = cfObj.name;
+            flavorPricePerDozen = priceAdd;
+            selectedDozenQuantity = dozenCount;
+            flavorUpchargeTotal = upcharge;
+          }
         } else {
-          itemUnitPrice += cfObj.priceAdd;
+          itemUnitPrice += priceAdd;
         }
       }
     }
@@ -324,6 +347,10 @@ export async function calculateAuthoritativePricing(
       selectedToppings: selectedToppings.length > 0 ? selectedToppings : undefined,
       selectedSprinkles: selectedSprinkles.length > 0 ? selectedSprinkles : undefined,
       flavor: selectedFrostings[0] || undefined, // Fallback for old orders view
+      flavorName,
+      flavorPricePerDozen,
+      selectedDozenQuantity,
+      flavorUpchargeTotal: flavorUpchargeTotal ? roundCurrency(flavorUpchargeTotal) : undefined,
       unitPrice: roundCurrency(itemUnitPrice),
       totalPrice: roundCurrency(itemUnitPrice * qty),
       unitPriceCents,

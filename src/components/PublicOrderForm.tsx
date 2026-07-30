@@ -259,7 +259,8 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
   const getPriceSuffix = (priceAdd: number) => {
     if (priceAdd <= 0) return "";
     const isMiniCakes = selectedProduct && (selectedProduct.category === "Mini Cakes" || selectedProduct.name === "Mini Cakes");
-    if (isMiniCakes) {
+    const isCupcakes = selectedProduct && (selectedProduct.category === "Cupcakes" || selectedProduct.name === "Cupcakes");
+    if (isMiniCakes || isCupcakes) {
       return ` (+$${priceAdd.toFixed(2)} per dozen)`;
     }
     return ` (+$${priceAdd.toFixed(2)})`;
@@ -268,7 +269,8 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
   const getPriceLabel = (priceAdd: number) => {
     if (priceAdd <= 0) return "Included";
     const isMiniCakes = selectedProduct && (selectedProduct.category === "Mini Cakes" || selectedProduct.name === "Mini Cakes");
-    if (isMiniCakes) {
+    const isCupcakes = selectedProduct && (selectedProduct.category === "Cupcakes" || selectedProduct.name === "Cupcakes");
+    if (isMiniCakes || isCupcakes) {
       return `+$${priceAdd.toFixed(2)}/dozen`;
     }
     return `+$${priceAdd.toFixed(2)}`;
@@ -440,10 +442,11 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
     price = selectedFullPrice + sizePriceModifier;
 
     const isMiniCakes = selectedProduct.category === "Mini Cakes" || selectedProduct.name === "Mini Cakes";
+    const isCupcakes = selectedProduct.category === "Cupcakes" || selectedProduct.name === "Cupcakes";
     let dozenCount = 1;
     let addonPrice = 0;
 
-    if (isMiniCakes && choiceSize && activeSizes.length > 0) {
+    if (choiceSize && activeSizes.length > 0) {
       const sizeObj = activeSizes.find(s => s.name === choiceSize);
       if (sizeObj) {
         if (typeof (sizeObj as any).dozenCount === "number" && (sizeObj as any).dozenCount > 0) {
@@ -465,8 +468,17 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
     if (choiceCakeFlavor && resolvedCakeFlavors) {
       const cakeFlavorObj = resolvedCakeFlavors.find(cf => cf.name === choiceCakeFlavor);
       if (cakeFlavorObj) {
-        if (isMiniCakes) addonPrice += cakeFlavorObj.priceAdd;
-        else price += cakeFlavorObj.priceAdd;
+        let priceAdd = cakeFlavorObj.priceAdd;
+        if (isCupcakes && cakeFlavorObj.name.toLowerCase().includes("marble") && priceAdd === 0) {
+          priceAdd = 5.0;
+        }
+        if (isMiniCakes) {
+          addonPrice += priceAdd;
+        } else if (isCupcakes) {
+          price += priceAdd * dozenCount;
+        } else {
+          price += priceAdd;
+        }
       }
     }
 
@@ -554,6 +566,47 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
     }
 
     const isNormalMiniCakes = (selectedProduct.category === "Mini Cakes" || selectedProduct.name === "Mini Cakes") && selectedVarId === "normal";
+    const isCupcakes = selectedProduct.category === "Cupcakes" || selectedProduct.name === "Cupcakes";
+
+    let dozenCount = 1;
+    if (choiceSize && activeSizes) {
+      const sizeObj = activeSizes.find(s => s.name === choiceSize);
+      if (sizeObj) {
+        if (typeof (sizeObj as any).dozenCount === "number" && (sizeObj as any).dozenCount > 0) {
+          dozenCount = (sizeObj as any).dozenCount;
+        } else {
+          const nameLower = sizeObj.name.toLowerCase().trim();
+          if (nameLower === "dozen" || nameLower === "one dozen") dozenCount = 1;
+          else if (nameLower === "two dozen") dozenCount = 2;
+          else if (nameLower === "three dozen") dozenCount = 3;
+          else if (nameLower === "four dozen") dozenCount = 4;
+          else if (nameLower === "five dozen") dozenCount = 5;
+        }
+      }
+    }
+
+    const rawCakeFlavors = activeVar ? activeVar.options?.cakeFlavors : selectedProduct.options?.cakeFlavors;
+    const resolvedCakeFlavors = resolveToOptions(rawCakeFlavors);
+    let flavorName: string | undefined;
+    let flavorPricePerDozen: number | undefined;
+    let selectedDozenQuantity: number | undefined;
+    let flavorUpchargeTotal: number | undefined;
+
+    if (isCupcakes && choiceCakeFlavor && resolvedCakeFlavors) {
+      const cfObj = resolvedCakeFlavors.find(cf => cf.name === choiceCakeFlavor);
+      if (cfObj) {
+        let priceAdd = cfObj.priceAdd;
+        if (cfObj.name.toLowerCase().includes("marble") && priceAdd === 0) {
+          priceAdd = 5.0;
+        }
+        if (priceAdd > 0) {
+          flavorName = cfObj.name;
+          flavorPricePerDozen = priceAdd;
+          selectedDozenQuantity = dozenCount;
+          flavorUpchargeTotal = priceAdd * dozenCount;
+        }
+      }
+    }
 
     const cartItem: OrderItem = {
       productId: selectedProduct.id,
@@ -572,7 +625,11 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
       variationId: activeVar?.id,
       variationName: activeVar?.name,
       variationBasePrice: activeVar?.basePrice,
-      sizePriceAdd: sizePriceAdd
+      sizePriceAdd: sizePriceAdd,
+      flavorName,
+      flavorPricePerDozen,
+      selectedDozenQuantity,
+      flavorUpchargeTotal
     };
 
     setCart([...cart, cartItem]);
@@ -1083,6 +1140,11 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
                       {item.selectedCakeFlavors && item.selectedCakeFlavors.length > 0 && (
                         <p className="text-[10px] text-brand-chocolate/70 font-semibold">
                           {item.category === "Dipped Pretzels" || item.name?.includes("Dipped Pretzels") ? "Dip Flavor: " : "Cake Flavor: "}{item.selectedCakeFlavors.join(", ")}
+                        </p>
+                      )}
+                      {((item.flavorUpchargeTotal && item.flavorUpchargeTotal > 0) || (item.selectedCakeFlavors && item.selectedCakeFlavors.some(f => f.toLowerCase().includes("marble")) && (item.name?.toLowerCase().includes("cupcake") || item.category?.toLowerCase().includes("cupcake")))) && (
+                        <p className="text-[10px] text-brand-rosegold font-bold mt-0.5">
+                          {item.flavorName || "Marble"} Flavor Upgrade: +${(item.flavorPricePerDozen || 5.0).toFixed(2)} per dozen × {item.selectedDozenQuantity || 1} dozen = +${(item.flavorUpchargeTotal || 5.0).toFixed(2)}
                         </p>
                       )}
                       {item.selectedFrostings && item.selectedFrostings.length > 0 ? (

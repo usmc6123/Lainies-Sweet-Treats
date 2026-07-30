@@ -397,6 +397,11 @@ export default function AdminOrders({ token, triggerRefresh }: AdminOrdersProps)
                             {item.selectedCakeFlavors.join(", ")}
                           </p>
                         )}
+                        {(((item as any).flavorUpchargeTotal && (item as any).flavorUpchargeTotal > 0) || (item.selectedCakeFlavors && item.selectedCakeFlavors.some(f => f.toLowerCase().includes("marble")) && item.name?.toLowerCase().includes("cupcake"))) && (
+                          <p className="text-xs text-brand-rosegold font-bold">
+                            {(item as any).flavorName || "Marble"} Flavor Upgrade: +${((item as any).flavorPricePerDozen || 5.0).toFixed(2)} per dozen × {(item as any).selectedDozenQuantity || 1} dozen = +${((item as any).flavorUpchargeTotal || 5.0).toFixed(2)}
+                          </p>
+                        )}
                         {item.selectedFrostings && item.selectedFrostings.length > 0 ? (
                           <p className="text-xs text-gray-500 font-medium">Frosting: {item.selectedFrostings.join(", ")}</p>
                         ) : (
