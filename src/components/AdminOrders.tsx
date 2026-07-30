@@ -457,12 +457,10 @@ export default function AdminOrders({ token, triggerRefresh }: AdminOrdersProps)
                     <span>Sales Tax (TX):</span>
                     <span className="font-semibold">${selectedOrder.tax.toFixed(2)}</span>
                   </div>
-                  {selectedOrder.type === "delivery" && (
-                    <div className="flex justify-between text-gray-500">
-                      <span>Delivery Charge:</span>
-                      <span className="font-semibold">${selectedOrder.deliveryFee.toFixed(2)}</span>
-                    </div>
-                  )}
+                  <div className="flex justify-between text-gray-500">
+                    <span>Delivery:</span>
+                    <span className="font-semibold">${selectedOrder.type === "delivery" ? (selectedOrder.deliveryFee ?? 10.00).toFixed(2) : "0.00"}</span>
+                  </div>
                   <div className="flex justify-between text-base font-bold text-brand-chocolate pt-2">
                     <span>Final Price:</span>
                     <span className="text-lg text-brand-rosegold">${selectedOrder.total.toFixed(2)}</span>

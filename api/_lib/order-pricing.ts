@@ -398,11 +398,8 @@ export async function calculateAuthoritativePricing(
   // Handle Delivery recalculation
   let deliveryFeeCents = 0;
   if (fulfillmentType === "delivery") {
-    const radius = typeof settings.deliveryRadius === "number" ? settings.deliveryRadius : 15;
-    const feePerMile = typeof settings.deliveryFeePerMile === "number" ? settings.deliveryFeePerMile : 0;
-    const flatFee = typeof settings.deliveryFee === "number" ? settings.deliveryFee : 15.00;
-    const deliveryCostDollar = feePerMile > 0 ? radius * feePerMile : flatFee;
-    deliveryFeeCents = toCents(deliveryCostDollar);
+    const flatFee = typeof settings.deliveryFee === "number" ? settings.deliveryFee : 10.00;
+    deliveryFeeCents = toCents(flatFee);
   }
 
   const totalAmountCents = discountedSubtotalCents + tipAmountCents + taxAmountCents + deliveryFeeCents;

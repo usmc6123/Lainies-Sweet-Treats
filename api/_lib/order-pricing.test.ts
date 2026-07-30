@@ -146,7 +146,8 @@ async function runTests() {
     businessName: "Lainie's Sweet Treats",
     leadTimeDays: 3,
     deliveryRadius: 15,
-    deliveryFeePerMile: 2.0,
+    deliveryFee: 10.0,
+    deliveryFeePerMile: 0,
     taxRate: 0.0825,
     emailTemplateConfirmation: "..."
   };
@@ -436,8 +437,8 @@ async function runTests() {
       0,
       "delivery"
     );
-    // 15 miles * $2 = $30 => 3000
-    assert(result.deliveryFeeCents === 3000, "Delivery fee is 3000");
+    // Flat $10.00 delivery fee = 1000 cents
+    assert(result.deliveryFeeCents === 1000, "Delivery fee is 1000");
     console.log("✅ Passed: 18. Delivery fee");
   }
 

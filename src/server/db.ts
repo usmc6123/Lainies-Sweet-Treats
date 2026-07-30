@@ -100,7 +100,7 @@ export const dbService = {
       address: "508 Sweetwood Lane, Royse City, TX 75189",
       leadTimeDays: 3,
       deliveryRadius: 15,
-      deliveryFee: 15.00,
+      deliveryFee: 10.00,
       deliveryFeePerMile: 0,
       taxRate: 0.0825,
       emailTemplateConfirmation: "Hi {name},\n\nThank you so much for ordering from Lainie's Sweet Treats! We are thrilled to make your sweet celebration perfect. Your order {orderNumber} has been received for {fulfillmentDate} ({type}).\n\nBest,\nLainie"

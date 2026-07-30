@@ -315,7 +315,7 @@ export default function AdminSettings({ token, triggerRefresh }: AdminSettingsPr
               onChange={(e) => setDeliveryFee(Number(e.target.value))}
               className="w-full text-sm bg-brand-cream/10 border border-brand-pink/20 rounded-xl p-3.5 mt-2 focus:outline-none focus:ring-1 focus:ring-brand-rosegold font-semibold text-brand-chocolate"
             />
-            <p className="text-xs text-gray-400 mt-1.5 font-medium">Flat local delivery fee (default: $15.00).</p>
+            <p className="text-xs text-gray-400 mt-1.5 font-medium">Flat local delivery fee (default: $10.00).</p>
           </div>
 
           {/* Surcharge mileage fee */}

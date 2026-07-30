@@ -641,10 +641,8 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
   }
 
   const cartTax = parseFloat((discountedTaxableSubtotal * taxRate).toFixed(2));
-  const deliveryRadius = typeof settings?.deliveryRadius === "number" ? settings.deliveryRadius : 15;
-  const deliveryFlatFee = typeof settings?.deliveryFee === "number" ? settings.deliveryFee : 15.00;
-  const deliveryFeePerMile = typeof settings?.deliveryFeePerMile === "number" ? settings.deliveryFeePerMile : 0;
-  const deliveryCost = fulfillmentType === "delivery" ? (deliveryFeePerMile > 0 ? deliveryRadius * deliveryFeePerMile : deliveryFlatFee) : 0;
+  const deliveryFlatFee = typeof settings?.deliveryFee === "number" ? settings.deliveryFee : 10.00;
+  const deliveryCost = fulfillmentType === "delivery" ? deliveryFlatFee : 0;
   const safeDiscountedSubtotal = isNaN(discountedSubtotal) ? 0 : discountedSubtotal;
   const safeTipAmount = isNaN(cartTipAmount) ? 0 : cartTipAmount;
   const safeTax = isNaN(cartTax) ? 0 : cartTax;
@@ -1269,7 +1267,7 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
                 </div>
                 {fulfillmentType === "delivery" && (
                   <div className="flex justify-between text-brand-chocolate/85 font-medium">
-                    <span>Delivery (within {settings?.deliveryRadius || 15} miles):</span>
+                    <span>Local Delivery:</span>
                     <span>${deliveryCost.toFixed(2)}</span>
                   </div>
                 )}
