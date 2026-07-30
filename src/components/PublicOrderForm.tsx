@@ -489,8 +489,13 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
     if (selectedFrostingVal && resolvedFrostings) {
       const frostingObj = resolvedFrostings.find(f => f.name === selectedFrostingVal);
       if (frostingObj) {
-        if (isMiniCakes) addonPrice += frostingObj.priceAdd;
-        else price += frostingObj.priceAdd;
+        if (isMiniCakes) {
+          addonPrice += frostingObj.priceAdd;
+        } else if (isCupcakes) {
+          price += frostingObj.priceAdd * dozenCount;
+        } else {
+          price += frostingObj.priceAdd;
+        }
       }
     }
 
@@ -608,6 +613,25 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
       }
     }
 
+    const rawFrostings = activeVar ? (activeVar.options?.frostings || activeVar.options?.flavors) : (selectedProduct.options?.frostings || selectedProduct.options?.flavors);
+    const resolvedFrostings = resolveToOptions(rawFrostings);
+    let selectedFrostingName: string | undefined;
+    let frostingName: string | undefined;
+    let frostingPricePerDozen: number | undefined;
+    let frostingUpchargeTotal: number | undefined;
+
+    const selectedFrostingVal = choiceFrosting || choiceFlavor;
+    if (isCupcakes && selectedFrostingVal && resolvedFrostings) {
+      const fObj = resolvedFrostings.find(f => f.name === selectedFrostingVal);
+      if (fObj && fObj.priceAdd > 0) {
+        selectedFrostingName = fObj.name;
+        frostingName = fObj.name;
+        frostingPricePerDozen = fObj.priceAdd;
+        selectedDozenQuantity = dozenCount;
+        frostingUpchargeTotal = fObj.priceAdd * dozenCount;
+      }
+    }
+
     const cartItem: OrderItem = {
       productId: selectedProduct.id,
       name: selectedProduct.name,
@@ -629,7 +653,11 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
       flavorName,
       flavorPricePerDozen,
       selectedDozenQuantity,
-      flavorUpchargeTotal
+      flavorUpchargeTotal,
+      selectedFrostingName,
+      frostingName,
+      frostingPricePerDozen,
+      frostingUpchargeTotal
     };
 
     setCart([...cart, cartItem]);
@@ -1154,6 +1182,11 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
                       ) : item.flavor ? (
                         <p className="text-[10px] text-brand-chocolate/70 font-semibold">
                           Frosting: {item.flavor}
+                        </p>
+                      ) : null}
+                      {item.frostingUpchargeTotal && item.frostingUpchargeTotal > 0 ? (
+                        <p className="text-[10px] text-brand-rosegold font-bold mt-0.5">
+                          {item.selectedFrostingName || item.frostingName || item.selectedFrostings?.[0] || item.flavor} Frosting Upgrade: +${(item.frostingPricePerDozen || 0).toFixed(2)} per dozen × {item.selectedDozenQuantity || 1} dozen = +${item.frostingUpchargeTotal.toFixed(2)}
                         </p>
                       ) : null}
                       {((item.selectedDrizzles && item.selectedDrizzles.length > 0) || item.selectedDrizzle) && (

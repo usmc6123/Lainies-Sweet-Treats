@@ -57,6 +57,11 @@ async function runTests() {
           { name: "Vanilla", priceAdd: 0 },
           { name: "Chocolate", priceAdd: 0 },
           { name: "Marble", priceAdd: 5.0 }
+        ],
+        frostings: [
+          { name: "Vanilla Buttercream", priceAdd: 0 },
+          { name: "Espresso Buttercream", priceAdd: 2.0 },
+          { name: "Strawberry Buttercream", priceAdd: 3.0 }
         ]
       },
       cakeFlavorSelectionLimit: 1
@@ -844,6 +849,66 @@ async function runTests() {
     // Base Dozen ($32.00) + Vanilla ($0) = $32.00 => 3200 cents
     assert(result.subtotalCents === 3200, `Expected 3200 but got ${result.subtotalCents}`);
     console.log("✅ Passed: 39. Cupcakes 1 dozen with Vanilla ($32.00)");
+  }
+
+  // 40. Cupcakes 1 dozen with Espresso Buttercream (+$2.00/doz)
+  {
+    const result = await calculateAuthoritativePricing(
+      [{
+        productId: "prod-cupcakes-dozen",
+        size: "Dozen",
+        selectedFrostings: ["Espresso Buttercream"],
+        quantity: 1
+      }],
+      undefined,
+      "none",
+      0,
+      "pickup"
+    );
+    // Base Dozen ($32.00) + Espresso ($2.00 * 1 dozen) = $34.00 => 3400 cents
+    assert(result.subtotalCents === 3400, `Expected 3400 but got ${result.subtotalCents}`);
+    assert(result.items[0].frostingUpchargeTotal === 2.0, "frostingUpchargeTotal should be 2.0");
+    console.log("✅ Passed: 40. Cupcakes 1 dozen with Espresso Buttercream ($34.00)");
+  }
+
+  // 41. Cupcakes 2 dozen with Espresso Buttercream (+$2.00/doz * 2)
+  {
+    const result = await calculateAuthoritativePricing(
+      [{
+        productId: "prod-cupcakes-dozen",
+        size: "Two Dozen",
+        selectedFrostings: ["Espresso Buttercream"],
+        quantity: 1
+      }],
+      undefined,
+      "none",
+      0,
+      "pickup"
+    );
+    // Base Two Dozen ($59.00) + Espresso ($2.00 * 2 dozen) = $63.00 => 6300 cents
+    assert(result.subtotalCents === 6300, `Expected 6300 but got ${result.subtotalCents}`);
+    assert(result.items[0].frostingUpchargeTotal === 4.0, "frostingUpchargeTotal should be 4.0");
+    console.log("✅ Passed: 41. Cupcakes 2 dozen with Espresso Buttercream ($63.00)");
+  }
+
+  // 42. Cupcakes 3 dozen with Strawberry Buttercream (+$3.00/doz * 3)
+  {
+    const result = await calculateAuthoritativePricing(
+      [{
+        productId: "prod-cupcakes-dozen",
+        size: "Three Dozen",
+        selectedFrostings: ["Strawberry Buttercream"],
+        quantity: 1
+      }],
+      undefined,
+      "none",
+      0,
+      "pickup"
+    );
+    // Base Three Dozen ($86.00) + Strawberry ($3.00 * 3 dozen) = $95.00 => 9500 cents
+    assert(result.subtotalCents === 9500, `Expected 9500 but got ${result.subtotalCents}`);
+    assert(result.items[0].frostingUpchargeTotal === 9.0, "frostingUpchargeTotal should be 9.0");
+    console.log("✅ Passed: 42. Cupcakes 3 dozen with Strawberry Buttercream ($95.00)");
   }
 
   console.log("\n✨ All Automated pricing tests completed successfully!");

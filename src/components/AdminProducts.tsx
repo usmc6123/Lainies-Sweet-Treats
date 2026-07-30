@@ -1962,7 +1962,9 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
                     <h4 className="text-sm font-extrabold text-[#B76E79] uppercase tracking-wider">AVAILABLE FROSTINGS</h4>
                     <span className="text-[8px] bg-brand-chocolate text-white px-1.5 py-0.5 rounded uppercase font-black tracking-widest">Storefront Choice</span>
                   </div>
-                  <p className="text-[10px] text-gray-500 font-semibold leading-tight">These are the frosting flavors customers can choose from.</p>
+                  <p className="text-[10px] text-gray-500 font-semibold leading-tight">
+                    These are the frosting flavors customers can choose from.{(category === "Cupcakes" || name === "Cupcakes") ? " Prices entered here are treated as price per dozen." : ""}
+                  </p>
                 </div>
 
                 {/* Frosting Selection Limit Control */}
@@ -2030,14 +2032,14 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
                     placeholder="e.g., Vanilla Buttercream"
                     className="flex-1 text-sm bg-brand-cream/5 border border-brand-pink/10 p-2 rounded-xl focus:outline-none focus:ring-1 focus:ring-[#B76E79]"
                   />
-                  <div className="relative w-20">
+                  <div className="relative w-28">
                     <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-gray-400 font-bold">$</span>
                     <input
                       type="number"
                       value={newFrostingPrice || ""}
                       onChange={(e) => setNewFrostingPrice(Number(e.target.value))}
-                      placeholder="Price"
-                      className="w-full text-sm bg-brand-cream/5 border border-brand-pink/10 p-2 pl-5 rounded-xl focus:outline-none focus:ring-1 focus:ring-[#B76E79] font-bold text-center"
+                      placeholder={(category === "Cupcakes" || name === "Cupcakes") ? "Price/doz" : "Price"}
+                      className="w-full text-xs bg-brand-cream/5 border border-brand-pink/10 p-2 pl-5 rounded-xl focus:outline-none focus:ring-1 focus:ring-[#B76E79] font-bold text-center"
                     />
                   </div>
                   <button
@@ -2119,7 +2121,7 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
                                 <span className="font-bold text-brand-chocolate">{f.name}</span>
                                 <div className="flex items-center gap-3">
                                   <span className="text-brand-rosegold font-bold bg-brand-pink/5 px-2.5 py-0.5 rounded-md">
-                                    +${f.priceAdd.toFixed(2)}
+                                    +${f.priceAdd.toFixed(2)}{(category === "Cupcakes" || name === "Cupcakes") ? " per dozen" : ""}
                                   </span>
                                   <div className="flex items-center gap-1.5">
                                     <button

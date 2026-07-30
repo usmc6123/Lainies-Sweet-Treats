@@ -182,6 +182,10 @@ export async function calculateAuthoritativePricing(
     let flavorPricePerDozen: number | undefined;
     let selectedDozenQuantity: number | undefined;
     let flavorUpchargeTotal: number | undefined;
+    let selectedFrostingName: string | undefined;
+    let frostingName: string | undefined;
+    let frostingPricePerDozen: number | undefined;
+    let frostingUpchargeTotal: number | undefined;
 
     if (selectedCakeFlavors.length > 0 && resolvedCakeFlavors.length > 0) {
       const limit = activeVar?.cakeFlavorSelectionLimit ?? product.cakeFlavorSelectionLimit ?? 1;
@@ -238,6 +242,16 @@ export async function calculateAuthoritativePricing(
         }
         if (isMiniCakes) {
           addonPrice += fObj.priceAdd;
+        } else if (isCupcakes) {
+          const upcharge = fObj.priceAdd * dozenCount;
+          itemUnitPrice += upcharge;
+          if (fObj.priceAdd > 0) {
+            frostingName = fObj.name;
+            selectedFrostingName = fObj.name;
+            frostingPricePerDozen = fObj.priceAdd;
+            selectedDozenQuantity = dozenCount;
+            frostingUpchargeTotal = upcharge;
+          }
         } else {
           itemUnitPrice += fObj.priceAdd;
         }
@@ -351,6 +365,10 @@ export async function calculateAuthoritativePricing(
       flavorPricePerDozen,
       selectedDozenQuantity,
       flavorUpchargeTotal: flavorUpchargeTotal ? roundCurrency(flavorUpchargeTotal) : undefined,
+      selectedFrostingName,
+      frostingName,
+      frostingPricePerDozen,
+      frostingUpchargeTotal: frostingUpchargeTotal ? roundCurrency(frostingUpchargeTotal) : undefined,
       unitPrice: roundCurrency(itemUnitPrice),
       totalPrice: roundCurrency(itemUnitPrice * qty),
       unitPriceCents,

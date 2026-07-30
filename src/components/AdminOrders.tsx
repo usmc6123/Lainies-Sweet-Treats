@@ -407,6 +407,11 @@ export default function AdminOrders({ token, triggerRefresh }: AdminOrdersProps)
                         ) : (
                           item.flavor && <p className="text-xs text-gray-500 font-medium">Frosting: {item.flavor}</p>
                         )}
+                        {(item as any).frostingUpchargeTotal && (item as any).frostingUpchargeTotal > 0 && (
+                          <p className="text-xs text-brand-rosegold font-bold">
+                            {(item as any).selectedFrostingName || (item as any).frostingName || item.selectedFrostings?.[0] || item.flavor} Frosting Upgrade: +${((item as any).frostingPricePerDozen || 0).toFixed(2)} per dozen × {(item as any).selectedDozenQuantity || 1} dozen = +${((item as any).frostingUpchargeTotal || 0).toFixed(2)}
+                          </p>
+                        )}
                         {item.selectedDrizzle && (
                           <p className="text-xs text-gray-500 font-medium">Drizzle: {item.selectedDrizzle}</p>
                         )}
