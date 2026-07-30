@@ -93,6 +93,12 @@ export interface PricingResult {
     frostingName?: string;
     frostingPricePerDozen?: number;
     frostingUpchargeTotal?: number;
+    toppingPricePerDozen?: number;
+    toppingUpchargeTotal?: number;
+    totalToppingUpcharge?: number;
+    drizzlePricePerDozen?: number;
+    drizzleUpchargeTotal?: number;
+    totalDrizzleUpcharge?: number;
     unitPrice: number; // in dollars for backward-compatibility
     totalPrice: number; // in dollars for backward-compatibility
     unitPriceCents: number;
@@ -153,6 +159,7 @@ export async function calculateAuthoritativePricing(
 
     const isMiniCakes = (product.category || "").toLowerCase().trim() === "mini cakes" || (product.name || "").toLowerCase().trim() === "mini cakes";
     const isCupcakes = (product.category || "").toLowerCase().trim() === "cupcakes" || (product.name || "").toLowerCase().trim() === "cupcakes";
+    const isDippedPretzels = (product.category || "").toLowerCase().trim() === "dipped pretzels" || (product.name || "").toLowerCase().trim() === "dipped pretzels";
     let dozenCount = 1;
     let addonPrice = 0;
 
@@ -190,6 +197,13 @@ export async function calculateAuthoritativePricing(
     let frostingName: string | undefined;
     let frostingPricePerDozen: number | undefined;
     let frostingUpchargeTotal: number | undefined;
+
+    let drizzlePricePerDozen: number | undefined;
+    let drizzleUpchargeTotal: number | undefined;
+    let totalDrizzleUpcharge: number | undefined;
+    let toppingPricePerDozen: number | undefined;
+    let toppingUpchargeTotal: number | undefined;
+    let totalToppingUpcharge: number | undefined;
 
     if (selectedCakeFlavors.length > 0 && resolvedCakeFlavors.length > 0) {
       const limit = activeVar?.cakeFlavorSelectionLimit ?? product.cakeFlavorSelectionLimit ?? 1;
@@ -278,6 +292,15 @@ export async function calculateAuthoritativePricing(
         }
         if (isMiniCakes) {
           addonPrice += dObj.priceAdd;
+        } else if (isDippedPretzels) {
+          const upcharge = dObj.priceAdd * dozenCount;
+          itemUnitPrice += upcharge;
+          if (dObj.priceAdd > 0) {
+            drizzlePricePerDozen = (drizzlePricePerDozen || 0) + dObj.priceAdd;
+            drizzleUpchargeTotal = (drizzleUpchargeTotal || 0) + upcharge;
+            totalDrizzleUpcharge = (totalDrizzleUpcharge || 0) + upcharge;
+            selectedDozenQuantity = dozenCount;
+          }
         } else {
           itemUnitPrice += dObj.priceAdd;
         }
@@ -330,6 +353,15 @@ export async function calculateAuthoritativePricing(
           }
           if (isMiniCakes) {
             addonPrice += tObj.priceAdd;
+          } else if (isDippedPretzels) {
+            const upcharge = tObj.priceAdd * dozenCount;
+            itemUnitPrice += upcharge;
+            if (tObj.priceAdd > 0) {
+              toppingPricePerDozen = (toppingPricePerDozen || 0) + tObj.priceAdd;
+              toppingUpchargeTotal = (toppingUpchargeTotal || 0) + upcharge;
+              totalToppingUpcharge = (totalToppingUpcharge || 0) + upcharge;
+              selectedDozenQuantity = dozenCount;
+            }
           } else {
             itemUnitPrice += tObj.priceAdd;
           }
@@ -373,6 +405,12 @@ export async function calculateAuthoritativePricing(
       frostingName,
       frostingPricePerDozen,
       frostingUpchargeTotal: frostingUpchargeTotal ? roundCurrency(frostingUpchargeTotal) : undefined,
+      toppingPricePerDozen: toppingPricePerDozen ? roundCurrency(toppingPricePerDozen) : undefined,
+      toppingUpchargeTotal: toppingUpchargeTotal ? roundCurrency(toppingUpchargeTotal) : undefined,
+      totalToppingUpcharge: totalToppingUpcharge ? roundCurrency(totalToppingUpcharge) : undefined,
+      drizzlePricePerDozen: drizzlePricePerDozen ? roundCurrency(drizzlePricePerDozen) : undefined,
+      drizzleUpchargeTotal: drizzleUpchargeTotal ? roundCurrency(drizzleUpchargeTotal) : undefined,
+      totalDrizzleUpcharge: totalDrizzleUpcharge ? roundCurrency(totalDrizzleUpcharge) : undefined,
       unitPrice: roundCurrency(itemUnitPrice),
       totalPrice: roundCurrency(itemUnitPrice * qty),
       unitPriceCents,

@@ -140,10 +140,18 @@ export default async function handler(req: any, res: any) {
           descParts.push(`Frosting: ${item.flavor}`);
         }
         if (item.selectedDrizzles && item.selectedDrizzles.length > 0) {
-          descParts.push(`Drizzle: ${item.selectedDrizzles.join(", ")}`);
+          if ((item as any).drizzleUpchargeTotal && (item as any).drizzleUpchargeTotal > 0) {
+            descParts.push(`Drizzle: ${item.selectedDrizzles.join(", ")} (+$${(item as any).drizzlePricePerDozen} per dozen x ${(item as any).selectedDozenQuantity} dozen = +$${(item as any).drizzleUpchargeTotal})`);
+          } else {
+            descParts.push(`Drizzle: ${item.selectedDrizzles.join(", ")}`);
+          }
         }
         if (item.selectedToppings && item.selectedToppings.length > 0) {
-          descParts.push(`Toppings: ${item.selectedToppings.join(", ")}`);
+          if ((item as any).toppingUpchargeTotal && (item as any).toppingUpchargeTotal > 0) {
+            descParts.push(`Toppings: ${item.selectedToppings.join(", ")} (+$${(item as any).toppingPricePerDozen} per dozen x ${(item as any).selectedDozenQuantity} dozen = +$${(item as any).toppingUpchargeTotal})`);
+          } else {
+            descParts.push(`Toppings: ${item.selectedToppings.join(", ")}`);
+          }
         }
         if (item.selectedSprinkles && item.selectedSprinkles.length > 0) {
           descParts.push(`Sprinkles: ${item.selectedSprinkles.join(", ")}`);

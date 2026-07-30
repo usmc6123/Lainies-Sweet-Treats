@@ -412,11 +412,23 @@ export default function AdminOrders({ token, triggerRefresh }: AdminOrdersProps)
                             {(item as any).selectedFrostingName || (item as any).frostingName || item.selectedFrostings?.[0] || item.flavor} Frosting Upgrade: +${((item as any).frostingPricePerDozen || 0).toFixed(2)} per dozen × {(item as any).selectedDozenQuantity || 1} dozen = +${((item as any).frostingUpchargeTotal || 0).toFixed(2)}
                           </p>
                         )}
-                        {item.selectedDrizzle && (
-                          <p className="text-xs text-gray-500 font-medium">Drizzle: {item.selectedDrizzle}</p>
+                        {((item as any).selectedDrizzles && (item as any).selectedDrizzles.length > 0) || item.selectedDrizzle ? (
+                          <p className="text-xs text-gray-500 font-medium">
+                            Drizzle: {(item as any).selectedDrizzles && (item as any).selectedDrizzles.length > 0 ? (item as any).selectedDrizzles.join(", ") : item.selectedDrizzle}
+                          </p>
+                        ) : null}
+                        {(((item as any).drizzleUpchargeTotal && (item as any).drizzleUpchargeTotal > 0) || ((item as any).totalDrizzleUpcharge && (item as any).totalDrizzleUpcharge > 0)) && (
+                          <p className="text-xs text-brand-rosegold font-bold">
+                            Drizzle Upgrade: +${((item as any).drizzlePricePerDozen || 0).toFixed(2)} per dozen × {(item as any).selectedDozenQuantity || 1} dozen = +${((item as any).drizzleUpchargeTotal || (item as any).totalDrizzleUpcharge || 0).toFixed(2)}
+                          </p>
                         )}
                         {((item.selectedToppings && item.selectedToppings.length > 0) || (item.addOns && item.addOns.length > 0)) && (
                           <p className="text-xs text-brand-rosegold font-bold">Toppings: {(item.selectedToppings && item.selectedToppings.length > 0 ? item.selectedToppings : item.addOns)!.join(", ")}</p>
+                        )}
+                        {(((item as any).toppingUpchargeTotal && (item as any).toppingUpchargeTotal > 0) || ((item as any).totalToppingUpcharge && (item as any).totalToppingUpcharge > 0)) && (
+                          <p className="text-xs text-brand-rosegold font-bold">
+                            Topping Upgrade: +${((item as any).toppingPricePerDozen || 0).toFixed(2)} per dozen × {(item as any).selectedDozenQuantity || 1} dozen = +${((item as any).toppingUpchargeTotal || (item as any).totalToppingUpcharge || 0).toFixed(2)}
+                          </p>
                         )}
                         {item.selectedSprinkles && item.selectedSprinkles.length > 0 && (
                           <p className="text-xs text-brand-rosegold font-bold">Sprinkles: {item.selectedSprinkles.join(", ")}</p>

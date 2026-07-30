@@ -261,7 +261,8 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
     if (priceAdd <= 0) return "";
     const isMiniCakes = selectedProduct && (selectedProduct.category === "Mini Cakes" || selectedProduct.name === "Mini Cakes");
     const isCupcakes = selectedProduct && (selectedProduct.category === "Cupcakes" || selectedProduct.name === "Cupcakes");
-    if (isMiniCakes || isCupcakes) {
+    const isDippedPretzels = selectedProduct && (selectedProduct.category === "Dipped Pretzels" || selectedProduct.name === "Dipped Pretzels");
+    if (isMiniCakes || isCupcakes || isDippedPretzels) {
       return ` (+$${priceAdd.toFixed(2)} per dozen)`;
     }
     return ` (+$${priceAdd.toFixed(2)})`;
@@ -271,7 +272,8 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
     if (priceAdd <= 0) return "Included";
     const isMiniCakes = selectedProduct && (selectedProduct.category === "Mini Cakes" || selectedProduct.name === "Mini Cakes");
     const isCupcakes = selectedProduct && (selectedProduct.category === "Cupcakes" || selectedProduct.name === "Cupcakes");
-    if (isMiniCakes || isCupcakes) {
+    const isDippedPretzels = selectedProduct && (selectedProduct.category === "Dipped Pretzels" || selectedProduct.name === "Dipped Pretzels");
+    if (isMiniCakes || isCupcakes || isDippedPretzels) {
       return `+$${priceAdd.toFixed(2)}/dozen`;
     }
     return `+$${priceAdd.toFixed(2)}`;
@@ -636,6 +638,53 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
       }
     }
 
+    let toppingPricePerDozen: number | undefined;
+    let toppingUpchargeTotal: number | undefined;
+    let totalToppingUpcharge: number | undefined;
+    let drizzlePricePerDozen: number | undefined;
+    let drizzleUpchargeTotal: number | undefined;
+    let totalDrizzleUpcharge: number | undefined;
+
+    if (isDippedPretzels) {
+      selectedDozenQuantity = dozenCount;
+
+      const rawToppings = activeVar 
+        ? (activeVar.options?.toppings || activeVar.options?.addOns) 
+        : (selectedProduct.options?.toppings || selectedProduct.options?.addOns);
+      const resolvedToppings = resolveToOptions(rawToppings);
+      if (choiceAddOns.length > 0 && resolvedToppings.length > 0) {
+        let tSum = 0;
+        choiceAddOns.forEach(tName => {
+          const tObj = resolvedToppings.find(t => t.name === tName);
+          if (tObj && tObj.priceAdd > 0) {
+            tSum += tObj.priceAdd;
+          }
+        });
+        if (tSum > 0) {
+          toppingPricePerDozen = tSum;
+          toppingUpchargeTotal = tSum * dozenCount;
+          totalToppingUpcharge = tSum * dozenCount;
+        }
+      }
+
+      const rawDrizzles = activeVar ? activeVar.options?.drizzles : selectedProduct.options?.drizzles;
+      const resolvedDrizzles = resolveToOptions(rawDrizzles);
+      if (choiceDrizzle.length > 0 && resolvedDrizzles.length > 0) {
+        let dSum = 0;
+        choiceDrizzle.forEach(dName => {
+          const dObj = resolvedDrizzles.find(d => d.name === dName);
+          if (dObj && dObj.priceAdd > 0) {
+            dSum += dObj.priceAdd;
+          }
+        });
+        if (dSum > 0) {
+          drizzlePricePerDozen = dSum;
+          drizzleUpchargeTotal = dSum * dozenCount;
+          totalDrizzleUpcharge = dSum * dozenCount;
+        }
+      }
+    }
+
     const cartItem: OrderItem = {
       productId: selectedProduct.id,
       name: selectedProduct.name,
@@ -645,6 +694,7 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
       selectedCakeFlavors: choiceCakeFlavor ? [choiceCakeFlavor] : undefined,
       selectedFrostings: choiceFrosting ? [choiceFrosting] : undefined,
       addOns: !isNormalMiniCakes && choiceAddOns.length > 0 ? choiceAddOns : undefined,
+      selectedToppings: !isNormalMiniCakes && choiceAddOns.length > 0 ? choiceAddOns : undefined,
       selectedSprinkles: isNormalMiniCakes && choiceSprinkles.length > 0 ? choiceSprinkles : undefined,
       selectedDrizzle: choiceDrizzle[0] || undefined,
       selectedDrizzles: choiceDrizzle.length > 0 ? choiceDrizzle : undefined,
@@ -661,7 +711,13 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
       selectedFrostingName,
       frostingName,
       frostingPricePerDozen,
-      frostingUpchargeTotal
+      frostingUpchargeTotal,
+      toppingPricePerDozen,
+      toppingUpchargeTotal,
+      totalToppingUpcharge,
+      drizzlePricePerDozen,
+      drizzleUpchargeTotal,
+      totalDrizzleUpcharge
     };
 
     setCart([...cart, cartItem]);
@@ -1198,14 +1254,20 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
                           Drizzle: {item.selectedDrizzles && item.selectedDrizzles.length > 0 ? item.selectedDrizzles.join(", ") : item.selectedDrizzle}
                         </p>
                       )}
-                      {item.addOns && item.addOns.length > 0 && (
-                        <div className="flex flex-wrap gap-1 mt-1">
-                          {item.addOns.map((add, i) => (
-                            <span key={i} className="text-[9px] bg-brand-pink/15 text-brand-rosegold font-black px-2 py-0.5 rounded border border-brand-pink/20">
-                              {add}
-                            </span>
-                          ))}
-                        </div>
+                      {((item.drizzleUpchargeTotal && item.drizzleUpchargeTotal > 0) || (item.totalDrizzleUpcharge && item.totalDrizzleUpcharge > 0)) && (
+                        <p className="text-[10px] text-brand-rosegold font-bold mt-0.5">
+                          Drizzle Upgrade: +${(item.drizzlePricePerDozen || 0).toFixed(2)} per dozen × {item.selectedDozenQuantity || 1} dozen = +${(item.drizzleUpchargeTotal || item.totalDrizzleUpcharge || 0).toFixed(2)}
+                        </p>
+                      )}
+                      {((item.selectedToppings && item.selectedToppings.length > 0) || (item.addOns && item.addOns.length > 0)) && (
+                        <p className="text-[10px] text-brand-chocolate/70 font-semibold mt-0.5">
+                          Toppings: {(item.selectedToppings && item.selectedToppings.length > 0 ? item.selectedToppings : item.addOns)!.join(", ")}
+                        </p>
+                      )}
+                      {((item.toppingUpchargeTotal && item.toppingUpchargeTotal > 0) || (item.totalToppingUpcharge && item.totalToppingUpcharge > 0)) && (
+                        <p className="text-[10px] text-brand-rosegold font-bold mt-0.5">
+                          Topping Upgrade: +${(item.toppingPricePerDozen || 0).toFixed(2)} per dozen × {item.selectedDozenQuantity || 1} dozen = +${(item.toppingUpchargeTotal || item.totalToppingUpcharge || 0).toFixed(2)}
+                        </p>
                       )}
                       {item.selectedSprinkles && item.selectedSprinkles.length > 0 && (
                         <div className="space-y-0.5 mt-1">

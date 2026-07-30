@@ -460,7 +460,11 @@ export default async function handler(req: any, res: any) {
               const specParts = [];
               if (item.size) specParts.push(`Scale: ${item.size}`);
               if (item.selectedCakeFlavors && item.selectedCakeFlavors.length > 0) {
-                specParts.push(`Cake Flavor: ${item.selectedCakeFlavors.join(', ')}`);
+                if ((item as any).flavorUpchargeTotal && (item as any).flavorUpchargeTotal > 0) {
+                  specParts.push(`Cake Flavor: ${item.selectedCakeFlavors.join(', ')} (+$${(item as any).flavorPricePerDozen}/doz)`);
+                } else {
+                  specParts.push(`Cake Flavor: ${item.selectedCakeFlavors.join(', ')}`);
+                }
               }
               if (item.selectedFrostings && item.selectedFrostings.length > 0) {
                 specParts.push(`Frosting: ${item.selectedFrostings.join(', ')}`);
@@ -468,9 +472,21 @@ export default async function handler(req: any, res: any) {
                 specParts.push(`Frosting: ${item.flavor}`);
               }
               const dText = item.selectedDrizzles && item.selectedDrizzles.length > 0 ? item.selectedDrizzles.join(', ') : item.selectedDrizzle;
-              if (dText) specParts.push(`Drizzle: ${dText}`);
+              if (dText) {
+                if ((item as any).drizzleUpchargeTotal && (item as any).drizzleUpchargeTotal > 0) {
+                  specParts.push(`Drizzle: ${dText} (+$${(item as any).drizzlePricePerDozen}/doz)`);
+                } else {
+                  specParts.push(`Drizzle: ${dText}`);
+                }
+              }
               const tList = (item.selectedToppings && item.selectedToppings.length > 0) ? item.selectedToppings : item.addOns;
-              if (tList && tList.length > 0) specParts.push(`Toppings: ${tList.join(', ')}`);
+              if (tList && tList.length > 0) {
+                if ((item as any).toppingUpchargeTotal && (item as any).toppingUpchargeTotal > 0) {
+                  specParts.push(`Toppings: ${tList.join(', ')} (+$${(item as any).toppingPricePerDozen}/doz)`);
+                } else {
+                  specParts.push(`Toppings: ${tList.join(', ')}`);
+                }
+              }
               if (item.selectedSprinkles && item.selectedSprinkles.length > 0) specParts.push(`Sprinkles: ${item.selectedSprinkles.join(', ')}`);
               if (specParts.length > 0) {
                 doc.font('Helvetica').fontSize(8.5).fillColor('#7d6259').text(specParts.join('  |  '), 60, yTable + 20, { width: 300 });

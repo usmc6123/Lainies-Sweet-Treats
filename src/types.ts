@@ -84,6 +84,12 @@ export interface OrderItem {
   frostingName?: string;
   frostingPricePerDozen?: number;
   frostingUpchargeTotal?: number;
+  toppingPricePerDozen?: number;
+  toppingUpchargeTotal?: number;
+  drizzlePricePerDozen?: number;
+  drizzleUpchargeTotal?: number;
+  totalToppingUpcharge?: number;
+  totalDrizzleUpcharge?: number;
 }
 
 export type OrderStatus = "Pending" | "Confirmed" | "In Progress" | "Ready" | "Delivered/Picked Up" | "Cancelled";

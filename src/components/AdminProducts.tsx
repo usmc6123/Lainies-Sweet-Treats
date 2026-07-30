@@ -2192,7 +2192,9 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
                     <h4 className="text-sm font-extrabold text-[#B76E79] uppercase tracking-wider">AVAILABLE DRIZZLES</h4>
                     <span className="text-[8px] bg-brand-chocolate text-white px-1.5 py-0.5 rounded uppercase font-black tracking-widest">Storefront Choice</span>
                   </div>
-                  <p className="text-[10px] text-gray-500 font-semibold leading-tight">Select the drizzle options customers can choose from.</p>
+                  <p className="text-[10px] text-gray-500 font-semibold leading-tight">
+                    Select the drizzle options customers can choose from.{isDippedPretzels ? " Prices entered here are treated as price per dozen." : ""}
+                  </p>
                 </div>
 
                 {/* Drizzle Selection Limit Control */}
@@ -2266,7 +2268,7 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
                       type="number"
                       value={newDrizzlePrice || ""}
                       onChange={(e) => setNewDrizzlePrice(Number(e.target.value))}
-                      placeholder="Price"
+                      placeholder={isDippedPretzels ? "Price/doz" : "Price"}
                       className="w-full text-sm bg-brand-cream/5 border border-brand-pink/10 p-2 pl-5 rounded-xl focus:outline-none focus:ring-1 focus:ring-[#B76E79] font-bold text-center"
                     />
                   </div>
@@ -2349,7 +2351,7 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
                                 <span className="font-bold text-brand-chocolate">{d.name}</span>
                                 <div className="flex items-center gap-3">
                                   <span className="text-brand-rosegold font-bold bg-brand-pink/5 px-2.5 py-0.5 rounded-md">
-                                    +${d.priceAdd.toFixed(2)}
+                                    +${d.priceAdd.toFixed(2)}{isDippedPretzels ? " per dozen" : ""}
                                   </span>
                                   <div className="flex items-center gap-1.5">
                                     <button
@@ -2387,7 +2389,7 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
                     <h4 className="text-sm font-extrabold text-[#B76E79] uppercase tracking-wider">{isNormalMiniCakes ? "AVAILABLE SPRINKLES" : "AVAILABLE TOPPINGS"}</h4>
                     <span className="text-[8px] bg-brand-chocolate text-white px-1.5 py-0.5 rounded uppercase font-black tracking-widest">Storefront Choice</span>
                   </div>
-                  <p className="text-[10px] text-gray-500 font-semibold leading-tight">{isNormalMiniCakes ? "Choose the sprinkles customers can select." : "Choose the toppings customers can select."}</p>
+                  <p className="text-[10px] text-gray-500 font-semibold leading-tight">{isNormalMiniCakes ? "Choose the sprinkles customers can select." : `Choose the toppings customers can select.${isDippedPretzels ? " Prices entered here are treated as price per dozen." : ""}`}</p>
                 </div>
 
                 {/* Topping Selection Limit Control */}
@@ -2469,7 +2471,7 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
                       type="number"
                       value={newToppingPrice || ""}
                       onChange={(e) => setNewToppingPrice(Number(e.target.value))}
-                      placeholder="Price"
+                      placeholder={isDippedPretzels ? "Price/doz" : "Price"}
                       className="w-full text-sm bg-brand-cream/5 border border-brand-pink/10 p-2 pl-5 rounded-xl focus:outline-none focus:ring-1 focus:ring-[#B76E79] font-bold text-center"
                     />
                   </div>
@@ -2552,7 +2554,7 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
                                 <span className="font-bold text-brand-chocolate">{t.name}</span>
                                 <div className="flex items-center gap-3">
                                   <span className="text-brand-rosegold font-bold bg-brand-pink/5 px-2.5 py-0.5 rounded-md">
-                                    +${t.priceAdd.toFixed(2)}
+                                    +${t.priceAdd.toFixed(2)}{isDippedPretzels ? " per dozen" : ""}
                                   </span>
                                   <div className="flex items-center gap-1.5">
                                     <button
