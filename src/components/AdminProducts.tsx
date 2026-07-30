@@ -542,13 +542,13 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
       setBasePrice(p.basePrice);
       setSizes(p.options.sizes || []);
       setCakeFlavors(normalizeOptions(p.options.cakeFlavors));
-      setFrostings(normalizeOptions(p.options.frostings || p.options.flavors));
+      setFrostings((p.category === "Dipped Pretzels" || p.name === "Dipped Pretzels") ? [] : normalizeOptions(p.options.frostings || p.options.flavors));
       setToppings(normalizeOptions(p.options.toppings || p.options.addOns));
       setDrizzles(normalizeOptions(p.options.drizzles));
       setDescription(p.description);
       setPhotos(pPhotos);
       setCakeFlavorSelectionLimit(p.cakeFlavorSelectionLimit ?? 1);
-      setFrostingSelectionLimit(p.frostingSelectionLimit ?? p.flavorSelectionLimit ?? 1);
+      setFrostingSelectionLimit((p.category === "Dipped Pretzels" || p.name === "Dipped Pretzels") ? 0 : (p.frostingSelectionLimit ?? p.flavorSelectionLimit ?? 1));
       setDrizzleSelectionLimit(p.drizzleSelectionLimit ?? 1);
       setToppingSelectionLimit(p.toppingSelectionLimit ?? 1);
     }
@@ -1213,6 +1213,16 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
           }))
         : null
     };
+
+    const isDippedPretzelsProduct = (finalCategory === "Dipped Pretzels" || name.trim() === "Dipped Pretzels" || editingProduct?.category === "Dipped Pretzels" || editingProduct?.name === "Dipped Pretzels");
+    if (isDippedPretzelsProduct) {
+      if (payload.options) {
+        payload.options.frostings = [];
+        payload.options.flavors = [];
+      }
+      payload.frostingSelectionLimit = 0;
+      payload.flavorSelectionLimit = 0;
+    }
 
     console.log("[Publish Catalog Audit]", {
       productId: editingProduct?.id || "NEW_PRODUCT",
@@ -1977,201 +1987,203 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
               </div>
 
               {/* AVAILABLE FROSTINGS */}
-              <div className="bg-brand-cream/15 p-5 rounded-[2rem] border-2 border-brand-pink/20 space-y-4">
-                <div className="border-b border-brand-pink/10 pb-2.5">
-                  <div className="flex items-center justify-between">
-                    <h4 className="text-sm font-extrabold text-[#B76E79] uppercase tracking-wider">AVAILABLE FROSTINGS</h4>
-                    <span className="text-[8px] bg-brand-chocolate text-white px-1.5 py-0.5 rounded uppercase font-black tracking-widest">Storefront Choice</span>
+              {!isDippedPretzels && (
+                <div className="bg-brand-cream/15 p-5 rounded-[2rem] border-2 border-brand-pink/20 space-y-4">
+                  <div className="border-b border-brand-pink/10 pb-2.5">
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-sm font-extrabold text-[#B76E79] uppercase tracking-wider">AVAILABLE FROSTINGS</h4>
+                      <span className="text-[8px] bg-brand-chocolate text-white px-1.5 py-0.5 rounded uppercase font-black tracking-widest">Storefront Choice</span>
+                    </div>
+                    <p className="text-[10px] text-gray-500 font-semibold leading-tight">
+                      These are the frosting flavors customers can choose from.{(category === "Cupcakes" || name === "Cupcakes") ? " Prices entered here are treated as price per dozen." : ""}
+                    </p>
                   </div>
-                  <p className="text-[10px] text-gray-500 font-semibold leading-tight">
-                    These are the frosting flavors customers can choose from.{(category === "Cupcakes" || name === "Cupcakes") ? " Prices entered here are treated as price per dozen." : ""}
-                  </p>
-                </div>
 
-                {/* Frosting Selection Limit Control */}
-                <div className="bg-white p-3.5 rounded-2xl border border-brand-pink/25 space-y-2.5 shadow-xs">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <span className="text-xs font-extrabold text-[#B76E79] uppercase tracking-wider block">
-                        Frosting Selection Limit
+                  {/* Frosting Selection Limit Control */}
+                  <div className="bg-white p-3.5 rounded-2xl border border-brand-pink/25 space-y-2.5 shadow-xs">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <span className="text-xs font-extrabold text-[#B76E79] uppercase tracking-wider block">
+                          Frosting Selection Limit
+                        </span>
+                        <span className="text-[10px] text-gray-500 font-semibold">
+                          “How many frostings may the customer select?”
+                        </span>
+                      </div>
+                      <div className="flex items-center space-x-1.5">
+                        <button
+                          type="button"
+                          onClick={() => setFrostingSelectionLimit(prev => Math.max(0, prev - 1))}
+                          className="w-7 h-7 bg-brand-pink/10 hover:bg-brand-pink/20 text-[#B76E79] rounded-lg flex items-center justify-center font-bold text-sm cursor-pointer border border-brand-pink/20 transition-all"
+                          disabled={frostingSelectionLimit <= 0}
+                        >
+                          -
+                        </button>
+                        <input
+                          type="number"
+                          min={0}
+                          max={frostings.length}
+                          step={1}
+                          value={frostingSelectionLimit}
+                          onChange={(e) => {
+                            const val = Math.floor(Number(e.target.value));
+                            if (!isNaN(val)) {
+                              setFrostingSelectionLimit(Math.max(0, Math.min(frostings.length, val)));
+                            }
+                          }}
+                          className="w-12 h-7 bg-brand-cream/5 border border-brand-pink/20 rounded-lg text-center text-xs font-bold text-brand-chocolate focus:outline-none focus:ring-1 focus:ring-brand-rosegold"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setFrostingSelectionLimit(prev => Math.min(frostings.length, prev + 1))}
+                          className="w-7 h-7 bg-brand-pink/10 hover:bg-brand-pink/20 text-[#B76E79] rounded-lg flex items-center justify-center font-bold text-sm cursor-pointer border border-brand-pink/20 transition-all"
+                          disabled={frostingSelectionLimit >= frostings.length}
+                        >
+                          +
+                        </button>
+                      </div>
+                    </div>
+                    <div className="text-[10px] text-brand-chocolate/80 font-bold bg-brand-pink/5 px-2.5 py-1 rounded-md border border-brand-pink/10">
+                      <span className="block text-[#B76E79]">
+                        Frosting Selection Limit: {frostingSelectionLimit}
                       </span>
-                      <span className="text-[10px] text-gray-500 font-semibold">
-                        “How many frostings may the customer select?”
+                      <span className="block text-gray-600 font-semibold mt-0.5 leading-tight">
+                        {frostingSelectionLimit === 0 ? "Customer cannot select any options." : `Customer may select up to ${frostingSelectionLimit} frosting${frostingSelectionLimit > 1 ? "s" : ""}.`}
+                      </span>
+                      <span className="block text-gray-500 font-medium mt-0.5">
+                        Customers may select up to {frostingSelectionLimit} of the {frostings.length} available frostings.
                       </span>
                     </div>
-                    <div className="flex items-center space-x-1.5">
-                      <button
-                        type="button"
-                        onClick={() => setFrostingSelectionLimit(prev => Math.max(0, prev - 1))}
-                        className="w-7 h-7 bg-brand-pink/10 hover:bg-brand-pink/20 text-[#B76E79] rounded-lg flex items-center justify-center font-bold text-sm cursor-pointer border border-brand-pink/20 transition-all"
-                        disabled={frostingSelectionLimit <= 0}
-                      >
-                        -
-                      </button>
+                  </div>
+
+                  <div className="flex gap-2 bg-white p-2.5 rounded-xl border border-brand-pink/15 shadow-xs">
+                    <input
+                      type="text"
+                      value={newFrostingName}
+                      onChange={(e) => setNewFrostingName(e.target.value)}
+                      placeholder="e.g., Vanilla Buttercream"
+                      className="flex-1 text-sm bg-brand-cream/5 border border-brand-pink/10 p-2 rounded-xl focus:outline-none focus:ring-1 focus:ring-[#B76E79]"
+                    />
+                    <div className="relative w-28">
+                      <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-gray-400 font-bold">$</span>
                       <input
                         type="number"
-                        min={0}
-                        max={frostings.length}
-                        step={1}
-                        value={frostingSelectionLimit}
-                        onChange={(e) => {
-                          const val = Math.floor(Number(e.target.value));
-                          if (!isNaN(val)) {
-                            setFrostingSelectionLimit(Math.max(0, Math.min(frostings.length, val)));
-                          }
-                        }}
-                        className="w-12 h-7 bg-brand-cream/5 border border-brand-pink/20 rounded-lg text-center text-xs font-bold text-brand-chocolate focus:outline-none focus:ring-1 focus:ring-brand-rosegold"
+                        value={newFrostingPrice || ""}
+                        onChange={(e) => setNewFrostingPrice(Number(e.target.value))}
+                        placeholder={(category === "Cupcakes" || name === "Cupcakes") ? "Price/doz" : "Price"}
+                        className="w-full text-xs bg-brand-cream/5 border border-brand-pink/10 p-2 pl-5 rounded-xl focus:outline-none focus:ring-1 focus:ring-[#B76E79] font-bold text-center"
                       />
-                      <button
-                        type="button"
-                        onClick={() => setFrostingSelectionLimit(prev => Math.min(frostings.length, prev + 1))}
-                        className="w-7 h-7 bg-brand-pink/10 hover:bg-brand-pink/20 text-[#B76E79] rounded-lg flex items-center justify-center font-bold text-sm cursor-pointer border border-brand-pink/20 transition-all"
-                        disabled={frostingSelectionLimit >= frostings.length}
-                      >
-                        +
-                      </button>
                     </div>
+                    <button
+                      type="button"
+                      onClick={handleAddFrostingOption}
+                      className="bg-brand-chocolate text-white text-xs font-bold px-3 py-2 rounded-xl cursor-pointer hover:opacity-90 transition shadow-sm"
+                    >
+                      Add
+                    </button>
                   </div>
-                  <div className="text-[10px] text-brand-chocolate/80 font-bold bg-brand-pink/5 px-2.5 py-1 rounded-md border border-brand-pink/10">
-                    <span className="block text-[#B76E79]">
-                      Frosting Selection Limit: {frostingSelectionLimit}
-                    </span>
-                    <span className="block text-gray-600 font-semibold mt-0.5 leading-tight">
-                      {frostingSelectionLimit === 0 ? "Customer cannot select any options." : `Customer may select up to ${frostingSelectionLimit} frosting${frostingSelectionLimit > 1 ? "s" : ""}.`}
-                    </span>
-                    <span className="block text-gray-500 font-medium mt-0.5">
-                      Customers may select up to {frostingSelectionLimit} of the {frostings.length} available frostings.
-                    </span>
-                  </div>
-                </div>
 
-                <div className="flex gap-2 bg-white p-2.5 rounded-xl border border-brand-pink/15 shadow-xs">
-                  <input
-                    type="text"
-                    value={newFrostingName}
-                    onChange={(e) => setNewFrostingName(e.target.value)}
-                    placeholder="e.g., Vanilla Buttercream"
-                    className="flex-1 text-sm bg-brand-cream/5 border border-brand-pink/10 p-2 rounded-xl focus:outline-none focus:ring-1 focus:ring-[#B76E79]"
-                  />
-                  <div className="relative w-28">
-                    <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-gray-400 font-bold">$</span>
-                    <input
-                      type="number"
-                      value={newFrostingPrice || ""}
-                      onChange={(e) => setNewFrostingPrice(Number(e.target.value))}
-                      placeholder={(category === "Cupcakes" || name === "Cupcakes") ? "Price/doz" : "Price"}
-                      className="w-full text-xs bg-brand-cream/5 border border-brand-pink/10 p-2 pl-5 rounded-xl focus:outline-none focus:ring-1 focus:ring-[#B76E79] font-bold text-center"
-                    />
-                  </div>
-                  <button
-                    type="button"
-                    onClick={handleAddFrostingOption}
-                    className="bg-brand-chocolate text-white text-xs font-bold px-3 py-2 rounded-xl cursor-pointer hover:opacity-90 transition shadow-sm"
-                  >
-                    Add
-                  </button>
-                </div>
-
-                {/* Collapsible Added Items List */}
-                <details className="group border border-brand-pink/10 rounded-xl bg-white overflow-hidden mt-2" open={frostings.length > 0}>
-                  <summary className="flex items-center justify-between p-2.5 cursor-pointer select-none bg-brand-pink/5 hover:bg-brand-pink/10 font-bold text-xs text-brand-chocolate">
-                    <span>Added Frostings ({frostings.length})</span>
-                    <span className="text-[10px] transition-transform group-open:rotate-180">▼</span>
-                  </summary>
-                  <div className="p-3 space-y-1.5 max-h-64 overflow-y-auto border-t border-brand-pink/10">
-                    {frostings.length === 0 ? (
-                      <p className="text-[10px] text-gray-400 italic text-center py-2">No frosting options added yet.</p>
-                    ) : (
-                      frostings.map((f, idx) => {
-                        const isEditing = editingFrostingIdx === idx;
-                        const isDragging = draggedIdx === idx && draggedType === "frostings";
-                        return (
-                          <div
-                            key={idx}
-                            draggable={!isEditing}
-                            onDragStart={(e) => handleDragStart(e, idx, "frostings")}
-                            onDragOver={handleDragOver}
-                            onDrop={(e) => handleDrop(e, idx, "frostings")}
-                            onDragEnd={() => { setDraggedIdx(null); setDraggedType(null); }}
-                            className={`flex items-center gap-2 bg-white p-2.5 rounded-xl border border-brand-pink/10 transition-all ${
-                              isDragging ? "opacity-30 border-dashed border-[#B76E79]" : "hover:border-[#B76E79]/50"
-                            }`}
-                          >
-                            {!isEditing && (
-                              <div className="cursor-grab text-gray-300 hover:text-gray-500 transition px-1">
-                                <GripVertical className="h-4.5 w-4.5" />
-                              </div>
-                            )}
-
-                            {isEditing ? (
-                              <div className="flex-1 flex gap-1.5 items-center">
-                                <input
-                                  type="text"
-                                  value={editingFrostingName}
-                                  onChange={(e) => setEditingFrostingName(e.target.value)}
-                                  className="flex-1 text-xs bg-brand-cream/5 border border-brand-pink/20 p-1.5 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#B76E79]"
-                                />
-                                <div className="relative w-16">
-                                  <span className="absolute left-1.5 top-1/2 -translate-y-1/2 text-[10px] text-gray-400 font-bold">$</span>
-                                  <input
-                                    type="number"
-                                    value={editingFrostingPrice}
-                                    onChange={(e) => setEditingFrostingPrice(Number(e.target.value))}
-                                    className="w-full text-xs bg-brand-cream/5 border border-brand-pink/20 p-1.5 pl-4 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#B76E79] text-center font-bold"
-                                  />
+                  {/* Collapsible Added Items List */}
+                  <details className="group border border-brand-pink/10 rounded-xl bg-white overflow-hidden mt-2" open={frostings.length > 0}>
+                    <summary className="flex items-center justify-between p-2.5 cursor-pointer select-none bg-brand-pink/5 hover:bg-brand-pink/10 font-bold text-xs text-brand-chocolate">
+                      <span>Added Frostings ({frostings.length})</span>
+                      <span className="text-[10px] transition-transform group-open:rotate-180">▼</span>
+                    </summary>
+                    <div className="p-3 space-y-1.5 max-h-64 overflow-y-auto border-t border-brand-pink/10">
+                      {frostings.length === 0 ? (
+                        <p className="text-[10px] text-gray-400 italic text-center py-2">No frosting options added yet.</p>
+                      ) : (
+                        frostings.map((f, idx) => {
+                          const isEditing = editingFrostingIdx === idx;
+                          const isDragging = draggedIdx === idx && draggedType === "frostings";
+                          return (
+                            <div
+                              key={idx}
+                              draggable={!isEditing}
+                              onDragStart={(e) => handleDragStart(e, idx, "frostings")}
+                              onDragOver={handleDragOver}
+                              onDrop={(e) => handleDrop(e, idx, "frostings")}
+                              onDragEnd={() => { setDraggedIdx(null); setDraggedType(null); }}
+                              className={`flex items-center gap-2 bg-white p-2.5 rounded-xl border border-brand-pink/10 transition-all ${
+                                isDragging ? "opacity-30 border-dashed border-[#B76E79]" : "hover:border-[#B76E79]/50"
+                              }`}
+                            >
+                              {!isEditing && (
+                                <div className="cursor-grab text-gray-300 hover:text-gray-500 transition px-1">
+                                  <GripVertical className="h-4.5 w-4.5" />
                                 </div>
-                                <button
-                                  type="button"
-                                  onClick={() => handleSaveEditFrosting(idx)}
-                                  className="bg-emerald-500 hover:bg-emerald-600 text-white p-1.5 rounded-lg cursor-pointer"
-                                  title="Save changes"
-                                >
-                                  <Check className="h-3.5 w-3.5" />
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => setEditingFrostingIdx(null)}
-                                  className="bg-gray-100 hover:bg-gray-200 text-gray-500 p-1.5 rounded-lg cursor-pointer"
-                                  title="Cancel"
-                                >
-                                  <X className="h-3.5 w-3.5" />
-                                </button>
-                              </div>
-                            ) : (
-                              <div className="flex-1 flex justify-between items-center text-xs">
-                                <span className="font-bold text-brand-chocolate">{f.name}</span>
-                                <div className="flex items-center gap-3">
-                                  <span className="text-brand-rosegold font-bold bg-brand-pink/5 px-2.5 py-0.5 rounded-md">
-                                    +${f.priceAdd.toFixed(2)}{(category === "Cupcakes" || name === "Cupcakes") ? " per dozen" : ""}
-                                  </span>
-                                  <div className="flex items-center gap-1.5">
-                                    <button
-                                      type="button"
-                                      onClick={() => handleStartEditFrosting(idx, f.name, f.priceAdd)}
-                                      className="text-[#B76E79] hover:text-[#B76E79]/80 p-1 hover:bg-[#B76E79]/5 rounded transition cursor-pointer"
-                                      title="Edit frosting name/price"
-                                    >
-                                      <Edit2 className="h-3.5 w-3.5" />
-                                    </button>
-                                    <button
-                                      type="button"
-                                      onClick={() => handleRemoveFrostingOption(idx)}
-                                      className="text-red-500 hover:text-red-700 p-1 hover:bg-red-50 rounded transition cursor-pointer"
-                                      title="Delete frosting option"
-                                    >
-                                      <Trash2 className="h-3.5 w-3.5" />
-                                    </button>
+                              )}
+
+                              {isEditing ? (
+                                <div className="flex-1 flex gap-1.5 items-center">
+                                  <input
+                                    type="text"
+                                    value={editingFrostingName}
+                                    onChange={(e) => setEditingFrostingName(e.target.value)}
+                                    className="flex-1 text-xs bg-brand-cream/5 border border-brand-pink/20 p-1.5 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#B76E79]"
+                                  />
+                                  <div className="relative w-16">
+                                    <span className="absolute left-1.5 top-1/2 -translate-y-1/2 text-[10px] text-gray-400 font-bold">$</span>
+                                    <input
+                                      type="number"
+                                      value={editingFrostingPrice}
+                                      onChange={(e) => setEditingFrostingPrice(Number(e.target.value))}
+                                      className="w-full text-xs bg-brand-cream/5 border border-brand-pink/20 p-1.5 pl-4 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#B76E79] text-center font-bold"
+                                    />
+                                  </div>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleSaveEditFrosting(idx)}
+                                    className="bg-emerald-500 hover:bg-emerald-600 text-white p-1.5 rounded-lg cursor-pointer"
+                                    title="Save changes"
+                                  >
+                                    <Check className="h-3.5 w-3.5" />
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => setEditingFrostingIdx(null)}
+                                    className="bg-gray-100 hover:bg-gray-200 text-gray-500 p-1.5 rounded-lg cursor-pointer"
+                                    title="Cancel"
+                                  >
+                                    <X className="h-3.5 w-3.5" />
+                                  </button>
+                                </div>
+                              ) : (
+                                <div className="flex-1 flex justify-between items-center text-xs">
+                                  <span className="font-bold text-brand-chocolate">{f.name}</span>
+                                  <div className="flex items-center gap-3">
+                                    <span className="text-brand-rosegold font-bold bg-brand-pink/5 px-2.5 py-0.5 rounded-md">
+                                      +${f.priceAdd.toFixed(2)}{(category === "Cupcakes" || name === "Cupcakes") ? " per dozen" : ""}
+                                    </span>
+                                    <div className="flex items-center gap-1.5">
+                                      <button
+                                        type="button"
+                                        onClick={() => handleStartEditFrosting(idx, f.name, f.priceAdd)}
+                                        className="text-[#B76E79] hover:text-[#B76E79]/80 p-1 hover:bg-[#B76E79]/5 rounded transition cursor-pointer"
+                                        title="Edit frosting name/price"
+                                      >
+                                        <Edit2 className="h-3.5 w-3.5" />
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => handleRemoveFrostingOption(idx)}
+                                        className="text-red-500 hover:text-red-700 p-1 hover:bg-red-50 rounded transition cursor-pointer"
+                                        title="Delete frosting option"
+                                      >
+                                        <Trash2 className="h-3.5 w-3.5" />
+                                      </button>
+                                    </div>
                                   </div>
                                 </div>
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })
-                    )}
-                  </div>
-                </details>
-              </div>
+                              )}
+                            </div>
+                          );
+                        })
+                      )}
+                    </div>
+                  </details>
+                </div>
+              )}
 
               {/* AVAILABLE DRIZZLES */}
               <div className="bg-brand-cream/15 p-5 rounded-[2rem] border-2 border-brand-pink/20 space-y-4">

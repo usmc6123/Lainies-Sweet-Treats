@@ -240,7 +240,8 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
     setChoiceCakeFlavor(hasVariations ? "" : defaultCakeFlavor);
 
     let defaultFrosting = "";
-    const activeFrostings = p.options.frostings || p.options.flavors;
+    const isDippedPretzels = p.category === "Dipped Pretzels" || p.name === "Dipped Pretzels";
+    const activeFrostings = isDippedPretzels ? [] : (p.options.frostings || p.options.flavors);
     if (activeFrostings && activeFrostings.length > 0) {
       const f = activeFrostings[0];
       defaultFrosting = typeof f === "string" ? f : f.name;
@@ -336,7 +337,8 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
     }
 
     // Frostings
-    const rawFrostings = activeVar ? (activeVar.options?.frostings || activeVar.options?.flavors) : (product.options?.frostings || product.options?.flavors);
+    const isDippedPretzels = product.category === "Dipped Pretzels" || product.name === "Dipped Pretzels";
+    const rawFrostings = isDippedPretzels ? [] : (activeVar ? (activeVar.options?.frostings || activeVar.options?.flavors) : (product.options?.frostings || product.options?.flavors));
     const resolvedFrostings = resolveToOptions(rawFrostings);
     const selectedFrostings = item.selectedFrostings || (item.flavor ? [item.flavor] : []);
     if (selectedFrostings && resolvedFrostings) {
@@ -483,7 +485,8 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
     }
 
     // Frosting price addition
-    const rawFrostings = activeVar ? (activeVar.options?.frostings || activeVar.options?.flavors) : (selectedProduct.options?.frostings || selectedProduct.options?.flavors);
+    const isDippedPretzels = selectedProduct.category === "Dipped Pretzels" || selectedProduct.name === "Dipped Pretzels";
+    const rawFrostings = isDippedPretzels ? [] : (activeVar ? (activeVar.options?.frostings || activeVar.options?.flavors) : (selectedProduct.options?.frostings || selectedProduct.options?.flavors));
     const resolvedFrostings = resolveToOptions(rawFrostings);
     const selectedFrostingVal = choiceFrosting || choiceFlavor;
     if (selectedFrostingVal && resolvedFrostings) {
@@ -613,7 +616,8 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
       }
     }
 
-    const rawFrostings = activeVar ? (activeVar.options?.frostings || activeVar.options?.flavors) : (selectedProduct.options?.frostings || selectedProduct.options?.flavors);
+    const isDippedPretzels = selectedProduct.category === "Dipped Pretzels" || selectedProduct.name === "Dipped Pretzels";
+    const rawFrostings = isDippedPretzels ? [] : (activeVar ? (activeVar.options?.frostings || activeVar.options?.flavors) : (selectedProduct.options?.frostings || selectedProduct.options?.flavors));
     const resolvedFrostings = resolveToOptions(rawFrostings);
     let selectedFrostingName: string | undefined;
     let frostingName: string | undefined;
@@ -1642,7 +1646,8 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
         const rawCakeFlavors = activeVar ? activeVar.options?.cakeFlavors : selectedProduct.options?.cakeFlavors;
         const resolvedCakeFlavors = resolveToOptions(rawCakeFlavors);
 
-        const rawFrostings = activeVar ? (activeVar.options?.frostings || activeVar.options?.flavors) : (selectedProduct.options?.frostings || selectedProduct.options?.flavors);
+        const isDippedPretzels = selectedProduct.category === "Dipped Pretzels" || selectedProduct.name === "Dipped Pretzels";
+        const rawFrostings = isDippedPretzels ? [] : (activeVar ? (activeVar.options?.frostings || activeVar.options?.flavors) : (selectedProduct.options?.frostings || selectedProduct.options?.flavors));
         const resolvedFrostings = resolveToOptions(rawFrostings);
 
         const rawToppings = activeVar 
@@ -1844,7 +1849,7 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
               })()}
 
               {/* Available Frostings selections */}
-              {(!hasVariations || selectedVarId) && resolvedFrostings && resolvedFrostings.length > 0 && (
+              {(!hasVariations || selectedVarId) && !isDippedPretzels && resolvedFrostings && resolvedFrostings.length > 0 && (
                 <div className="mt-5">
                   <label className="text-xs font-bold text-brand-chocolate uppercase tracking-wider block mb-2">
                     3. Selected Frosting Preference:
