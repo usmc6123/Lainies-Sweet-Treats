@@ -482,21 +482,22 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
     const pPhotos = normalizeProductPhotos(p);
     setProdIngredients(p.ingredients || []);
 
-    // Set up variation structure
-    let productVariations: ProductVariation[] = p.variations || [];
-    if ((p.category === "Mini Cakes" || p.name === "Mini Cakes") && (!p.variations || p.variations.length === 0)) {
+    // Set up variation structure ONLY for Mini Cakes
+    const isMiniCakeProduct = (p.category === "Mini Cakes" || p.name === "Mini Cakes");
+    let productVariations: ProductVariation[] = isMiniCakeProduct ? (p.variations || []) : [];
+    if (isMiniCakeProduct && productVariations.length === 0) {
       productVariations = [
         {
           id: "normal",
           name: "Normal",
           basePrice: p.basePrice,
           options: {
-            sizes: p.options.sizes || [],
-            cakeFlavors: p.options.cakeFlavors || [],
-            flavors: p.options.flavors || [],
-            frostings: p.options.frostings || p.options.flavors || [],
-            toppings: p.options.toppings || p.options.addOns || [],
-            drizzles: p.options.drizzles || []
+            sizes: p.options?.sizes || [],
+            cakeFlavors: p.options?.cakeFlavors || [],
+            flavors: p.options?.flavors || [],
+            frostings: p.options?.frostings || p.options?.flavors || [],
+            toppings: p.options?.toppings || p.options?.addOns || [],
+            drizzles: p.options?.drizzles || []
           },
           description: p.description,
           photos: pPhotos
@@ -658,6 +659,9 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
   const handleAddCakeFlavorOption = () => {
     if (!newCakeFlavorName) return;
     setCakeFlavors([...cakeFlavors, { name: newCakeFlavorName, priceAdd: Number(newCakeFlavorPrice) }]);
+    if (cakeFlavorSelectionLimit === 0) {
+      setCakeFlavorSelectionLimit(1);
+    }
     setNewCakeFlavorName("");
     setNewCakeFlavorPrice(0);
   };
@@ -1086,6 +1090,11 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
       finalPhotos = normalVar.photos || photos;
     }
 
+    const isMiniCakeCategory = (finalCategory === "Mini Cakes" || name.trim() === "Mini Cakes");
+    if (!isMiniCakeCategory) {
+      finalVariations = undefined;
+    }
+
     // Validation:
     if (finalBasePrice < 0 || isNaN(finalBasePrice)) {
       alert("Price cannot be negative or invalid.");
@@ -1187,24 +1196,32 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
         : drizzleSelectionLimit),
       toppingSelectionLimit: cleanLimit((activeVarId && finalVariations)
         ? (finalVariations.find(v => v.id === "normal")?.toppingSelectionLimit ?? 1)
-        : toppingSelectionLimit)
+        : toppingSelectionLimit),
+      variations: (isMiniCakeCategory && finalVariations && finalVariations.length > 0)
+        ? finalVariations.map((v: any) => ({
+            id: v.id,
+            name: (v.name || "").trim(),
+            basePrice: isNaN(Number(v.basePrice)) || Number(v.basePrice) < 0 ? 0 : Number(v.basePrice),
+            description: (v.description || "").trim(),
+            photos: (v.photos || []).map((ph: any) => ({ url: ph.url || "", isPrimary: !!ph.isPrimary })).filter((ph: any) => ph.url),
+            options: normalizePayloadOptions(v.options),
+            cakeFlavorSelectionLimit: cleanLimit(v.cakeFlavorSelectionLimit),
+            flavorSelectionLimit: cleanLimit(v.frostingSelectionLimit ?? v.flavorSelectionLimit),
+            frostingSelectionLimit: cleanLimit(v.frostingSelectionLimit ?? v.flavorSelectionLimit),
+            drizzleSelectionLimit: cleanLimit(v.drizzleSelectionLimit),
+            toppingSelectionLimit: cleanLimit(v.toppingSelectionLimit)
+          }))
+        : null
     };
 
-    if (finalVariations) {
-      payload.variations = finalVariations.map((v: any) => ({
-        id: v.id,
-        name: (v.name || "").trim(),
-        basePrice: isNaN(Number(v.basePrice)) || Number(v.basePrice) < 0 ? 0 : Number(v.basePrice),
-        description: (v.description || "").trim(),
-        photos: (v.photos || []).map((ph: any) => ({ url: ph.url || "", isPrimary: !!ph.isPrimary })).filter((ph: any) => ph.url),
-        options: normalizePayloadOptions(v.options),
-        cakeFlavorSelectionLimit: cleanLimit(v.cakeFlavorSelectionLimit),
-        flavorSelectionLimit: cleanLimit(v.frostingSelectionLimit ?? v.flavorSelectionLimit),
-        frostingSelectionLimit: cleanLimit(v.frostingSelectionLimit ?? v.flavorSelectionLimit),
-        drizzleSelectionLimit: cleanLimit(v.drizzleSelectionLimit),
-        toppingSelectionLimit: cleanLimit(v.toppingSelectionLimit)
-      }));
-    }
+    console.log("[Publish Catalog Audit]", {
+      productId: editingProduct?.id || "NEW_PRODUCT",
+      productCategory: finalCategory,
+      dirtyState: isDirty,
+      validationResult: "PASSED",
+      payloadBeingSaved: payload,
+      firestoreDocumentPath: editingProduct ? `products/${editingProduct.id}` : "products/[AUTO_GENERATED_ID]"
+    });
 
     try {
       let res;
@@ -1228,8 +1245,11 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
         });
       }
 
+      console.log("[Publish Catalog Audit] Firestore response status:", res.status);
+
       if (res.ok) {
         const saved = await res.json();
+        console.log("[Publish Catalog Audit] Save successful:", saved);
         if (editingProduct) {
           setProducts(products.map(p => p.id === editingProduct.id ? saved : p));
         } else {
@@ -1250,6 +1270,7 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
       } else {
         const errData = await res.json().catch(() => ({}));
         const errMsg = errData.error || `Server responded with status ${res.status}`;
+        console.error("[Publish Catalog Audit] Save failed with status:", res.status, errMsg);
         if (res.status === 401 || res.status === 403) {
           alert(`Your admin session has expired. Please sign in again. (Details: ${errMsg})`);
           localStorage.removeItem("lainie_admin_token");
@@ -1260,7 +1281,7 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
         }
       }
     } catch (err: any) {
-      console.error("Save catalog failed:", err);
+      console.error("[Publish Catalog Audit] Exception thrown during save:", err);
       alert(`Error publishing catalog changes: ${err.message || err}`);
     } finally {
       setSaving(false);

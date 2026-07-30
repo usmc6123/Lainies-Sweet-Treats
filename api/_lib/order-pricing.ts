@@ -89,6 +89,10 @@ export interface PricingResult {
     flavorPricePerDozen?: number;
     selectedDozenQuantity?: number;
     flavorUpchargeTotal?: number;
+    selectedFrostingName?: string;
+    frostingName?: string;
+    frostingPricePerDozen?: number;
+    frostingUpchargeTotal?: number;
     unitPrice: number; // in dollars for backward-compatibility
     totalPrice: number; // in dollars for backward-compatibility
     unitPriceCents: number;
