@@ -546,6 +546,7 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
           const toppingObj = resolvedToppings.find(t => t.name === tName);
           if (toppingObj) {
             if (isMiniCakes) addonPrice += toppingObj.priceAdd;
+            else if (isCupcakes) price += toppingObj.priceAdd * dozenCount;
             else price += toppingObj.priceAdd;
           }
         });
@@ -650,7 +651,7 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
     let drizzleUpchargeTotal: number | undefined;
     let totalDrizzleUpcharge: number | undefined;
 
-    if (isDippedPretzels) {
+    if (isDippedPretzels || isCupcakes) {
       selectedDozenQuantity = dozenCount;
 
       const rawToppings = activeVar 

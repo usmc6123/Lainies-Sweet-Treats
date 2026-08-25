@@ -1323,6 +1323,7 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
   };
 
   const isDippedPretzels = category === "Dipped Pretzels" || name === "Dipped Pretzels" || editingProduct?.category === "Dipped Pretzels" || editingProduct?.name === "Dipped Pretzels";
+  const isCupcakes = category === "Cupcakes" || name === "Cupcakes" || editingProduct?.category === "Cupcakes" || editingProduct?.name === "Cupcakes";
 
   return (
     <div id="admin-menu-tab" className="space-y-6 animate-in fade-in duration-300">
@@ -2390,7 +2391,7 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
                     <h4 className="text-sm font-extrabold text-[#B76E79] uppercase tracking-wider">{isNormalMiniCakes ? "AVAILABLE SPRINKLES" : "AVAILABLE TOPPINGS"}</h4>
                     <span className="text-[8px] bg-brand-chocolate text-white px-1.5 py-0.5 rounded uppercase font-black tracking-widest">Storefront Choice</span>
                   </div>
-                  <p className="text-[10px] text-gray-500 font-semibold leading-tight">{isNormalMiniCakes ? "Choose the sprinkles customers can select." : `Choose the toppings customers can select.${isDippedPretzels ? " Prices entered here are treated as price per dozen." : ""}`}</p>
+                  <p className="text-[10px] text-gray-500 font-semibold leading-tight">{isNormalMiniCakes ? "Choose the sprinkles customers can select." : `Choose the toppings customers can select.${isCupcakes || isDippedPretzels ? " Prices entered here are treated as price per dozen." : ""}`}</p>
                 </div>
 
                 {/* Topping Selection Limit Control */}
@@ -2466,13 +2467,13 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
                     placeholder={isNormalMiniCakes ? "e.g., Rainbow Sprinkles" : "e.g., Reese's Pieces"}
                     className="flex-1 text-sm bg-brand-cream/5 border border-brand-pink/10 p-2 rounded-xl focus:outline-none focus:ring-1 focus:ring-[#B76E79]"
                   />
-                  <div className="relative w-20">
+                  <div className="relative w-28">
                     <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-gray-400 font-bold">$</span>
                     <input
                       type="number"
                       value={newToppingPrice || ""}
                       onChange={(e) => setNewToppingPrice(Number(e.target.value))}
-                      placeholder={isDippedPretzels ? "Price/doz" : "Price"}
+                      placeholder={isCupcakes ? "Price / Dozen" : isDippedPretzels ? "Price/doz" : "Price"}
                       className="w-full text-sm bg-brand-cream/5 border border-brand-pink/10 p-2 pl-5 rounded-xl focus:outline-none focus:ring-1 focus:ring-[#B76E79] font-bold text-center"
                     />
                   </div>
@@ -2524,12 +2525,13 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
                                   onChange={(e) => setEditingToppingName(e.target.value)}
                                   className="flex-1 text-xs bg-brand-cream/5 border border-brand-pink/20 p-1.5 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#B76E79]"
                                 />
-                                <div className="relative w-16">
+                                <div className="relative w-24">
                                   <span className="absolute left-1.5 top-1/2 -translate-y-1/2 text-[10px] text-gray-400 font-bold">$</span>
                                   <input
                                     type="number"
                                     value={editingToppingPrice}
                                     onChange={(e) => setEditingToppingPrice(Number(e.target.value))}
+                                    placeholder={isCupcakes ? "Price/doz" : isDippedPretzels ? "Price/doz" : "Price"}
                                     className="w-full text-xs bg-brand-cream/5 border border-brand-pink/20 p-1.5 pl-4 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#B76E79] text-center font-bold"
                                   />
                                 </div>
@@ -2555,7 +2557,7 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
                                 <span className="font-bold text-brand-chocolate">{t.name}</span>
                                 <div className="flex items-center gap-3">
                                   <span className="text-brand-rosegold font-bold bg-brand-pink/5 px-2.5 py-0.5 rounded-md">
-                                    +${t.priceAdd.toFixed(2)}{isDippedPretzels ? " per dozen" : ""}
+                                    +${t.priceAdd.toFixed(2)}{isCupcakes ? "/dozen" : isDippedPretzels ? " per dozen" : ""}
                                   </span>
                                   <div className="flex items-center gap-1.5">
                                     <button
