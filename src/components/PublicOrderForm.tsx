@@ -207,7 +207,12 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
     const handleCategoryCheck = () => {
       const stored = sessionStorage.getItem("lainie_shop_category");
       if (stored) {
-        setActiveCategory(stored);
+        if (stored === "Cookies") {
+          setActiveCategory("All");
+          sessionStorage.setItem("lainie_shop_category", "All");
+        } else {
+          setActiveCategory(stored);
+        }
       }
     };
     handleCategoryCheck();
@@ -928,8 +933,13 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
     }
   };
 
-  const categories = ["All", "Mini Cakes", "Cupcakes", "Cookies", "Dipped Pretzels"];
+  const categories = ["All", "Mini Cakes", "Cupcakes", "Dipped Pretzels"];
   const filteredProducts = products.filter(p => {
+    const pCatLower = (p.category || "").toLowerCase().trim();
+    const pNameLower = (p.name || "").toLowerCase().trim();
+    if (pCatLower === "cookies" || pNameLower.includes("jumbo cookies") || pNameLower.includes("cookies that people like")) {
+      return false;
+    }
     const matchesCategory = activeCategory === "All" || p.category === activeCategory;
     const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                           p.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
