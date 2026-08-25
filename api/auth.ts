@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import { setCorsHeaders } from './_lib/helper.js';
 
-const JWT_SECRET = process.env.JWT_SECRET as string;
+const JWT_SECRET = process.env.JWT_SECRET || 'lainies-sweet-treats-admin-jwt-secret-key-2025';
 
 export default async function handler(req: any, res: any) {
   if (setCorsHeaders(req, res)) return;

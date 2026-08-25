@@ -68,6 +68,7 @@ function AdminProductCardImage({ product }: AdminProductCardImageProps) {
 }
 
 export default function AdminProducts({ token, triggerRefresh }: AdminProductsProps) {
+  const authToken = token || localStorage.getItem("lainie_admin_token") || "";
   const [products, setProducts] = useState<Product[]>([]);
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
   const [loading, setLoading] = useState(true);
@@ -136,7 +137,7 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
           const uploadRes = await fetch("/api/upload", {
             method: "POST",
             headers: {
-              "Authorization": `Bearer ${token}`,
+              "Authorization": `Bearer ${authToken}`,
               "Content-Type": "application/json"
             },
             body: JSON.stringify({
@@ -376,7 +377,7 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
       const [pRes, iRes] = await Promise.all([
         fetch("/api/products"),
         fetch("/api/ingredients", {
-          headers: { "Authorization": `Bearer ${token}` }
+          headers: { "Authorization": `Bearer ${authToken}` }
         })
       ]);
       if (pRes.ok) {
@@ -1239,7 +1240,7 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
         res = await fetch(`/api/products/${editingProduct.id}`, {
           method: "PUT",
           headers: {
-            "Authorization": `Bearer ${token}`,
+            "Authorization": `Bearer ${authToken}`,
             "Content-Type": "application/json"
           },
           body: JSON.stringify(payload)
@@ -1248,7 +1249,7 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
         res = await fetch("/api/products", {
           method: "POST",
           headers: {
-            "Authorization": `Bearer ${token}`,
+            "Authorization": `Bearer ${authToken}`,
             "Content-Type": "application/json"
           },
           body: JSON.stringify(payload)
@@ -1282,10 +1283,10 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
         const errMsg = errData.error || `Server responded with status ${res.status}`;
         console.error("[Publish Catalog Audit] Save failed with status:", res.status, errMsg);
         if (res.status === 401 || res.status === 403) {
-          alert(`Your admin session has expired. Please sign in again. (Details: ${errMsg})`);
+          alert(`Your admin session has expired or is invalid. Please sign in again. (Details: ${errMsg})`);
           localStorage.removeItem("lainie_admin_token");
           localStorage.removeItem("lainie_admin_email");
-          window.location.href = "/";
+          window.location.reload();
         } else {
           alert(`Failed to save changes: ${errMsg}`);
         }
@@ -1308,7 +1309,7 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
     try {
       const res = await fetch(`/api/products/${productId}`, {
         method: "DELETE",
-        headers: { "Authorization": `Bearer ${token}` }
+        headers: { "Authorization": `Bearer ${authToken}` }
       });
       if (res.ok) {
         setProducts(products.filter(p => p.id !== productId));

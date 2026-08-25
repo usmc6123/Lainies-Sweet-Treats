@@ -73,15 +73,33 @@ export default function App() {
       .catch(err => console.error("Error loading store settings:", err));
   }, [triggerRefreshCount]);
 
-  // Load token of admin if exists in localStorage
+  // Load token of admin if exists in localStorage and verify
   useEffect(() => {
     const storedToken = localStorage.getItem("lainie_admin_token");
     const storedEmail = localStorage.getItem("lainie_admin_email");
     if (storedToken && storedEmail) {
       setToken(storedToken);
       setAdminEmail(storedEmail);
-      // default back to dashboard upon loading if was on an admin view
-      setView("admin-dashboard");
+      
+      // Verify token with backend to avoid stale 401s
+      fetch("/api/auth", {
+        headers: { "Authorization": `Bearer ${storedToken}` }
+      })
+        .then(res => {
+          if (res.ok) {
+            setView(prev => prev.startsWith("admin-") ? prev : "admin-dashboard");
+          } else {
+            console.warn("Stored admin token expired or invalid, clearing session.");
+            localStorage.removeItem("lainie_admin_token");
+            localStorage.removeItem("lainie_admin_email");
+            setToken(null);
+            setAdminEmail(null);
+            setView(prev => prev.startsWith("admin-") ? "admin-login" : prev);
+          }
+        })
+        .catch(() => {
+          setView(prev => prev.startsWith("admin-") ? prev : "admin-dashboard");
+        });
     }
   }, []);
 

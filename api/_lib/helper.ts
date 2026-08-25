@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET as string;
+const JWT_SECRET = process.env.JWT_SECRET || 'lainies-sweet-treats-admin-jwt-secret-key-2025';
 
 export function parseRoute(req: any) {
   // Try to read from query (Vercel rewrites append these)
