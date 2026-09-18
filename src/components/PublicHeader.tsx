@@ -1,5 +1,5 @@
 import React from "react";
-import { Cake, Sparkles, ClipboardCheck, LogOut, LogIn } from "lucide-react";
+import { Cake, ClipboardCheck, LogOut, LogIn } from "lucide-react";
 
 interface PublicHeaderProps {
   currentView: string;
@@ -53,24 +53,6 @@ export default function PublicHeader({ currentView, setView, isAdminLoggedIn, on
               }`}
             >
               Shop All
-            </button>
-
-            <span className="text-brand-chocolate/20">|</span>
-
-
-            <button
-              id="nav-quote"
-              onClick={() => setView("quote-builder")}
-              className="group flex flex-col items-center justify-center text-center transition-all duration-200 leading-none hover:scale-105"
-            >
-              <span className={`text-[11px] uppercase tracking-widest font-black transition-colors duration-200 ${
-                currentView === "quote-builder" ? "text-brand-pink" : "text-brand-chocolate group-hover:text-brand-rosegold"
-              }`}>
-                Wedding & Events
-              </span>
-              <span className="text-[11px] font-semibold text-brand-pink underline mt-0.5 group-hover:text-brand-rosegold transition-colors">
-                Request Quote
-              </span>
             </button>
 
             <span className="text-brand-chocolate/20">|</span>
@@ -149,15 +131,6 @@ export default function PublicHeader({ currentView, setView, isAdminLoggedIn, on
         >
           <Cake className="h-4 w-4 mb-0.5" />
           <span>Shop All</span>
-        </button>
-        <button
-          onClick={() => setView("quote-builder")}
-          className={`flex flex-col items-center text-[10px] uppercase font-bold py-1 ${
-            currentView === "quote-builder" ? "text-brand-pink" : "text-brand-chocolate/60"
-          }`}
-        >
-          <Sparkles className="h-4 w-4 mb-0.5" />
-          <span>Quote</span>
         </button>
         <button
           onClick={() => setView("quote-portal")}
