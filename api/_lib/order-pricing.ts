@@ -292,7 +292,7 @@ export async function calculateAuthoritativePricing(
         }
         if (isMiniCakes) {
           addonPrice += dObj.priceAdd;
-        } else if (isDippedPretzels) {
+        } else if (isDippedPretzels || isCupcakes) {
           const upcharge = dObj.priceAdd * dozenCount;
           itemUnitPrice += upcharge;
           if (dObj.priceAdd > 0) {

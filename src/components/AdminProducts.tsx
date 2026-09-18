@@ -2195,7 +2195,7 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
                     <span className="text-[8px] bg-brand-chocolate text-white px-1.5 py-0.5 rounded uppercase font-black tracking-widest">Storefront Choice</span>
                   </div>
                   <p className="text-[10px] text-gray-500 font-semibold leading-tight">
-                    Select the drizzle options customers can choose from.{isDippedPretzels ? " Prices entered here are treated as price per dozen." : ""}
+                    Select the drizzle options customers can choose from.{isCupcakes || isDippedPretzels ? " Prices entered here are treated as price per dozen." : ""}
                   </p>
                 </div>
 
@@ -2264,13 +2264,13 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
                     placeholder="e.g., Chocolate Drizzle"
                     className="flex-1 text-sm bg-brand-cream/5 border border-brand-pink/10 p-2 rounded-xl focus:outline-none focus:ring-1 focus:ring-[#B76E79]"
                   />
-                  <div className="relative w-20">
+                  <div className="relative w-28">
                     <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-gray-400 font-bold">$</span>
                     <input
                       type="number"
                       value={newDrizzlePrice || ""}
                       onChange={(e) => setNewDrizzlePrice(Number(e.target.value))}
-                      placeholder={isDippedPretzels ? "Price/doz" : "Price"}
+                      placeholder={isCupcakes ? "Price / Dozen" : isDippedPretzels ? "Price/doz" : "Price"}
                       className="w-full text-sm bg-brand-cream/5 border border-brand-pink/10 p-2 pl-5 rounded-xl focus:outline-none focus:ring-1 focus:ring-[#B76E79] font-bold text-center"
                     />
                   </div>
@@ -2322,12 +2322,13 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
                                   onChange={(e) => setEditingDrizzleName(e.target.value)}
                                   className="flex-1 text-xs bg-brand-cream/5 border border-brand-pink/20 p-1.5 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#B76E79]"
                                 />
-                                <div className="relative w-16">
+                                <div className="relative w-24">
                                   <span className="absolute left-1.5 top-1/2 -translate-y-1/2 text-[10px] text-gray-400 font-bold">$</span>
                                   <input
                                     type="number"
                                     value={editingDrizzlePrice}
                                     onChange={(e) => setEditingDrizzlePrice(Number(e.target.value))}
+                                    placeholder={isCupcakes ? "Price/doz" : isDippedPretzels ? "Price/doz" : "Price"}
                                     className="w-full text-xs bg-brand-cream/5 border border-brand-pink/20 p-1.5 pl-4 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#B76E79] text-center font-bold"
                                   />
                                 </div>
@@ -2353,7 +2354,7 @@ export default function AdminProducts({ token, triggerRefresh }: AdminProductsPr
                                 <span className="font-bold text-brand-chocolate">{d.name}</span>
                                 <div className="flex items-center gap-3">
                                   <span className="text-brand-rosegold font-bold bg-brand-pink/5 px-2.5 py-0.5 rounded-md">
-                                    +${d.priceAdd.toFixed(2)}{isDippedPretzels ? " per dozen" : ""}
+                                    +${d.priceAdd.toFixed(2)}{isCupcakes ? "/dozen" : isDippedPretzels ? " per dozen" : ""}
                                   </span>
                                   <div className="flex items-center gap-1.5">
                                     <button

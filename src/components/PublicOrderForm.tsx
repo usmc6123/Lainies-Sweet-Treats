@@ -517,6 +517,7 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
         const drizzleObj = resolvedDrizzles.find(d => d.name === dName);
         if (drizzleObj) {
           if (isMiniCakes) addonPrice += drizzleObj.priceAdd;
+          else if (isCupcakes || isDippedPretzels) price += drizzleObj.priceAdd * dozenCount;
           else price += drizzleObj.priceAdd;
         }
       });

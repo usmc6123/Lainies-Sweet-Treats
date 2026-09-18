@@ -62,6 +62,9 @@ async function runTests() {
           { name: "Vanilla Buttercream", priceAdd: 0 },
           { name: "Espresso Buttercream", priceAdd: 2.0 },
           { name: "Strawberry Buttercream", priceAdd: 3.0 }
+        ],
+        drizzles: [
+          { name: "Chocolate Drizzle", priceAdd: 2.0 }
         ]
       },
       cakeFlavorSelectionLimit: 1
@@ -909,6 +912,52 @@ async function runTests() {
     assert(result.subtotalCents === 9500, `Expected 9500 but got ${result.subtotalCents}`);
     assert(result.items[0].frostingUpchargeTotal === 9.0, "frostingUpchargeTotal should be 9.0");
     console.log("✅ Passed: 42. Cupcakes 3 dozen with Strawberry Buttercream ($95.00)");
+  }
+
+  // 43. Cupcakes 1 dozen with Chocolate Drizzle ($34.00)
+  {
+    const result = await calculateAuthoritativePricing(
+      [{
+        productId: "prod-cupcakes-dozen",
+        size: "Dozen",
+        selectedDrizzles: ["Chocolate Drizzle"],
+        quantity: 1
+      }],
+      undefined,
+      "none",
+      0,
+      "pickup"
+    );
+    // Base 1 Dozen ($32.00) + Drizzle ($2.00 * 1 dozen) = $34.00 => 3400 cents
+    assert(result.subtotalCents === 3400, `Expected 3400 but got ${result.subtotalCents}`);
+    assert(result.items[0].drizzlePricePerDozen === 2.0, "drizzlePricePerDozen should be 2.0");
+    assert(result.items[0].drizzleUpchargeTotal === 2.0, "drizzleUpchargeTotal should be 2.0");
+    assert(result.items[0].selectedDozenQuantity === 1, "selectedDozenQuantity should be 1");
+    console.log("✅ Passed: 43. Cupcakes 1 dozen with Chocolate Drizzle ($34.00)");
+  }
+
+  // 44. Cupcakes 5 dozen with Espresso Frosting and Chocolate Drizzle ($160.00)
+  {
+    const result = await calculateAuthoritativePricing(
+      [{
+        productId: "prod-cupcakes-dozen",
+        size: "Five Dozen",
+        selectedFrostings: ["Espresso Buttercream"],
+        selectedDrizzles: ["Chocolate Drizzle"],
+        quantity: 1
+      }],
+      undefined,
+      "none",
+      0,
+      "pickup"
+    );
+    // Base Five Dozen ($140.00) + Espresso ($2.00 * 5) + Drizzle ($2.00 * 5) = $140 + $10 + $10 = $160.00 => 16000 cents
+    assert(result.subtotalCents === 16000, `Expected 16000 but got ${result.subtotalCents}`);
+    assert(result.items[0].frostingUpchargeTotal === 10.0, "frostingUpchargeTotal should be 10.0");
+    assert(result.items[0].drizzlePricePerDozen === 2.0, "drizzlePricePerDozen should be 2.0");
+    assert(result.items[0].drizzleUpchargeTotal === 10.0, "drizzleUpchargeTotal should be 10.0");
+    assert(result.items[0].selectedDozenQuantity === 5, "selectedDozenQuantity should be 5");
+    console.log("✅ Passed: 44. Cupcakes 5 dozen with Espresso Frosting and Chocolate Drizzle ($160.00)");
   }
 
   console.log("\n✨ All Automated pricing tests completed successfully!");
