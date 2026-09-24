@@ -25,6 +25,7 @@ const resolveToOptions = (rawList: (string | OptionItem)[] | undefined): OptionI
 
 interface PublicOrderFormProps {
   onSwitchToQuote: () => void;
+  storefrontOnly?: boolean;
 }
 
 interface ProductPhotoGalleryProps {
@@ -106,7 +107,7 @@ function ProductPhotoGallery({ product, selectedVariationId }: ProductPhotoGalle
   );
 }
 
-export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProps) {
+export default function PublicOrderForm({ onSwitchToQuote, storefrontOnly }: PublicOrderFormProps) {
   // States
   const [products, setProducts] = useState<Product[]>([]);
   const [settings, setSettings] = useState<Settings | null>(null);
@@ -1198,7 +1199,7 @@ export default function PublicOrderForm({ onSwitchToQuote }: PublicOrderFormProp
         <div className="lg:col-span-1">
           <div 
             id="shop-cart" 
-            className="lg:sticky lg:top-32 bg-white border border-brand-pink/15 rounded-[1.5rem] p-6 shadow-md h-fit transition-all duration-300"
+            className={`lg:sticky ${storefrontOnly ? "lg:top-6" : "lg:top-32"} bg-white border border-brand-pink/15 rounded-[1.5rem] p-6 shadow-md h-fit transition-all duration-300`}
           >
             <div className="border-b border-brand-pink/20 pb-4 flex items-center space-x-2.5">
               <ShoppingBag className="h-5.5 w-5.5 text-brand-rosegold" />

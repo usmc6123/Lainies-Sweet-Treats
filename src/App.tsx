@@ -22,6 +22,21 @@ import {
 } from "lucide-react";
 
 export default function App() {
+  const [storefrontOnly] = useState<boolean>(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const mode = params.get("mode");
+      if (mode === "shop") {
+        sessionStorage.setItem("lainie_storefront", "1");
+      } else if (mode === "full") {
+        sessionStorage.removeItem("lainie_storefront");
+      }
+      return sessionStorage.getItem("lainie_storefront") === "1";
+    } catch {
+      return false;
+    }
+  });
+
   const [view, setView] = useState<string>("shop"); // 'shop', 'quote-request', 'client-portal', 'admin-login', 'admin-dashboard', 'admin-orders', etc.
   const [token, setToken] = useState<string | null>(null);
   const [adminEmail, setAdminEmail] = useState<string | null>(null);
@@ -87,21 +102,27 @@ export default function App() {
       })
         .then(res => {
           if (res.ok) {
-            setView(prev => prev.startsWith("admin-") ? prev : "admin-dashboard");
+            if (!storefrontOnly) {
+              setView(prev => prev.startsWith("admin-") ? prev : "admin-dashboard");
+            }
           } else {
             console.warn("Stored admin token expired or invalid, clearing session.");
             localStorage.removeItem("lainie_admin_token");
             localStorage.removeItem("lainie_admin_email");
             setToken(null);
             setAdminEmail(null);
-            setView(prev => prev.startsWith("admin-") ? "admin-login" : prev);
+            if (!storefrontOnly) {
+              setView(prev => prev.startsWith("admin-") ? "admin-login" : prev);
+            }
           }
         })
         .catch(() => {
-          setView(prev => prev.startsWith("admin-") ? prev : "admin-dashboard");
+          if (!storefrontOnly) {
+            setView(prev => prev.startsWith("admin-") ? prev : "admin-dashboard");
+          }
         });
     }
-  }, []);
+  }, [storefrontOnly]);
 
   const handleLoginSuccess = (newToken: string, email: string) => {
     localStorage.setItem("lainie_admin_token", newToken);
@@ -124,11 +145,16 @@ export default function App() {
   };
 
   const navigateTo = (newView: string) => {
+    let targetView = newView;
+    if (storefrontOnly && (targetView === "client-portal" || targetView === "quote-request" || targetView === "admin-login" || targetView.startsWith("admin-"))) {
+      targetView = "shop";
+    }
+
     // If selecting admin-login and already have a token, take straight to dashboard
-    if (newView === "admin-login" && token) {
+    if (targetView === "admin-login" && token) {
       setView("admin-dashboard");
     } else {
-      setView(newView);
+      setView(targetView);
     }
     // Scroll to view header smoothly
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -150,27 +176,29 @@ export default function App() {
 
       {/* Main Header Integration */}
       {!isAdminView ? (
-        <PublicHeader 
-          currentView={
-            view === "quote-request" ? "quote-builder" :
-            view === "client-portal" ? "quote-portal" :
-            view === "admin-login" ? "login" :
-            view
-          }
-          setView={(headerView: string) => {
-            if (headerView === "quote-builder") {
-              navigateTo("quote-request");
-            } else if (headerView === "quote-portal") {
-              navigateTo("client-portal");
-            } else if (headerView === "login") {
-              navigateTo("admin-login");
-            } else {
-              navigateTo(headerView);
+        !storefrontOnly && (
+          <PublicHeader 
+            currentView={
+              view === "quote-request" ? "quote-builder" :
+              view === "client-portal" ? "quote-portal" :
+              view === "admin-login" ? "login" :
+              view
             }
-          }}
-          isAdminLoggedIn={!!token}
-          onLogout={handleLogout}
-        />
+            setView={(headerView: string) => {
+              if (headerView === "quote-builder") {
+                navigateTo("quote-request");
+              } else if (headerView === "quote-portal") {
+                navigateTo("client-portal");
+              } else if (headerView === "login") {
+                navigateTo("admin-login");
+              } else {
+                navigateTo(headerView);
+              }
+            }}
+            isAdminLoggedIn={!!token}
+            onLogout={handleLogout}
+          />
+        )
       ) : (
         /* Dynamic Header for Logged-In Admin with Tab Indicators */
         <header className="sticky top-0 bg-brand-cream/95 backdrop-blur-md border-b border-brand-pink/20 px-6 py-4 flex items-center justify-between z-50 shadow-xs shrink-0">
@@ -478,7 +506,10 @@ export default function App() {
 
           {/* Dynamic renders based on current active view keyword */}
           {view === "shop" && (
-            <PublicOrderForm onSwitchToQuote={() => navigateTo("quote-request")} />
+            <PublicOrderForm 
+              onSwitchToQuote={() => navigateTo("quote-request")} 
+              storefrontOnly={storefrontOnly}
+            />
           )}
           {view === "payment-outcome" && paymentStatus && (
             <PaymentStatusPage
