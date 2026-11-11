@@ -1325,31 +1325,39 @@ export default function PublicOrderForm({ onSwitchToQuote, storefrontOnly }: Pub
 
             {/* Delivery Type Option tabs */}
             {cart.length > 0 && (
-              <div className="grid grid-cols-2 gap-2 mt-6">
-                <button
-                  type="button"
-                  onClick={() => setFulfillmentType("pickup")}
-                  className={`flex items-center justify-center space-x-1.5 py-3 rounded-2xl text-xs font-bold border-2 transition-all cursor-pointer transform-gpu active:scale-95 ${
-                    fulfillmentType === "pickup" 
-                      ? "bg-brand-pink/30 border-brand-rosegold text-brand-chocolate shadow-2xs font-extrabold" 
-                      : "border-brand-pink/10 bg-white/50 text-brand-chocolate/65 hover:bg-brand-cream/40"
-                  }`}
-                >
-                  <MapPin className="h-4 w-4 text-brand-rosegold" />
-                  <span>Store Pickup</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setFulfillmentType("delivery")}
-                  className={`flex items-center justify-center space-x-1.5 py-3 rounded-2xl text-xs font-bold border-2 transition-all cursor-pointer transform-gpu active:scale-95 ${
-                    fulfillmentType === "delivery" 
-                      ? "bg-brand-pink/30 border-brand-rosegold text-brand-chocolate shadow-2xs font-extrabold" 
-                      : "border-brand-pink/10 bg-white/50 text-brand-chocolate/65 hover:bg-brand-cream/40"
-                  }`}
-                >
-                  <Truck className="h-4 w-4 text-brand-rosegold" />
-                  <span>Local Delivery</span>
-                </button>
+              <div className="mt-6">
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setFulfillmentType("pickup")}
+                    className={`flex items-center justify-center space-x-1.5 py-3 rounded-2xl text-xs font-bold border-2 transition-all cursor-pointer transform-gpu active:scale-95 ${
+                      fulfillmentType === "pickup" 
+                        ? "bg-brand-pink/30 border-brand-rosegold text-brand-chocolate shadow-2xs font-extrabold" 
+                        : "border-brand-pink/10 bg-white/50 text-brand-chocolate/65 hover:bg-brand-cream/40"
+                    }`}
+                  >
+                    <MapPin className="h-4 w-4 text-brand-rosegold" />
+                    <span>Store Pickup</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFulfillmentType("delivery")}
+                    className={`flex items-center justify-center space-x-1.5 py-3 rounded-2xl text-xs font-bold border-2 transition-all cursor-pointer transform-gpu active:scale-95 ${
+                      fulfillmentType === "delivery" 
+                        ? "bg-brand-pink/30 border-brand-rosegold text-brand-chocolate shadow-2xs font-extrabold" 
+                        : "border-brand-pink/10 bg-white/50 text-brand-chocolate/65 hover:bg-brand-cream/40"
+                    }`}
+                  >
+                    <Truck className="h-4 w-4 text-brand-rosegold" />
+                    <span>Local Delivery</span>
+                  </button>
+                </div>
+                {fulfillmentType === "pickup" && (
+                  <div className="mt-2 text-[10.5px] text-brand-chocolate/75 flex items-center gap-1.5 px-1 font-semibold">
+                    <MapPin className="h-3.5 w-3.5 text-brand-rosegold shrink-0" />
+                    <span className="truncate">Pickup: {settings?.address || "1240 Streetman Road, Royse City, 97189, TX"}</span>
+                  </div>
+                )}
               </div>
             )}
 
@@ -1573,6 +1581,21 @@ export default function PublicOrderForm({ onSwitchToQuote, storefrontOnly }: Pub
                     </div>
                   </div>
                 </div>
+
+                {fulfillmentType === "pickup" && (
+                  <div className="bg-brand-cream/35 border border-brand-pink/20 rounded-2xl p-3.5 flex items-start gap-3">
+                    <MapPin className="h-4 w-4 text-brand-rosegold shrink-0 mt-0.5" />
+                    <div className="text-xs">
+                      <span className="font-extrabold text-brand-chocolate block text-[10px] uppercase tracking-wider">Store Pickup Location</span>
+                      <span className="text-brand-chocolate/90 font-bold block mt-0.5">
+                        {settings?.address || "1240 Streetman Road, Royse City, 97189, TX"}
+                      </span>
+                      <span className="text-[10px] text-gray-500 block mt-0.5">
+                        This address will be printed on your order confirmation invoice & receipt.
+                      </span>
+                    </div>
+                  </div>
+                )}
 
                 {fulfillmentType === "delivery" && (
                   <div>

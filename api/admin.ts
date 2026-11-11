@@ -7,7 +7,7 @@ import { getApps, initializeApp, cert, getApp } from "firebase-admin/app";
 import crypto from "crypto";
 
 // Helper for drawing PDF labels (reused from orders.ts)
-function drawLabel(doc: any, order: any, startY: number) {
+function drawLabel(doc: any, order: any, startY: number, pickupAddress: string = "1240 Streetman Road, Royse City, 97189, TX") {
   const xStart = 50;
   const xEnd = 562;
   const width = xEnd - xStart;
@@ -74,7 +74,8 @@ function drawLabel(doc: any, order: any, startY: number) {
     doc.font('Helvetica-Bold').fontSize(11).text("🚗 LOCAL DELIVERY TO:", xStart + 15, currentY + 16);
     doc.font('Helvetica').fontSize(10).text(order.deliveryAddress || "Address details on invoice", xStart + 15, currentY + 30, { width: width - 40 });
   } else {
-    doc.font('Helvetica-Bold').fontSize(11).text("🎁 STORE PICKUP", xStart + 15, currentY + 16);
+    doc.font('Helvetica-Bold').fontSize(11).text("🎁 STORE PICKUP AT:", xStart + 15, currentY + 16);
+    doc.font('Helvetica').fontSize(9).text(pickupAddress, xStart + 15, currentY + 30, { width: width - 40 });
   }
 
   const notesText = (order.notes || "").toLowerCase();
@@ -414,6 +415,9 @@ export default async function handler(req: any, res: any) {
             const order = await dbService.get("orders", orderId);
             if (!order) return res.status(404).json({ error: "Order not found" });
 
+            const settings = await dbService.getSettings();
+            const pickupAddress = settings?.address || "1240 Streetman Road, Royse City, 97189, TX";
+
             const doc = new PDFDocument({ margin: 50, size: 'LETTER' });
             res.setHeader('Content-Type', 'application/pdf');
             res.setHeader('Content-Disposition', `attachment; filename=Lainies-Sweet-Treats-Order-${order.orderNumber}.pdf`);
@@ -439,7 +443,7 @@ export default async function handler(req: any, res: any) {
             if (order.type === 'delivery') {
               doc.text(`Local Delivery Address: ${order.deliveryAddress || 'Not specified'}`, 60, 220, { width: 490 });
             } else {
-              doc.text("Fulfillment Method: Store Pickup (508 Sweetwood Lane, Royse City, TX 75189)", 60, 220);
+              doc.text(`Fulfillment Method: Store Pickup (${pickupAddress})`, 60, 220, { width: 490 });
             }
             
             let yTable = 265;
@@ -553,6 +557,9 @@ export default async function handler(req: any, res: any) {
             const allOrders = await dbService.list("orders");
             const targetOrders = allOrders.filter(o => o.fulfillmentDate === selectedDate && o.status !== 'Cancelled');
             
+            const settings = await dbService.getSettings();
+            const pickupAddress = settings?.address || "1240 Streetman Road, Royse City, 97189, TX";
+
             const doc = new PDFDocument({ margin: 0, size: 'LETTER' });
             res.setHeader('Content-Type', 'application/pdf');
             res.setHeader('Content-Disposition', `attachment; filename=Lainies-Labels-${selectedDate}.pdf`);
@@ -566,11 +573,11 @@ export default async function handler(req: any, res: any) {
             
             for (let i = 0; i < targetOrders.length; i += 2) {
               if (i > 0) doc.addPage();
-              drawLabel(doc, targetOrders[i], 25);
+              drawLabel(doc, targetOrders[i], 25, pickupAddress);
               if (i + 1 < targetOrders.length) {
                 doc.strokeColor('#777777').lineWidth(1).dash(5, { space: 5 }).moveTo(50, 396).lineTo(562, 396).stroke();
                 doc.undash();
-                drawLabel(doc, targetOrders[i + 1], 415);
+                drawLabel(doc, targetOrders[i + 1], 415, pickupAddress);
               }
             }
             
@@ -585,12 +592,15 @@ export default async function handler(req: any, res: any) {
             const order = await dbService.get("orders", orderId);
             if (!order) return res.status(404).json({ error: "Order not found" });
             
+            const settings = await dbService.getSettings();
+            const pickupAddress = settings?.address || "1240 Streetman Road, Royse City, 97189, TX";
+
             const doc = new PDFDocument({ margin: 0, size: 'LETTER' });
             res.setHeader('Content-Type', 'application/pdf');
             res.setHeader('Content-Disposition', `attachment; filename=Lainies-Label-Order-${order.orderNumber}.pdf`);
             doc.pipe(res);
             
-            drawLabel(doc, order, 25);
+            drawLabel(doc, order, 25, pickupAddress);
             doc.end();
             return;
           }

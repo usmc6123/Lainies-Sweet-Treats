@@ -50,14 +50,20 @@ async function startServer() {
   app.all("/api/public/validate-coupon", adapt(publicHandler));
 
   app.all("/api/ingredients", adapt(adminHandler));
+  app.all("/api/ingredients/shopping-list", adapt(adminHandler));
   app.all("/api/ingredients/:id", adapt(adminHandler));
 
   app.all("/api/expenses", adapt(adminHandler));
   app.all("/api/expenses/:id", adapt(adminHandler));
 
   app.all("/api/orders", adapt(adminHandler));
+  app.all("/api/orders/receipt", adapt(adminHandler));
+  app.all("/api/orders/labels", adapt(adminHandler));
+  app.all("/api/orders/labels/date", adapt(adminHandler));
   app.all("/api/orders/:id", adapt(adminHandler));
   app.all("/api/orders/:id/status", adapt(adminHandler));
+  app.all("/api/orders/:id/receipt", adapt(adminHandler));
+  app.all("/api/orders/:id/labels", adapt(adminHandler));
 
   app.all("/api/quotes", adapt(adminHandler));
   app.all("/api/quotes/:id", adapt(adminHandler));

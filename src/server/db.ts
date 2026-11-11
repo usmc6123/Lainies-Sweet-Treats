@@ -91,13 +91,17 @@ export const dbService = {
     const db = getDb();
     const doc = await db.collection("settings").doc("business").get();
     if (doc.exists) {
-      return doc.data();
+      const data = doc.data() as any;
+      if (!data.address || data.address.includes("Sweetwood")) {
+        data.address = "1240 Streetman Road, Royse City, 97189, TX";
+      }
+      return data;
     }
     return {
       businessName: "Lainie's Sweet Treats",
       phone: "214-555-CAKE",
       email: "elainiehoncoop@gmail.com",
-      address: "508 Sweetwood Lane, Royse City, TX 75189",
+      address: "1240 Streetman Road, Royse City, 97189, TX",
       leadTimeDays: 3,
       deliveryRadius: 15,
       deliveryFee: 10.00,
@@ -109,7 +113,7 @@ export const dbService = {
 
   async saveSettings(settings: any): Promise<any> {
     const db = getDb();
-    await db.collection("settings").doc("business").set(settings);
+    await db.collection("settings").doc("business").set(settings, { merge: true });
     return settings;
   }
 };

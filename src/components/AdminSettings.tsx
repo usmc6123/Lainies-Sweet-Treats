@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Settings, Save, CheckCircle2, Lock, Sparkles, Instagram, Upload, Sliders } from "lucide-react";
+import { Settings, Save, CheckCircle2, Lock, Sparkles, Instagram, Upload, Sliders, MapPin } from "lucide-react";
 import { Settings as SettingsType } from "../types";
 
 interface AdminSettingsProps {
@@ -13,6 +13,7 @@ export default function AdminSettings({ token, triggerRefresh }: AdminSettingsPr
   
   // Settings Form States
   const [businessName, setBusinessName] = useState("");
+  const [address, setAddress] = useState("1240 Streetman Road, Royse City, 97189, TX");
   const [taxRate, setTaxRate] = useState(0);
   const [deliveryFee, setDeliveryFee] = useState(15);
   const [deliveryFeePerMile, setDeliveryFeePerMile] = useState(0);
@@ -60,6 +61,7 @@ export default function AdminSettings({ token, triggerRefresh }: AdminSettingsPr
           setSettings(data);
           
           setBusinessName(data.businessName || "Lainie's Sweet Treats");
+          setAddress(data.address || "1240 Streetman Road, Royse City, 97189, TX");
           setTaxRate(data.taxRate || 0);
           setDeliveryFee(data.deliveryFee !== undefined ? Number(data.deliveryFee) : 15.00);
           setDeliveryFeePerMile(data.deliveryFeePerMile || 0);
@@ -160,7 +162,9 @@ export default function AdminSettings({ token, triggerRefresh }: AdminSettingsPr
     setSaveSuccess(false);
 
     const payload = {
+      ...settings,
       businessName,
+      address,
       taxRate: Number(taxRate),
       deliveryFee: Number(deliveryFee),
       deliveryFeePerMile: Number(deliveryFeePerMile),
@@ -284,6 +288,25 @@ export default function AdminSettings({ token, triggerRefresh }: AdminSettingsPr
               className="w-full text-sm bg-brand-cream/10 border border-brand-pink/20 rounded-xl p-3.5 mt-2 focus:outline-none focus:ring-1 focus:ring-brand-rosegold font-semibold text-brand-chocolate"
             />
             <p className="text-xs text-gray-400 mt-1.5">Displays layout title bars dynamically.</p>
+          </div>
+
+          {/* Store Pickup Address */}
+          <div>
+            <label className="text-xs uppercase font-bold text-brand-chocolate/70 tracking-wider block">
+              Store Pickup Address
+            </label>
+            <div className="relative mt-2">
+              <input
+                type="text"
+                required
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                placeholder="1240 Streetman Road, Royse City, 97189, TX"
+                className="w-full text-sm bg-brand-cream/10 border border-brand-pink/20 rounded-xl p-3.5 pl-10 focus:outline-none focus:ring-1 focus:ring-brand-rosegold font-semibold text-brand-chocolate"
+              />
+              <MapPin className="h-4 w-4 text-brand-rosegold absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+            </div>
+            <p className="text-xs text-gray-400 mt-1.5 font-medium">Printed on all invoices, receipts, and pickup labels.</p>
           </div>
 
           {/* Texas Sales Tax Rate */}
